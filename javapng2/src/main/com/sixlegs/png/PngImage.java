@@ -20,6 +20,7 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -80,7 +81,7 @@ public class PngImage
 
     public PngImage()
     {
-        this(new SimplePngConfig());
+        this(new BasicPngConfig());
     }
 
     public PngImage(PngConfig config)
@@ -131,6 +132,8 @@ public class PngImage
                 PngChunk chunk = config.getChunk(type);
 
                 if (chunk == null) {
+                    if (!PngChunk.isAncillary(type))
+                        throw new PngError("Critical chunk " + name + " cannot be skipped");
                     data.skipFully(length);
                 } else {
                     Integer key = Integers.valueOf(type);
@@ -151,7 +154,7 @@ public class PngImage
                 if (calcChecksum != fileChecksum)
                     throw new PngError("Bad CRC value for " + name + " chunk");
             }
-            return ImageFactory.create(config, props);
+            return new ImageFactory().create(config, props);
         } finally {
             if (close)
                 in.close();
@@ -184,7 +187,7 @@ public class PngImage
             case PngChunk.tRNS:
                 throw new PngException(name + " cannot appear before PLTE");
             default:
-                return state;
+                return STATE_SAW_IHDR;
             }
         case STATE_SAW_PLTE:
             switch (type) {
@@ -198,6 +201,8 @@ public class PngImage
                 return STATE_IN_IDAT;
             case PngChunk.IEND:
                 throw new PngException("Required data chunk(s) not found");
+            default:
+                return STATE_SAW_PLTE;
             }
         default:
             switch (type) {
@@ -289,6 +294,11 @@ public class PngImage
     public boolean isIndexedColor()
     {
         return getColorType() == COLOR_TYPE_PALETTE;
+    }
+
+    public Color getBackground()
+    {
+        return (Color)getProperty(BACKGROUND);
     }
 
     public Object getProperty(String name)

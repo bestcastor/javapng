@@ -20,7 +20,7 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-public class SimplePngConfig
+public class BasicPngConfig
 implements PngConfig
 {
     private double displayExponent = 2.2;
@@ -28,12 +28,12 @@ implements PngConfig
     private boolean metadataOnly;
     private boolean warningsFatal;
 
-    public SimplePngConfig()
+    public BasicPngConfig()
     {
         this(false, false);
     }
 
-    public SimplePngConfig(boolean metadataOnly, boolean warningsFatal)
+    public BasicPngConfig(boolean metadataOnly, boolean warningsFatal)
     {
         this.metadataOnly = metadataOnly;
         this.warningsFatal = warningsFatal;
