@@ -98,7 +98,7 @@
         <viewerImpl file="${suite.file}"/>
     </target>
 
-    <target name="clean" depends="init">
+    <target name="clean">
         <delete dir="build"/>
         <delete dir="dist"/>
     </target>
