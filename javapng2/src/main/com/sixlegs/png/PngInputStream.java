@@ -25,10 +25,6 @@ import java.io.*;
 public class PngInputStream
 extends DataInputStream
 {
-//     private static final String ASCII_ENCODING = "US-ASCII";
-//     private static final String LATIN1_ENCODING = "8859_1";
-//     private static final String UTF8_ENCODING = "UTF8";
-
     public PngInputStream(InputStream in)
     {
         super(in);
@@ -56,37 +52,6 @@ extends DataInputStream
     }
 
     /*
-    public String readString()
-    throws IOException
-    {
-        return readString(-1, PngImage.LATIN1_ENCODING);
-    }
-
-    public String readString(String encoding)
-    throws IOException
-    {
-        return readString(-1, encoding);
-    }
-
-    public String readString(int limit)
-    throws IOException
-    {
-        return readString(limit, PngImage.LATIN1_ENCODING);
-    }
-
-    public String readString(int limit, String encoding)
-    throws IOException
-    {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream(limit < 0 ? 80 : limit);
-        int i;
-        for (i = 0; i != limit; i++) {
-            int b = readByte();
-            if (b == 0) break;
-            bytes.write(b);
-        }
-        return bytes.toString(encoding);
-    }
-
     static public double parseFloatingPoint(String token)
     {
         int st = 0;

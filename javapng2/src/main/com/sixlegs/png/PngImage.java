@@ -52,6 +52,9 @@ public class PngImage
     public static final String TRANSPARENCY_GREEN = "transparencyGreen";
     public static final String TRANSPARENCY_BLUE = "transparencyBlue";
     public static final String WIDTH = "width";
+    public static final String PIXELS_PER_UNIT_X = "pixelsPerUnitX";
+    public static final String PIXELS_PER_UNIT_Y = "pixelsPerUnitY";
+    public static final String UNIT = "unit";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -301,7 +304,8 @@ public class PngImage
         return getInt(COLOR_TYPE);
     }
 
-    public int getSamples()
+    // package protected
+    int getSamples()
     {
         switch (getColorType()) {
         case COLOR_TYPE_GRAY_ALPHA: return 2;
@@ -375,13 +379,18 @@ public class PngImage
         return props;
     }
 
-    /*
     public TextChunk getTextChunk(String key)
     {
-        Map map = (Map)getProperty(TEXT_CHUNKS);
-        return (map != null) ? (TextChunk)map.get(key) : null;
+        List list = (List)getProperty(TEXT_CHUNKS);
+        if (key != null && list != null) {
+            for (Iterator it = list.iterator(); it.hasNext();) {
+                TextChunk chunk = (TextChunk)it.next();
+                if (chunk.getKeyword().equals(key))
+                    return chunk;
+            }
+        }
+        return null;
     }
-    */
 
     // package-protected
     int getInt(String name)
