@@ -29,28 +29,32 @@ extends CompletePngConfig
     public static final String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
     public static final String GIF_DELAY_TIME = "gif_delay_time";
     public static final String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
+    public static final String POSITION_UNIT = "position_unit";
     public static final String POSITION_X = "position_x";
     public static final String POSITION_Y = "position_y";
-    public static final String POSITION_UNIT = "position_unit";
+    public static final String SCALE_UNIT = "scale_unit";
+    public static final String PIXEL_WIDTH = "pixel_width";
+    public static final String PIXEL_HEIGHT = "pixel_height";
     
-    public static final int UNIT_PIXEL = 0;
-    public static final int UNIT_MICROMETER = 1;
-    public static final int UNIT_RADIAN = 2;
+    public static final int POSITION_UNIT_PIXEL = 0;
+    public static final int POSITION_UNIT_MICROMETER = 1;
+    public static final int SCALE_UNIT_METER = 1;
+    public static final int SCALE_UNIT_RADIAN = 2;
 
     private static final PngChunk gIFg = new Chunk_gIFg();
     private static final PngChunk gIFx = new Chunk_gIFx();
     private static final PngChunk oFFs = new Chunk_oFFs();
-    // private static final PngChunk pCAL = new Chunk_pCAL();
-    // private static final PngChunk sCAL = new Chunk_sCAL();
-
+    private static final PngChunk pCAL = new Chunk_pCAL();
+    private static final PngChunk sCAL = new Chunk_sCAL();
+    
     public PngChunk getChunk(int type)
     {
         switch (type) {
         case PngChunk.gIFg: return gIFg;
         case PngChunk.gIFx: return gIFx;
         case PngChunk.oFFs: return oFFs;
-        // case PngChunk.pCAL: return pCAL;
-        // case PngChunk.sCAL: return sCAL;
+        case PngChunk.pCAL: return pCAL;
+        case PngChunk.sCAL: return sCAL;
         }
         return super.getChunk(type);
     }
