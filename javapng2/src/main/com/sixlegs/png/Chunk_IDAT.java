@@ -1,6 +1,6 @@
 /*
 com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998-2004 Chris Nokleberg
+Copyright (C) 1998-2005 Chris Nokleberg
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
@@ -21,7 +21,7 @@ Boston, MA  02111-1307, USA.
 package com.sixlegs.png;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 
 class Chunk_IDAT
 extends PngChunk
@@ -31,9 +31,19 @@ extends PngChunk
         super(IDAT);
     }
 
+    public boolean isMultipleOK()
+    {
+        return true;
+    }
+
     public void read(PngInputStream in, int length, Map props, PngConfig config)
     throws IOException
     {
-        in.skipFully(length);
+        byte[] array = new byte[length];
+        in.readFully(array);
+        List data = (List)props.get(PngImage.DATA);
+        if (data == null)
+            props.put(PngImage.DATA, data = new ArrayList());
+        data.add(array);
     }
 }

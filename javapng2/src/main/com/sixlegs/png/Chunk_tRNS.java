@@ -1,6 +1,6 @@
 /*
 com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998-2004 Chris Nokleberg
+Copyright (C) 1998-2005 Chris Nokleberg
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
@@ -32,21 +32,11 @@ extends PngChunk
         super(tRNS);
     }
 
-    public boolean isUnique()
-    {
-        return true;
-    }
-    
-    public boolean isBeforeData()
-    {
-        return true;
-    }
-
     public void read(PngInputStream in, int length, Map props, PngConfig config)
     throws IOException
     {
         int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
-        int bitDepth = PngImage.getInt(props, PngImage.BIT_DEPTH);
+        int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
 
         int r, g, b;
         switch (colorType) {
@@ -82,8 +72,6 @@ extends PngChunk
 
         case PngImage.COLOR_TYPE_PALETTE:
             int[] palette = (int[])props.get(PngImage.PALETTE);
-            if (palette == null)
-                throw new PngError("tRNS chunk must follow PLTE chunk");
             if (length > palette.length)
                 throw new PngError("Too many transparency palette entries (" + length + " > " + palette.length + ")");
             for (int i = 0; i < length; i++) 

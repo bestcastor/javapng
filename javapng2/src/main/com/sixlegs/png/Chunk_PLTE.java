@@ -1,6 +1,6 @@
 /*
 com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998-2004 Chris Nokleberg
+Copyright (C) 1998-2005 Chris Nokleberg
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
@@ -31,21 +31,9 @@ extends PngChunk
         super(PLTE);
     }
 
-    public boolean isBeforeData()
-    {
-        return true;
-    }
-
-    public boolean isUnique()
-    {
-        return true;
-    }
-
     public void read(PngInputStream in, int length, Map props, PngConfig config)
     throws IOException
     {
-        if (props.containsKey(PngImage.BACKGROUND))
-            throw new PngError("bKGD chunk must follow PLTE chunk");
         if (length % 3 != 0)
             throw new PngError("PLTE chunk length indivisible by 3");
         int size = length / 3;
