@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project name="Sixlegs PNG" default="jar">
+    <property file="${user.home}/build.properties" />
+    <property file="build.properties" />
+
+    <property name="src" location="src"/>
+    <property name="lib" location="lib"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+
+    <property name="javadoc" location="${dist}/javadoc"/>
+    <property name="javadoc.access" value="public"/>
+
+    <property name="compile.debug" value="true"/>
+    <property name="compile.deprecation" value="false"/>
+    <property name="compile.optimize" value="false"/>
+
+    <property name="images.txt" value="${build}/test/images.txt"/>
+
+    <target name="init">
+        <tstamp/>
+        <path id="path.build">
+            <!-- <fileset dir="${lib}" includes="**/*.jar"/> -->
+        </path>
+        <path id="path.run">
+            <path refid="path.build"/>
+            <pathelement path="${build}/main"/>
+        </path>
+        <path id="path.test">
+            <path refid="path.run"/>
+            <pathelement path="${build}/test"/>
+        </path>
+        <path id="path.images">
+            <fileset dir="${src}/test/images" includes="**/*.png"/>
+        </path>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="${build}/main"/>
+        <javac srcdir="${src}/main" destdir="${build}/main"
+          debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
+             <classpath refid="path.build"/>
+        </javac>
+        <copy todir="${build}/main">
+            <fileset dir="${src}/main" excludes="**/*.java"/>
+        </copy>
+    </target>
+
+    <target name="compile-tests" depends="compile">
+        <mkdir dir="${build}/test"/>
+        <javac srcdir="${src}/test" destdir="${build}/test"
+          debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
+             <classpath refid="path.run"/>
+        </javac>
+        <copy todir="${build}/test">
+            <fileset dir="${src}/test" excludes="**/*.java"/>
+        </copy>
+    </target>
+
+    <target name="test" depends="compile-tests">
+        <junit>
+            <!-- <jvmarg value="-Xint"/> -->
+            <!-- <jvmarg value="-Xprof"/> -->
+            <!-- <jvmarg value="-server"/> -->
+            <!-- <sysproperty key="cglib.debugLocation" value="."/> -->
+            <formatter type="plain" usefile="false"/>
+            <classpath refid="path.test"/>
+            <batchtest>
+                <fileset dir="${src}/test" includes="**/*Test.java"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="clean" depends="init">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+        <delete dir="${javadoc}"/>
+    </target>
+
+    <target name="jar" depends="test">
+        <mkdir dir="${dist}"/>
+        <jar jarfile="${dist}/png.jar">
+            <fileset dir="${build}/main"/>
+        </jar>
+    </target>
+
+    <!-- TODO: zip target -->
+
+    <target name="javadoc" depends="compile" description="Generate the javadoc">
+        <mkdir dir="${javadoc}"/>
+        <javadoc 
+          sourcepath="${src}/main"
+          destdir="${javadoc}"
+          access="${javadoc.access}"
+          failonerror="true"
+          packagenames="com.sixlegs.image.png.*"
+          classpathref="path.run"
+          Author="true"
+          Version="true"
+          Use="true"
+        />
+    </target>
+</project>
