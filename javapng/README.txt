@@ -1,7 +1,7 @@
 Copyright (C) 1998-2003 Chris Nokleberg
 All rights reserved.
 
-README - com.sixlegs.image.png v1.2.4
+README - com.sixlegs.image.png v1.3.0
 
 Features
 
@@ -11,10 +11,11 @@ Features
 
 Revision History
 
-  Changes from v1.2.3 -> v1.2.4 (???):
+  Changes from v1.2.3 -> v1.3.0 (???):
 
   * Bug fix: throws EOFException if InputStream is empty (instead of
     NullPointerException).
+  * ???
 
   Changes from v1.2.2 -> v1.2.3 (2002-5-14):
 
