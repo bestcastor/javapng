@@ -50,25 +50,33 @@ class ImageFactory
         int samples   = png.getSamples();
 
         boolean interlaced = interlace == PngImage.INTERLACE_ADAM7;
-        short[] gammaTable = png.getGammaTable();
+        short[] gammaTable = config.getGammaCorrect() ? png.getGammaTable() : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
         WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
 
         PixelProcessor pp = BasicPixelProcessor.getInstance();
         if (colorModel instanceof ComponentColorModel) {
-            int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
+            int[] trans = null;
             if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
-                pp = new TransGammaPixelProcessor(gammaTable, new int[]{
+                trans = new int[]{
                     png.getInt(PngImage.TRANSPARENCY_GRAY),
-                }, shift);
+                };
             } else if (props.containsKey(PngImage.TRANSPARENCY_RED)) {
-                pp = new TransGammaPixelProcessor(gammaTable, new int[]{
+                trans = new int[]{
                     png.getInt(PngImage.TRANSPARENCY_RED),
                     png.getInt(PngImage.TRANSPARENCY_GREEN),
                     png.getInt(PngImage.TRANSPARENCY_BLUE),
-                }, shift);
-            } else {
-                pp = new GammaPixelProcessor(gammaTable, shift);
+                };
+            }
+            int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
+            if (shift != 0 || trans != null || gammaTable != null) {
+                if (gammaTable == null)
+                    gammaTable = getIdentityTable(bitDepth - shift);
+                if (trans != null) {
+                    pp = new TransGammaPixelProcessor(gammaTable, trans, shift);
+                } else {
+                    pp = new GammaPixelProcessor(gammaTable, shift);
+                }
             }
         }
         if (config.getProgressive() && interlaced)
@@ -159,5 +167,15 @@ class ImageFactory
         for (int i = 0; i < size; i++)
             copy[i] = (byte)gammaTable[0xFF & palette[i]];
         return copy;
+    }
+
+    private static short[] getIdentityTable(int bitDepth)
+    {
+        // TODO: cache identity tables?
+        int size = 1 << bitDepth;
+        short[] table = new short[size];
+        for (short i = 0; i < size; i++)
+            table[i] = i;
+        return table;
     }
 }

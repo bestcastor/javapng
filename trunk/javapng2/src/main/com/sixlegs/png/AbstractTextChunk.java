@@ -22,7 +22,6 @@ package com.sixlegs.png;
 
 import java.io.*;
 import java.util.*;
-import java.util.zip.*;
 
 abstract class AbstractTextChunk
 extends PngChunk
@@ -44,9 +43,9 @@ extends PngChunk
     protected void read(PngInputStream in, int length, PngImage png, boolean compressed)
     throws IOException
     {
-        byte[] keyword = readToNull(in);
-        read(in, length - (keyword.length + 1), png, compressed, ISO_8859_1,
-             new String(keyword, ISO_8859_1), null, null);
+        String keyword = in.readKeyword();
+        read(in, length - (keyword.length() + 1), png, compressed, ISO_8859_1,
+             keyword, null, null);
     }
 
     protected void read(PngInputStream in, int length, PngImage png,
@@ -56,54 +55,18 @@ extends PngChunk
                         String translated)
     throws IOException
     {
-        if (keyword.length() == 0 || keyword.length() > 79)
-            throw new PngWarning("Invalid " + this + " keyword length: " + keyword.length());
-        
-        byte[] data = new byte[length];
-        in.readFully(data);
-
-        String text;
+        byte[] data;
         if (compressed) {
-            if (data[0] != 0)
-                throw new PngWarning("Unrecognized " + this + " compression method: " + data[0]);
-            byte[] tbuf = new byte[512];
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Inflater inf = new Inflater();
-            inf.reset();
-            inf.setInput(data, 1, length - 1);
-            try {
-                while (!inf.needsInput()) {
-                    out.write(tbuf, 0, inf.inflate(tbuf));
-                }
-            } catch (DataFormatException e) {
-                throw new PngWarning("Error inflating " + this + ": " + e.getMessage());
-            }
-            text = out.toString(enc);
+            data = in.readCompressed(length);
         } else {
-            text = new String(data, enc);
+            data = new byte[length];
+            in.readFully(data);
         }
-
+        String text = new String(data, enc);
         Map props = png.getProperties();
         List chunks = (List)props.get(PngImage.TEXT_CHUNKS);
         if (chunks == null)
             props.put(PngImage.TEXT_CHUNKS, chunks = new ArrayList());
         chunks.add(new TextChunk(keyword, text, language, translated));
-    }
-
-    protected byte[] readToNull(InputStream in)
-    throws IOException
-    {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (;;) {
-            int c = in.read();
-            switch (c) {
-            case 0:
-                return out.toByteArray();
-            case -1:
-                throw new EOFException();
-            default:
-                out.write(c);
-            }
-        }
     }
 }

@@ -33,7 +33,7 @@ extends AbstractTextChunk
     public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        byte[] keyword = readToNull(in);
+        String keyword = in.readKeyword();
         int flag = in.readByte();
         int method = in.readByte();
         boolean compressed = false;
@@ -44,11 +44,10 @@ extends AbstractTextChunk
         } else if (flag != 0) {
             throw new PngWarning("Illegal " + this + " compression flag: " + flag);
         }
-        byte[] language = readToNull(in);
-        byte[] translated = readToNull(in);
-        length -= (keyword.length + language.length + translated.length + 5);
-        read(in, length, png, compressed, UTF_8, 
-             new String(keyword, ISO_8859_1),
+        byte[] language = in.readToNull();
+        byte[] translated = in.readToNull();
+        length -= (keyword.length() + language.length + translated.length + 5);
+        read(in, length, png, compressed, UTF_8, keyword,
              new String(language, US_ASCII),
              new String(translated, UTF_8));
     }

@@ -21,10 +21,13 @@ Boston, MA  02111-1307, USA.
 package com.sixlegs.png;
 
 import java.io.*;
+import java.util.zip.*;
 
 public class PngInputStream
 extends DataInputStream
 {
+    private byte[] tmp = new byte[512];
+    
     public PngInputStream(InputStream in)
     {
         super(in);
@@ -34,6 +37,54 @@ extends DataInputStream
     throws IOException
     {
         return 0xFFFFFFFFL & readInt();
+    }
+
+    public byte[] readCompressed(int length)
+    throws IOException
+    {
+        byte[] data = new byte[length];
+        readFully(data);
+        if (data[0] != 0)
+            throw new PngWarning("Unrecognized compression method: " + data[0]);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Inflater inf = new Inflater();
+        inf.reset();
+        inf.setInput(data, 1, length - 1);
+        try {
+            while (!inf.needsInput()) {
+                out.write(tmp, 0, inf.inflate(tmp));
+            }
+        } catch (DataFormatException e) {
+            throw new PngWarning(e.getMessage());
+        }
+        return out.toByteArray();
+    }
+
+    public String readKeyword()
+    throws IOException
+    {
+        byte[] bytes = readToNull();
+        if (bytes.length == 0 || bytes.length > 79)
+            throw new PngWarning("Invalid keyword length: " + bytes.length);
+        return new String(bytes, "ISO-8859-1");
+    }
+
+    // package protected
+    byte[] readToNull()
+    throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (;;) {
+            int c = read();
+            switch (c) {
+            case 0:
+                return out.toByteArray();
+            case -1:
+                throw new EOFException();
+            default:
+                out.write(c);
+            }
+        }
     }
 
     public void skipFully(long n)
@@ -51,20 +102,15 @@ extends DataInputStream
         }
     }
 
-    /*
-    static public double parseFloatingPoint(String token)
-    {
-        int st = 0;
-        int e1 = Math.max(token.indexOf('e'),token.indexOf('E'));
-        double d = Double.valueOf(token.substring(st, (e1 < 0 ? token.length() : e1))).doubleValue();
-        if (e1 > 0) d *= Math.pow(10d, Double.valueOf(token.substring(e1+1)).doubleValue());
-        return d;
-    }
-
     public double readFloatingPoint()
     throws IOException
     {
-        return parseFloatingPoint(readString());
+        String s = new String(readToNull(), "US-ASCII");
+        int e = Math.max(s.indexOf('e'), s.indexOf('E'));
+        double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
+        if (e > 0)
+            d *= Math.pow(10d, Double.valueOf(s.substring(e + 1)).doubleValue());
+        return d;
     }
-    */
+
 }

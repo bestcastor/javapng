@@ -20,17 +20,33 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.Map;
 
-public interface PngConfig
+class Chunk_sBIT
+extends PngChunk
 {
-    float getDefaultGamma();
-    float getDisplayExponent();
-    float getUserExponent();
-    boolean getGammaCorrect();
-    boolean getMetadataOnly();
-    boolean getProgressive();
-    boolean getReduce16();
-    PngChunk getChunk(int type);
-    void handleWarning(PngWarning e) throws PngWarning;
+    public Chunk_sBIT()
+    {
+        super(sBIT);
+    }
+
+    public void read(PngInputStream in, int length, PngImage png)
+    throws IOException
+    {
+        boolean paletted = png.getColorType() == PngImage.COLOR_TYPE_PALETTE;
+        int count = paletted ? 3 : png.getSamples();
+        checkLength(length, count);
+
+        int depth = paletted ? 8 : png.getBitDepth();
+        int[] array = new int[count];
+        for (int i = 0; i < count; i++) {
+            int bits = in.readByte();
+            if (bits <= 0 || bits > depth)
+                throw new PngWarning("Illegal sBIT sample depth");
+            array[i] = bits;
+        }
+
+        png.getProperties().put(PngImage.SIGNIFICANT_BITS, array);
+    }
 }
