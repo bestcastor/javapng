@@ -18,28 +18,31 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png.opt;
+package com.sixlegs.png.ext;
 
 import com.sixlegs.png.*;
+import java.io.*;
+import java.util.*;
 
-public class OptPngConfig
-extends BasicPngConfig
+class Chunk_gIFg
+extends PngChunk
 {
-//     private static final PngChunk oFFs = new Chunk_oFFs();
-//     private static final PngChunk pCAL = new Chunk_pCAL();
-//     private static final PngChunk sCAL = new Chunk_sCAL();
-//     private static final PngChunk gIFg = new Chunk_gIFg();
-//     private static final PngChunk gIFx = new Chunk_gIFx();
-
-    public PngChunk getChunk(int type)
+    public Chunk_gIFg()
     {
-        switch (type) {
-//         case PngChunk.oFFs: return oFFs;
-//         case PngChunk.pCAL: return pCAL;
-//         case PngChunk.sCAL: return sCAL;
-//         case PngChunk.gIFg: return gIFg;
-//         case PngChunk.gIFx: return gIFx;
-        }
-        return super.getChunk(type);
+        super(gIFg);
+    }
+
+    public void read(PngInputStream in, int length, PngImage png)
+    throws IOException
+    {
+        checkLength(length, 4);
+        int disposalMethod = in.readUnsignedByte();
+        int userInputFlag = in.readUnsignedByte();
+        int delayTime = in.readUnsignedShort();
+
+        Map props = png.getProperties();
+        props.put(ExtendedPngConfig.GIF_DISPOSAL_METHOD, new Integer(disposalMethod));
+        props.put(ExtendedPngConfig.GIF_USER_INPUT_FLAG, new Integer(userInputFlag));
+        props.put(ExtendedPngConfig.GIF_DELAY_TIME, new Integer(delayTime));
     }
 }
