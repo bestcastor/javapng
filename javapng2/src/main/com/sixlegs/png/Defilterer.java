@@ -108,8 +108,6 @@ class Defilterer
             for (xc = bpp, xp = 0; xc < rowSize; xc++, xp++)
                 cur[xc] = (byte)(cur[xc] + paeth(cur[xp], prev[xc], prev[xp]));
             break;
-        case 64:
-            throw new PngError("Intra-pixel filtering not implemented yet");
         default:
             throw new PngError("Unrecognized filter type " + filterType);
         }

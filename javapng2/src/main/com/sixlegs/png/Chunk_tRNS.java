@@ -36,10 +36,9 @@ extends PngChunk
     public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        int colorType = png.getColorType();
         Map props = png.getProperties();
 
-        switch (colorType) {
+        switch (png.getColorType()) {
         case PngImage.COLOR_TYPE_GRAY:
             checkLength(length, 2);
             props.put(PngImage.TRANSPARENCY_GRAY, Integers.valueOf(in.readUnsignedShort()));
@@ -66,7 +65,7 @@ extends PngChunk
             break;
 
         default:
-            throw new PngError("tRNS prohibited for color type " + colorType);
+            throw new PngError("tRNS prohibited for color type " + png.getColorType());
         }
     }
 }
