@@ -22,6 +22,7 @@ package com.sixlegs.png;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 class Chunk_tRNS
@@ -38,47 +39,30 @@ extends PngChunk
         int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
         int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
 
-        int r, g, b;
         switch (colorType) {
         case PngImage.COLOR_TYPE_GRAY:
             checkLength(length, 2);
-            if (bitDepth == 16) {
-                r = g = b = in.readUnsignedByte();
-                int low = in.readUnsignedByte();
-                props.put(PngImage.TRANSPARENCY_LOW_BYTES, new Color(low, low, low));
-            } else {
-                r = g = b = in.readUnsignedShort();
-            }
-            props.put(PngImage.TRANSPARENCY, new Color(r, g, b));
+            props.put(PngImage.TRANSPARENCY_GRAY, Integers.valueOf(in.readUnsignedShort()));
             break;
 
         case PngImage.COLOR_TYPE_RGB:
             checkLength(length, 6);
-            if (bitDepth == 16) {
-                r = in.readUnsignedByte();
-                int low_r = in.readUnsignedByte();
-                g = in.readUnsignedByte();
-                int low_g = in.readUnsignedByte();
-                b = in.readUnsignedByte();
-                int low_b = in.readUnsignedByte();
-                props.put(PngImage.TRANSPARENCY_LOW_BYTES, new Color(low_r, low_g, low_b));
-            } else {
-                r = in.readUnsignedShort();
-                g = in.readUnsignedShort();
-                b = in.readUnsignedShort();
-            }
-            props.put(PngImage.TRANSPARENCY, new Color(r, g, b));
+            props.put(PngImage.TRANSPARENCY_RED,   Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngImage.TRANSPARENCY_GREEN, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngImage.TRANSPARENCY_BLUE,  Integers.valueOf(in.readUnsignedShort()));
             break;
 
         case PngImage.COLOR_TYPE_PALETTE:
-            int[] palette = (int[])props.get(PngImage.PALETTE);
-            if (length > palette.length)
-                throw new PngError("Too many transparency palette entries (" + length + " > " + palette.length + ")");
-            for (int i = 0; i < length; i++) 
-                palette[i] |= in.readUnsignedByte() << 24;
-            for (int i = length; i < palette.length; i++)
-                palette[i] |= 0xFF000000;
-            props.put(PngImage.TRANSPARENCY_SIZE, Integers.valueOf(length));
+            byte[] r = (byte[])props.get(PngImage.PALETTE_RED);
+            if (length > r.length)
+                throw new PngError("Too many transparency palette entries (" + length + " > " + r.length + ")");
+
+            byte[] alpha = new byte[r.length];
+            Arrays.fill(alpha, (byte)0xFF);
+            for (int i = 0; i < length; i++)
+                alpha[i] = in.readByte();
+
+            props.put(PngImage.PALETTE_ALPHA, alpha);
             break;
 
         default:

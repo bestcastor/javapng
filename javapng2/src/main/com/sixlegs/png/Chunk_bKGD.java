@@ -38,48 +38,24 @@ extends PngChunk
         int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
         int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
 
-        Color color;
-        int r, g, b;
         switch (colorType) {
         case PngImage.COLOR_TYPE_PALETTE:
             checkLength(length, 1);
-            int index = in.readUnsignedByte();
-            props.put(PngImage.BACKGROUND_INDEX, Integers.valueOf(index));
-            int[] palette = (int[])props.get(PngImage.PALETTE);
-            color = new Color(palette[index]);
+            props.put(PngImage.BACKGROUND_INDEX, Integers.valueOf(in.readUnsignedByte()));
             break;
             
         case PngImage.COLOR_TYPE_GRAY:
         case PngImage.COLOR_TYPE_GRAY_ALPHA:
             checkLength(length, 2);
-            if (bitDepth == 16) {
-                r = g = b = in.readUnsignedByte();
-                int low = in.readUnsignedByte();
-                props.put(PngImage.BACKGROUND_LOW_BYTES, new Color(low, low, low));
-            } else {
-                r = g = b = in.readUnsignedShort();
-            }
-            color = new Color(r, g, b);
+            props.put(PngImage.BACKGROUND_GRAY, Integers.valueOf(in.readUnsignedShort()));
             break;
             
         default:
             // truecolor
             checkLength(length, 6);
-            if (bitDepth == 16) {
-                r = in.readUnsignedByte();
-                int low_r = in.readUnsignedByte();
-                g = in.readUnsignedByte();
-                int low_g = in.readUnsignedByte();
-                b = in.readUnsignedByte();
-                int low_b = in.readUnsignedByte();
-                props.put(PngImage.BACKGROUND_LOW_BYTES, new Color(low_r, low_g, low_b));
-            } else {
-                r = in.readUnsignedShort();
-                g = in.readUnsignedShort();
-                b = in.readUnsignedShort();
-            }
-            color = new Color(r, g, b);
+            props.put(PngImage.BACKGROUND_RED,   Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngImage.BACKGROUND_GREEN, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngImage.BACKGROUND_BLUE,  Integers.valueOf(in.readUnsignedShort()));
         }
-        props.put(PngImage.BACKGROUND, color);
     }
 }

@@ -20,15 +20,25 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.Map;
 
-public interface PngConfig
+class Chunk_gAMA
+extends PngChunk
 {
-    double getDisplayExponent();
-    double getUserExponent();
-    boolean getMetadataOnly();
-    boolean isProgressive();
-    PngChunk getChunk(int type);
-    void handleException(PngException e) throws PngException;
-    void handleFrame(BufferedImage image, int framesLeft);
+    public Chunk_gAMA()
+    {
+        super(gAMA);
+    }
+
+    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    throws IOException
+    {
+        checkLength(length, 4);
+        long gamma = in.readUnsignedInt();
+        if (gamma == 0)
+            throw new PngWarning("Meaningless zero gAMA chunk value");
+        // if (img.getChunk(sRGB) == null)
+        props.put(PngImage.GAMMA, new Long(gamma));
+    }
 }

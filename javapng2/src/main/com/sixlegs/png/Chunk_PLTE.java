@@ -51,15 +51,17 @@ extends PngChunk
                 throw new PngError("Too many palette entries");
         }
 
-        int[] palette = new int[size];
+        byte[] r = new byte[size];
+        byte[] g = new byte[size];
+        byte[] b = new byte[size];
         for (int i = 0; i < size; i++) {
-            palette[i] =
-                in.readUnsignedByte() << 16 |
-                in.readUnsignedByte() << 8  |
-                in.readUnsignedByte();
+            r[i] = in.readByte();
+            g[i] = in.readByte();
+            b[i] = in.readByte();
         }
 
-        props.put(PngImage.PALETTE, palette);
-        props.put(PngImage.PALETTE_SIZE, Integers.valueOf(size));
+        props.put(PngImage.PALETTE_RED, r);
+        props.put(PngImage.PALETTE_GREEN, g);
+        props.put(PngImage.PALETTE_BLUE, b);
     }
 }
