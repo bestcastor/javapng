@@ -66,7 +66,7 @@ implements TextChunk
                 char ch = chs[p++];
                 switch (ch) {
                 case '\r':
-                    if (p < L && chs[p + 1] == '\n') break;
+                    if (p + 1 < L && chs[p + 1] == '\n') break;
                 case '\n':
                     out_chars.write(endl);
                     break;

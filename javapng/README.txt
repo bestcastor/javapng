@@ -11,6 +11,11 @@ Features
 
 Revision History
 
+  Changes from v1.3.0 -> v1.3.1 (?)
+
+  * Fix bug reading text values with a trailing carriage return.
+    [Michael Powers]
+
   Changes from v1.2.3 -> v1.3.0 (2004-5-26):
 
   * Add new constructor that allows you to disable the automatic
