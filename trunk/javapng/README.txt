@@ -1,4 +1,4 @@
-Copyright (C) 1998-2003 Chris Nokleberg
+Copyright (C) 1998-2004 Chris Nokleberg
 All rights reserved.
 
 README - com.sixlegs.image.png v1.3.0
@@ -11,15 +11,15 @@ Features
 
 Revision History
 
-  Changes from v1.2.3 -> v1.3.0 (???):
+  Changes from v1.2.3 -> v1.3.0 (2004-5-26):
 
   * Add new constructor that allows you to disable the automatic
     closing of the InputStream, useful for when a stream contains
     multiple images. [David Steigleite]
   * Bug fix: throws EOFException if InputStream is empty (instead of
     NullPointerException).
-  * Remove SINGLEFRAMEDONE calls for compatibility with JDK.
-  * Add setBuffer(int[]) method to set internal pixel buffer.
+  * Remove SINGLEFRAMEDONE calls for compatibility with JDK. [Eugen Dueck]
+  * Add setBuffer(int[]) method to set internal pixel buffer. [Eugen Dueck]
   * Add getEverything(boolean) to allow fatal exceptions to be thrown.
   * First release via SourceForge: http://sourceforge.net/projects/javapng
 
