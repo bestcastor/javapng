@@ -32,6 +32,7 @@ implements PngConfig
     private boolean warningsFatal;
     private boolean progressive;
     private boolean reduce16 = true;
+    private boolean gammaCorrect = true;
 
     public boolean getReduce16()
     {
@@ -53,6 +54,16 @@ implements PngConfig
         this.defaultGamma = defaultGamma;
     }
     
+    public boolean getGammaCorrect()
+    {
+        return gammaCorrect;
+    }
+
+    public void setGammaCorrect(boolean gammaCorrect)
+    {
+        this.gammaCorrect = gammaCorrect;
+    }
+
     public boolean getProgressive()
     {
         return progressive;
@@ -119,6 +130,7 @@ implements PngConfig
     private static final PngChunk gAMA = new Chunk_gAMA();
     private static final PngChunk iTXt = new Chunk_iTXt();
     private static final PngChunk pHYs = new Chunk_pHYs();
+    private static final PngChunk sBIT = new Chunk_sBIT();
     private static final PngChunk sRGB = new Chunk_sRGB();
     private static final PngChunk tEXt = new Chunk_tEXt();
     private static final PngChunk tIME = new Chunk_tIME();
@@ -137,17 +149,12 @@ implements PngConfig
         case PngChunk.gAMA: return gAMA;
         case PngChunk.iTXt: return iTXt;
         case PngChunk.pHYs: return pHYs;
+        case PngChunk.sBIT: return sBIT;
         case PngChunk.sRGB: return sRGB;
         case PngChunk.tEXt: return tEXt;
         case PngChunk.tIME: return tIME;
         case PngChunk.tRNS: return tRNS;
         case PngChunk.zTXt: return zTXt;
-            /*
-        case PngChunk.hIST: return hIST;
-        case PngChunk.sBIT: return sBIT;
-        case PngChunk.sPLT: return sPLT;
-        case PngChunk.iCCP: return iCCP;
-            */
         }
         return null;
     }

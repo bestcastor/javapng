@@ -37,8 +37,7 @@ extends PngChunk
         checkLength(length, 1);
         int intent = in.readByte();
         Map props = png.getProperties();
-        if (props.containsKey(PngImage.ICC_PROFILE_NAME))
-            throw new PngWarning("Conflicting iCCP and sRGB chunks found");
+        
         props.put(PngImage.RENDERING_INTENT, Integers.valueOf(intent));
         props.put(PngImage.GAMMA, new Float(0.45455));
         props.put(PngImage.WHITE_POINT_X, new Float(0.3127f));

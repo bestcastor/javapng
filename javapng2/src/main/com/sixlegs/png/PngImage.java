@@ -39,8 +39,6 @@ public class PngImage
     public static final String FILTER = "filter";
     public static final String GAMMA = "gamma";
     public static final String HEIGHT = "height";
-    public static final String ICC_PROFILE = "icc_profile";
-    public static final String ICC_PROFILE_NAME = "icc_profile_name";
     public static final String INTERLACE = "interlace";
     public static final String PALETTE_ALPHA = "palette_alpha";
     public static final String PALETTE_BLUE = "palette_blue";
@@ -66,6 +64,10 @@ public class PngImage
     public static final String BLUE_Y = "blue_y";
     public static final String GREEN_X = "green_x";
     public static final String GREEN_Y = "green_y";
+    public static final String ICC_PROFILE = "icc_profile";
+    public static final String ICC_PROFILE_NAME = "icc_profile_name";
+    public static final String HISTOGRAM = "histogram";
+    public static final String SUGGESTED_PALETTES = "suggested_palettes";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -83,9 +85,6 @@ public class PngImage
 
     public static final int UNIT_UNKNOWN = 0;
     public static final int UNIT_METER = 1;
-    public static final int UNIT_PIXEL = 0;
-    public static final int UNIT_MICROMETER = 1;
-    public static final int UNIT_RADIAN = 2;
 
     public static final int SRGB_PERCEPTUAL = 0;
     public static final int SRGB_RELATIVE_COLORIMETRIC = 1;
@@ -125,7 +124,8 @@ public class PngImage
         try {
             read = true;
             props.clear();
-            CRCInputStream crc = new CRCInputStream(in, new byte[0x2000]);
+            CountingInputStream count = new CountingInputStream(in);
+            CRCInputStream crc = new CRCInputStream(count, new byte[0x2000]);
             PngInputStream data = new PngInputStream(crc);
             long sig = data.readLong();
             if (sig != SIGNATURE) {
@@ -161,22 +161,25 @@ public class PngImage
                         throw new PngError("Critical chunk " + name + " cannot be skipped");
                     data.skipFully(length);
                 } else {
+                    long before = count.getCount();
                     try {
                         Integer key = Integers.valueOf(type);
                         if (!chunk.isMultipleOK()) {
                             if (seen.contains(key)) {
                                 String msg = "Multiple " + name + " chunks are not allowed";
-                                if (PngChunk.isAncillary(type)) {
-                                    data.skipFully(length);
+                                if (PngChunk.isAncillary(type))
                                     throw new PngWarning(msg);
-                                }
                                 throw new PngError(msg);
                             } else {
                                 seen.add(key);
                             }
                         }
                         chunk.read(data, length, this);
+                        long diff = length - (count.getCount() - before);
+                        if (diff != 0)
+                            throw new PngError(chunk + " read " + diff + " extra bytes");
                     } catch (PngWarning warning) {
+                        data.skipFully(length - (count.getCount() - before));
                         config.handleWarning(warning);
                     }
                 }
@@ -185,9 +188,6 @@ public class PngImage
                 if (calcChecksum != fileChecksum)
                     throw new PngError("Bad CRC value for " + name + " chunk");
             }
-            // TODO
-            if (getColorType() == COLOR_TYPE_PALETTE && props.get(PALETTE_RED) == null)
-                throw new PngError("Required PLTE chunk not found");
             if (config.getMetadataOnly())
                 return null;
             return ImageFactory.create(this);
@@ -226,7 +226,8 @@ public class PngImage
                     throw new PngError("IHDR chunk must be first chunk");
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
-                // TODO: move "Required PLTE chunk not found here"
+                if (getColorType() == COLOR_TYPE_PALETTE)
+                    throw new PngError("Required PLTE chunk not found");
                 return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
             case PngChunk.bKGD:
             case PngChunk.hIST:

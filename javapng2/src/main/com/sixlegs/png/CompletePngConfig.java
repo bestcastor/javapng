@@ -22,15 +22,20 @@ package com.sixlegs.png;
 
 import java.awt.image.BufferedImage;
 
-public interface PngConfig
+public class CompletePngConfig
+extends BasicPngConfig
 {
-    float getDefaultGamma();
-    float getDisplayExponent();
-    float getUserExponent();
-    boolean getGammaCorrect();
-    boolean getMetadataOnly();
-    boolean getProgressive();
-    boolean getReduce16();
-    PngChunk getChunk(int type);
-    void handleWarning(PngWarning e) throws PngWarning;
+    private static final PngChunk hIST = new Chunk_hIST();
+    private static final PngChunk iCCP = new Chunk_iCCP();
+    private static final PngChunk sPLT = new Chunk_sPLT();
+
+    public PngChunk getChunk(int type)
+    {
+        switch (type) {
+        case PngChunk.hIST: return hIST;
+        case PngChunk.iCCP: return iCCP;
+        case PngChunk.sPLT: return sPLT;
+        }
+        return super.getChunk(type);
+    }
 }
