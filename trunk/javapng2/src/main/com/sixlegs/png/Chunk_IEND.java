@@ -31,7 +31,7 @@ extends PngChunk
         super(IEND);
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
         checkLength(length, 0);

@@ -31,14 +31,14 @@ extends PngChunk
         super(PLTE);
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
         if (length % 3 != 0)
             throw new PngError("PLTE chunk length indivisible by 3");
         int size = length / 3;
 
-        int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
+        int colorType = png.getColorType();
         switch (colorType) {
         case PngImage.COLOR_TYPE_GRAY:
         case PngImage.COLOR_TYPE_GRAY_ALPHA:
@@ -46,8 +46,7 @@ extends PngChunk
         }
 
         if (colorType == PngImage.COLOR_TYPE_PALETTE) {
-            int bitDepth = PngImage.getInt(props, PngImage.BIT_DEPTH);
-            if (size > (2 << bitDepth) || size > 256)
+            if (size > (2 << png.getBitDepth()) || size > 256)
                 throw new PngError("Too many palette entries");
         }
 
@@ -60,6 +59,7 @@ extends PngChunk
             b[i] = in.readByte();
         }
 
+        Map props = png.getProperties();
         props.put(PngImage.PALETTE_RED, r);
         props.put(PngImage.PALETTE_GREEN, g);
         props.put(PngImage.PALETTE_BLUE, b);

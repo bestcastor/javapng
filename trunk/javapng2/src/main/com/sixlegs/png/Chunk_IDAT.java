@@ -36,14 +36,14 @@ extends PngChunk
         return true;
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
         byte[] array = new byte[length];
         in.readFully(array);
-        List data = (List)props.get(PngImage.DATA);
+        List data = (List)png.getProperty(PngImage.DATA);
         if (data == null)
-            props.put(PngImage.DATA, data = new ArrayList());
+            png.getProperties().put(PngImage.DATA, data = new ArrayList());
         data.add(array);
     }
 }

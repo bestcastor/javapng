@@ -22,14 +22,16 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-class GammaPixelProcessor
+final class GammaPixelProcessor
 extends PixelProcessor
 {
-    private int[] gammaTable;
+    final private short[] gammaTable;
+    final private int shift;
     
-    public GammaPixelProcessor(int[] gammaTable)
+    public GammaPixelProcessor(short[] gammaTable, int shift)
     {
         this.gammaTable = gammaTable;
+        this.shift = shift;
     }
     
     public void process(Raster src, WritableRaster dst,
@@ -37,12 +39,16 @@ extends PixelProcessor
     {
         int[] pixel = dst.getPixel(0, 0, (int[])null);
         int samples = pixel.length;
-        if (samples % 2 == 0)
+        boolean hasAlpha = samples % 2 == 0;
+        if (hasAlpha)
             samples--; // don't change alpha channel
+        boolean shiftAlpha = hasAlpha && shift > 0;
         for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
             src.getPixel(srcX, 0, pixel);
             for (int i = 0; i < samples; i++)
-                pixel[i] = gammaTable[pixel[i]];
+                pixel[i] = 0xFFFF & gammaTable[pixel[i] >> shift];
+            if (shiftAlpha)
+                pixel[samples] = pixel[samples] >> shift;
             dst.setPixel(dstX, y, pixel);
             dstX += xStep;
         }

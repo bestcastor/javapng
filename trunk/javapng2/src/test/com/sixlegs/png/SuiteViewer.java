@@ -49,12 +49,17 @@ public class SuiteViewer
     public static void main(String[] args)
     throws Exception
     {
+        boolean createImage = args.length > 0;
         int w = (32 + PADDING) * ACROSS;
         int h = (32 + PADDING) * DOWN;
-        BufferedImage test = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = test.createGraphics();
-        g.setPaint(Color.gray);
-        g.fillRect(0, 0, w, h);
+        BufferedImage test = null;
+        Graphics2D g = null;
+        if (createImage) {
+            test = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            g = test.createGraphics();
+            g.setPaint(Color.gray);
+            g.fillRect(0, 0, w, h);
+        }
         int i = 0, ix = 0, iy = 0;
         while (i < IMAGES.length) {
             if (IMAGES[i] == null) {
@@ -73,13 +78,20 @@ public class SuiteViewer
 //             } catch (Exception e) {
 //                 System.err.println("ImageIO could not load " + resource);
 //             }
-            g.setPaint(png.getBackground());
-            g.fillRect(x, y, png.getWidth(), png.getHeight());
-            g.drawImage(img, x, y, null);
+            if (createImage) {
+                Color bg = png.getBackground();
+                if (bg != null) {
+                    g.setPaint(bg);
+                    g.fillRect(x, y, png.getWidth(), png.getHeight());
+                }
+                g.drawImage(img, x, y, null);
+            }
             i++;
             ix++;
         }
-        g.dispose();
-        ImageIO.write(test, "PNG", new File(args[0]));
+        if (createImage) {
+            g.dispose();
+            ImageIO.write(test, "PNG", new File(args[0]));
+        }
     }
 }

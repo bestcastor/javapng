@@ -32,13 +32,12 @@ extends PngChunk
         super(bKGD);
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
-        int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
-
-        switch (colorType) {
+        Map props = png.getProperties();
+        
+        switch (png.getColorType()) {
         case PngImage.COLOR_TYPE_PALETTE:
             checkLength(length, 1);
             props.put(PngImage.BACKGROUND_INDEX, Integers.valueOf(in.readUnsignedByte()));
