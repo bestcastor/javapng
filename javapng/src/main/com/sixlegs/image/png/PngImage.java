@@ -601,12 +601,26 @@ implements ImageProducer
     }
 
     /**
+     * Alternative to {@link #getEverything()} which can throw
+     * a fatal error if one was detected during the decoding process.
+     * @param throwFatalError if true, any fatal error will be thrown after
+     * attempting to decode the image
+     */
+    public void getEverything(boolean throwFatalError)
+    throws IOException
+    {
+        startProduction(new DummyImageConsumer());
+        if (hasFatalError())
+            throw (IOException)errorList.get(errorList.size() - 1);
+    }
+
+    /**
      * Check if the specified chunk type appears at least once in this image.
      * <p>
      * <b>Note:</b> This method will only reflect chunks seen up to the
      * beginning of the image data unless the image data has already
      * been read, either through the consumer/producer interface or by
-     * calling {@link getEverything}.
+     * calling {@link #getEverything}.
      * @param type the PNG chunk name, for example <code>"tRNS"</code>.
      */
     public boolean hasChunk(String type)
@@ -841,7 +855,7 @@ implements ImageProducer
         data.chunks.put(new Integer(type), c);
     }
 
-    /* package */ void addError(Exception e)
+    /* package */ void addError(IOException e)
     {
         if (errorList == null) {
             errorList = new Vector();

@@ -15,7 +15,10 @@ Revision History
 
   * Bug fix: throws EOFException if InputStream is empty (instead of
     NullPointerException).
-  * ???
+  * Remove SINGLEFRAMEDONE calls for compatibility with JDK.
+  * Add setBuffer(int[]) method to set internal pixel buffer.
+  * Add getEverything(boolean) to allow fatal exceptions to be thrown.
+  * First release via SourceForge: http://sourceforge.net/projects/javapng
 
   Changes from v1.2.2 -> v1.2.3 (2002-5-14):
 
@@ -55,7 +58,6 @@ Revision History
   * File handles are now properly closed after the images are read.
     [Steve Thorne]
   * Added "setFlushAfterNextProduction" method. [Klaus Goessl]
-
 
   Changes from v0.9 -> v1.0a (1999-4-1):
 
