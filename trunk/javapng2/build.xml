@@ -14,8 +14,9 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
-    <property name="images.txt" value="build/test/images.txt"/>
     <property name="version" value="2.0.0-dev"/>
+    <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
+    <property name="suite.file" value="suite.png"/>
 
     <target name="init">
         <tstamp/>
@@ -30,8 +31,9 @@
             <path refid="path.run"/>
             <pathelement path="build/test"/>
         </path>
-        <path id="path.images">
-            <fileset dir="src/test/images" includes="**/*.png"/>
+        <path id="path.examples">
+            <path refid="path.run"/>
+            <pathelement path="build/examples"/>
         </path>
     </target>
 
@@ -41,6 +43,10 @@
 
     <target name="compile-test" depends="compile" description="Compile tests">
         <compile module="test" refid="path.run"/>
+    </target>
+
+    <target name="compile-examples" depends="compile" description="Compile examples">
+        <compile module="examples" refid="path.run"/>
     </target>
 
     <macrodef name="compile">
@@ -70,6 +76,26 @@
                 <fileset dir="src/test" includes="**/*Test.java"/>
             </batchtest>
         </junit>
+    </target>
+
+    <macrodef name="viewerImpl">
+        <attribute name="file"/>
+        <sequential>
+	    <java classname="com.sixlegs.png.examples.Viewer" classpathref="path.examples" fork="yes">
+		<arg value="@{file}"/>
+	    </java>
+        </sequential>
+    </macrodef>
+
+    <target name="viewer" depends="compile-examples">
+        <viewerImpl file="${viewer.file}"/>
+    </target>
+
+    <target name="suite" depends="compile-test, compile-examples">
+        <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
+            <arg value="${suite.file}"/>
+        </java>
+        <viewerImpl file="${suite.file}"/>
     </target>
 
     <target name="clean" depends="init">
