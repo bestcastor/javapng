@@ -62,7 +62,7 @@ implements PngConfig
         return progressive;
     }
 
-    public void setProgressive()
+    public void setProgressive(boolean progressive)
     {
         this.progressive = progressive;
     }
@@ -127,7 +127,7 @@ implements PngConfig
         switch (type) {
         case PngChunk.IHDR: return IHDR;
         case PngChunk.PLTE: return PLTE;
-        case PngChunk.IDAT: return metadataOnly ? null : IDAT;
+        case PngChunk.IDAT: return IDAT;
         case PngChunk.IEND: return IEND;
         case PngChunk.bKGD: return bKGD;
         case PngChunk.tRNS: return tRNS;
