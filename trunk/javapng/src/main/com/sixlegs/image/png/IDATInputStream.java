@@ -35,10 +35,12 @@ extends InputStream
     throws IOException
     {
         if (cur != null) return;
-        for (int i = 0; i < 8; i++) 
-            if (in_data.readUnsignedByte() != signature[i]) {
-                throw new PngException("Improper signature");
+        for (int i = 0; i < 8; i++) {
+            int b = in_data.readUnsignedByte();
+            if (b != signature[i]) {
+                throw new PngException("Improper signature, byte " + i + " should be 0x" + Integer.toHexString(signature[i]) + " but is 0x" + Integer.toHexString(b));
             }
+        }
         try {
             if (getNextChunk().type != Chunk.IHDR) {
                 throw new PngException("IHDR chunk must be first chunk");
