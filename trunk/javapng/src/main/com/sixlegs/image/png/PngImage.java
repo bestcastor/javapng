@@ -59,8 +59,8 @@ implements ImageProducer
     private Vector errorList;
 
     final class Data {
-        final Vector consumers = new Vector();
-        final Hashtable chunks = new Hashtable();
+        Vector consumers = new Vector();
+        Hashtable chunks = new Hashtable();
 
         int[] pixels;
         boolean produced;
@@ -71,11 +71,11 @@ implements ImageProducer
         /* package */ IDATInputStream in_idat;
         /* package */ Chunk_IHDR header;
         /* package */ Chunk_PLTE palette;
-        /* package */ final int[] gammaTable = new int[256];
-        /* package */ final Hashtable textChunks = new Hashtable();
-        /* package */ final Hashtable properties = new Hashtable();
-        /* package */ final Hashtable palettes = new Hashtable(1);
-        /* package */ final Vector gifExtensions = new Vector();
+        /* package */ int[] gammaTable = new int[256];
+        /* package */ Hashtable textChunks = new Hashtable();
+        /* package */ Hashtable properties = new Hashtable();
+        /* package */ Hashtable palettes = new Hashtable(1);
+        /* package */ Vector gifExtensions = new Vector();
 
         private Data() {}
     }

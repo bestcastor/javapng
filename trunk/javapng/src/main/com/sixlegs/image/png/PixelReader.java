@@ -10,7 +10,7 @@ final class PixelReader
 {
     final private BitMover mover;
     final private InputStream str;
-    final private int[] leftover = new int[8];
+    private int[] leftover = new int[8];
     private int leftamt = 0;
 
     /* package */ final int fillSize;
