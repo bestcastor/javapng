@@ -32,5 +32,4 @@ public interface PngConfig
     boolean getReduce16();
     PngChunk getChunk(int type);
     void handleException(PngException e) throws PngException;
-    void handleFrame(BufferedImage image, int framesLeft);
 }
