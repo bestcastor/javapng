@@ -18,28 +18,28 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png;
+package com.sixlegs.png.opt;
 
-import java.io.*;
-import java.util.Map;
+import com.sixlegs.png.*;
 
-class Chunk_gAMA
-extends PngChunk
+public class OptPngConfig
+extends BasicPngConfig
 {
-    public Chunk_gAMA()
-    {
-        super(gAMA);
-    }
+//     private static final PngChunk oFFs = new Chunk_oFFs();
+//     private static final PngChunk pCAL = new Chunk_pCAL();
+//     private static final PngChunk sCAL = new Chunk_sCAL();
+//     private static final PngChunk gIFg = new Chunk_gIFg();
+//     private static final PngChunk gIFx = new Chunk_gIFx();
 
-    public void read(PngInputStream in, int length, PngImage png)
-    throws IOException
+    public PngChunk getChunk(int type)
     {
-        checkLength(length, 4);
-        int gamma = in.readInt();
-        if (gamma == 0)
-            throw new PngWarning("Meaningless zero gAMA chunk value");
-        Map props = png.getProperties();
-        if (!props.containsKey(PngImage.RENDERING_INTENT))
-            props.put(PngImage.GAMMA, Integers.valueOf(gamma));
+        switch (type) {
+//         case PngChunk.oFFs: return oFFs;
+//         case PngChunk.pCAL: return pCAL;
+//         case PngChunk.sCAL: return sCAL;
+//         case PngChunk.gIFg: return gIFg;
+//         case PngChunk.gIFx: return gIFx;
+        }
+        return super.getChunk(type);
     }
 }

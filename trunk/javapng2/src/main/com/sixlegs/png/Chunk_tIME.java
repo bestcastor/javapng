@@ -21,25 +21,39 @@ Boston, MA  02111-1307, USA.
 package com.sixlegs.png;
 
 import java.io.*;
-import java.util.Map;
+import java.util.*;
 
-class Chunk_gAMA
+class Chunk_tIME
 extends PngChunk
 {
-    public Chunk_gAMA()
+    private static TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+0");
+    
+    public Chunk_tIME()
     {
-        super(gAMA);
+        super(tIME);
     }
 
     public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        checkLength(length, 4);
-        int gamma = in.readInt();
-        if (gamma == 0)
-            throw new PngWarning("Meaningless zero gAMA chunk value");
-        Map props = png.getProperties();
-        if (!props.containsKey(PngImage.RENDERING_INTENT))
-            props.put(PngImage.GAMMA, Integers.valueOf(gamma));
+        checkLength(length, 7);
+        int year   = in.readUnsignedShort();
+        int month  = check(in.readUnsignedByte(), 1, 12);
+        int day    = check(in.readUnsignedByte(), 1, 31);
+        int hour   = check(in.readUnsignedByte(), 0, 23);
+        int minute = check(in.readUnsignedByte(), 0, 59);
+        int second = check(in.readUnsignedByte(), 0, 60);
+
+        Calendar cal = Calendar.getInstance(TIME_ZONE);
+        cal.set(year, month - 1, day, hour, minute, second);
+        png.getProperties().put(PngImage.TIME, cal.getTime());
+    }
+
+    private static int check(int value, int min, int max)
+    throws PngWarning
+    {
+        if (value < min || value > max)
+            throw new PngWarning("tIME value out of bounds");
+        return value;
     }
 }

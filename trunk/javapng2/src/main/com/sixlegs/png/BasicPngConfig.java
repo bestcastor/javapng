@@ -33,10 +33,6 @@ implements PngConfig
     private boolean progressive;
     private boolean reduce16 = true;
 
-    public BasicPngConfig()
-    {
-    }
-
     public boolean getReduce16()
     {
         return reduce16;
@@ -87,10 +83,10 @@ implements PngConfig
         this.userExponent = userExponent;
     }
 
-    public void handleException(PngException e)
-    throws PngException
+    public void handleWarning(PngWarning e)
+    throws PngWarning
     {
-        if (warningsFatal || (e instanceof PngError))
+        if (warningsFatal)
             throw e;
     }
 
@@ -119,12 +115,14 @@ implements PngConfig
     private static final PngChunk IDAT = new Chunk_IDAT();
     private static final PngChunk IEND = new Chunk_IEND();
     private static final PngChunk bKGD = new Chunk_bKGD();
-    private static final PngChunk tRNS = new Chunk_tRNS();
     private static final PngChunk gAMA = new Chunk_gAMA();
-    private static final PngChunk pHYs = new Chunk_pHYs();
-    private static final PngChunk tEXt = new Chunk_tEXt();
-    private static final PngChunk zTXt = new Chunk_zTXt();
     private static final PngChunk iTXt = new Chunk_iTXt();
+    private static final PngChunk pHYs = new Chunk_pHYs();
+    private static final PngChunk sRGB = new Chunk_sRGB();
+    private static final PngChunk tEXt = new Chunk_tEXt();
+    private static final PngChunk tIME = new Chunk_tIME();
+    private static final PngChunk tRNS = new Chunk_tRNS();
+    private static final PngChunk zTXt = new Chunk_zTXt();
 
     public PngChunk getChunk(int type)
     {
@@ -134,28 +132,22 @@ implements PngConfig
         case PngChunk.IDAT: return IDAT;
         case PngChunk.IEND: return IEND;
         case PngChunk.bKGD: return bKGD;
-        case PngChunk.tRNS: return tRNS;
         case PngChunk.gAMA: return gAMA;
-        case PngChunk.pHYs: return pHYs;
-        case PngChunk.tEXt: return tEXt;
-        case PngChunk.zTXt: return zTXt;
         case PngChunk.iTXt: return iTXt;
+        case PngChunk.pHYs: return pHYs;
+        case PngChunk.sRGB: return sRGB;
+        case PngChunk.tEXt: return tEXt;
+        case PngChunk.tIME: return tIME;
+        case PngChunk.tRNS: return tRNS;
+        case PngChunk.zTXt: return zTXt;
             /*
         case PngChunk.cHRM: return cHRM;
         case PngChunk.hIST: return hIST;
         case PngChunk.sBIT: return sBIT;
-        case PngChunk.tIME: return tIME;
-        case PngChunk.sRGB: return sRGB;
         case PngChunk.sPLT: return sPLT;
-        case PngChunk.oFFs: return oFFs;
-        case PngChunk.sCAL: return sCAL;
         case PngChunk.iCCP: return iCCP;
-        case PngChunk.pCAL: return pCAL;
-        case PngChunk.gIFg: return gIFg;
-        case PngChunk.gIFx: return gIFx;
             */
-        default:
-            return null;
         }
+        return null;
     }
 }

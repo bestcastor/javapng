@@ -28,33 +28,37 @@ import java.util.*;
 // TODO: progressive rendering
 public class PngImage
 {
-    public static final String BACKGROUND_GRAY = "backgroundGray";
-    public static final String BACKGROUND_RED = "backgroundRed";
-    public static final String BACKGROUND_GREEN = "backgroundGreen";
     public static final String BACKGROUND_BLUE = "backgroundBlue";
+    public static final String BACKGROUND_GRAY = "backgroundGray";
+    public static final String BACKGROUND_GREEN = "backgroundGreen";
     public static final String BACKGROUND_INDEX = "backgroundIndex";
-    public static final String DATA = "data";
-    public static final String GAMMA = "gamma";
+    public static final String BACKGROUND_RED = "backgroundRed";
     public static final String BIT_DEPTH = "bitDepth";
     public static final String COLOR_TYPE = "colorType";
     public static final String COMPRESSION = "compression";
+    public static final String DATA = "data";
     public static final String FILTER = "filter";
+    public static final String GAMMA = "gamma";
     public static final String HEIGHT = "height";
+    public static final String ICC_PROFILE = "iccProfile";
+    public static final String ICC_PROFILE_NAME = "iccProfileName";
     public static final String INTERLACE = "interlace";
     public static final String PALETTE_ALPHA = "paletteAlpha";
-    public static final String PALETTE_RED = "paletteRed";
-    public static final String PALETTE_GREEN = "paletteGreen";
     public static final String PALETTE_BLUE = "paletteBlue";
-    public static final String SIGNIFICANT_BITS = "significantBits";
-    public static final String TEXT_CHUNKS = "textChunks";
-    public static final String TRANSPARENCY_GRAY = "transparencyGray";
-    public static final String TRANSPARENCY_RED = "transparencyRed";
-    public static final String TRANSPARENCY_GREEN = "transparencyGreen";
-    public static final String TRANSPARENCY_BLUE = "transparencyBlue";
-    public static final String WIDTH = "width";
+    public static final String PALETTE_GREEN = "paletteGreen";
+    public static final String PALETTE_RED = "paletteRed";
     public static final String PIXELS_PER_UNIT_X = "pixelsPerUnitX";
     public static final String PIXELS_PER_UNIT_Y = "pixelsPerUnitY";
+    public static final String RENDERING_INTENT = "renderingIntent";
+    public static final String SIGNIFICANT_BITS = "significantBits";
+    public static final String TEXT_CHUNKS = "textChunks";
+    public static final String TIME = "time";
+    public static final String TRANSPARENCY_BLUE = "transparencyBlue";
+    public static final String TRANSPARENCY_GRAY = "transparencyGray";
+    public static final String TRANSPARENCY_GREEN = "transparencyGreen";
+    public static final String TRANSPARENCY_RED = "transparencyRed";
     public static final String UNIT = "unit";
+    public static final String WIDTH = "width";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -118,7 +122,7 @@ public class PngImage
             long sig = data.readLong();
             if (sig != SIGNATURE) {
                 throw new PngError("Improper signature, expected 0x" +
-                                   Long.toHexString(SIGNATURE).toUpperCase() + ", got " +
+                                   Long.toHexString(SIGNATURE).toUpperCase() + ", got 0x" +
                                    Long.toHexString(sig).toUpperCase());
             }
             Set seen = new HashSet();
@@ -165,7 +169,7 @@ public class PngImage
                         }
                         chunk.read(data, length, this);
                     } catch (PngWarning warning) {
-                        config.handleException(warning);
+                        config.handleWarning(warning);
                     }
                 }
                 long calcChecksum = crc.getValue();
@@ -180,7 +184,6 @@ public class PngImage
                 return null;
             return ImageFactory.create(this);
         } catch (PngError e) {
-            config.handleException(e);
             throw e;
         } finally {
             if (close)

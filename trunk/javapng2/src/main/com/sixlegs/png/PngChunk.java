@@ -29,23 +29,25 @@ abstract public class PngChunk
     public static final int PLTE = 0x504c5445;
     public static final int IDAT = 0x49444154;
     public static final int IEND = 0x49454e44;
+
     public static final int bKGD = 0x624b4744;
     public static final int cHRM = 0x6348524d;
     public static final int gAMA = 0x67414d41;
     public static final int hIST = 0x68495354;
+    public static final int iCCP = 0x69434350;
+    public static final int iTXt = 0x69545874;
     public static final int pHYs = 0x70485973;
     public static final int sBIT = 0x73424954;
+    public static final int sPLT = 0x73504c54;
+    public static final int sRGB = 0x73524742;
     public static final int tEXt = 0x74455874;
     public static final int tIME = 0x74494d45;
     public static final int tRNS = 0x74524e53;
     public static final int zTXt = 0x7a545874;
-    public static final int sRGB = 0x73524742;
-    public static final int sPLT = 0x73504c54;
+
     public static final int oFFs = 0x6f464673;
-    public static final int sCAL = 0x7343414c;
-    public static final int iCCP = 0x69434350;
     public static final int pCAL = 0x7043414c;
-    public static final int iTXt = 0x69545874;
+    public static final int sCAL = 0x7343414c;
     public static final int gIFg = 0x67494667;
     public static final int gIFx = 0x67494678;
 

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<project name="Sixlegs PNG" default="compile">
+<project name="Sixlegs PNG" default="jar">
     <property file="${user.home}/build.properties" />
     <property file="build.properties" />
 
@@ -130,7 +130,7 @@
     <macrodef name="viewerImpl">
         <attribute name="file"/>
         <sequential>
-	    <java classname="com.sixlegs.png.examples.Viewer" classpathref="path.examples" fork="yes">
+	    <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.examples" fork="yes">
 		<arg value="@{file}"/>
 	    </java>
         </sequential>
@@ -154,8 +154,11 @@
 
     <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
-        <jar jarfile="dist/png.jar">
-            <fileset dir="build/main"/>
+        <jar jarfile="dist/png-${version}.jar">
+            <fileset dir="build/main" excludes="**/opt/**"/>
+        </jar>
+        <jar jarfile="dist/pngopt-${version}.jar">
+            <fileset dir="build/main" includes="**/opt/**"/>
         </jar>
     </target>
 
