@@ -26,6 +26,13 @@ import java.util.NoSuchElementException;
 public class EmptyEnumeration
 implements Enumeration
 {
+    private static final EmptyEnumeration INSTANCE = new EmptyEnumeration();
+    
+    public static EmptyEnumeration getInstance()
+    {
+        return INSTANCE;
+    }
+    
     public boolean hasMoreElements()
     {
         return false;
