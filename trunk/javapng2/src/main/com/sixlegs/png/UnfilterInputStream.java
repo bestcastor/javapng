@@ -20,13 +20,14 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.io.IOException;
+import java.io.*;
 
-public class PngException
-extends IOException
+class UnfilterInputStream
+extends FilterInputStream
 {
-    public PngException(String message)
+    public UnfilterInputStream(InputStream in, int colorType, int bitDepth, boolean interlaced)
     {
-        super(message);
+        super(in);
+        // TODO
     }
 }

@@ -1,6 +1,6 @@
 /*
 com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998-2004 Chris Nokleberg
+Copyright (C) 1998-2005 Chris Nokleberg
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
+// TODO: progressive rendering
 public class PngImage
 {
     public static final String BACKGROUND = "background";
@@ -43,6 +44,8 @@ public class PngImage
     public static final String TRANSPARENCY_LOW_BYTES = "transparencyLowBytes";
     public static final String TRANSPARENCY_SIZE = "transparencySize";
     public static final String WIDTH = "width";
+
+    /* package */ static final String DATA = "data";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -123,22 +126,23 @@ public class PngImage
                         throw new PngError("Corrupted chunk type: " + name);
                 }
 
-                state = updateState(state, type);
+                state = updateState(state, type, name);
+                System.err.println("read chunk " + name + ", state=" + state);
                 PngChunk chunk = config.getChunk(type);
 
                 if (chunk == null) {
                     data.skipFully(length);
                 } else {
-                    if (state == STATE_AFTER_IDAT && chunk.isBeforeData())
-                        throw new PngException(name + " chunk must precede first IDAT chunk");
                     Integer key = Integers.valueOf(type);
-                    if (chunk.isUnique() && seen.contains(key)) {
-                        String msg = "Multiple " + name + " chunks are not allowed";
-                        if (PngChunk.isAncillary(type))
-                            throw new PngWarning(msg);
-                        throw new PngError(msg);
-                    } else {
-                        seen.add(key);
+                    if (!chunk.isMultipleOK()) {
+                        if (seen.contains(key)) {
+                            String msg = "Multiple " + name + " chunks are not allowed";
+                            if (PngChunk.isAncillary(type))
+                                throw new PngWarning(msg);
+                            throw new PngError(msg);
+                        } else {
+                            seen.add(key);
+                        }
                     }
                     chunk.read(data, length, props, config);
                 }
@@ -147,7 +151,7 @@ public class PngImage
                 if (calcChecksum != fileChecksum)
                     throw new PngError("Bad CRC value for " + name + " chunk");
             }
-            return null; // TODO
+            return ImageFactory.create(config, props);
         } finally {
             if (close)
                 in.close();
@@ -161,7 +165,7 @@ public class PngImage
     private static final int STATE_AFTER_IDAT = 4;
     private static final int STATE_END = 5;
 
-    private int updateState(int state, int type)
+    private int updateState(int state, int type, String name)
     throws IOException
     {
         switch (state) {
@@ -174,28 +178,65 @@ public class PngImage
             case PngChunk.PLTE:
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
-            case PngChunk.IEND:
-                throw new PngException("Required PLTE chunk not found");
+                return STATE_IN_IDAT;
+            case PngChunk.bKGD:
+            case PngChunk.hIST:
+            case PngChunk.tRNS:
+                throw new PngException(name + " cannot appear before PLTE");
+            default:
+                return state;
             }
         case STATE_SAW_PLTE:
             switch (type) {
+            case PngChunk.cHRM:
+            case PngChunk.gAMA:
+            case PngChunk.iCCP:
+            case PngChunk.sBIT:
+            case PngChunk.sRGB:
+                throw new PngException(name + " cannot appear after PLTE");
             case PngChunk.IDAT:
                 return STATE_IN_IDAT;
             case PngChunk.IEND:
                 throw new PngException("Required data chunk(s) not found");
             }
-        case STATE_IN_IDAT:
-            if (type == PngChunk.IDAT)
-                return STATE_IN_IDAT;
-            return STATE_AFTER_IDAT;
-        case STATE_AFTER_IDAT:
-            if (type == PngChunk.IEND)
-                return STATE_END;
-            return STATE_AFTER_IDAT;
         default:
-            // impossible
-            return state;
+            switch (type) {
+            case PngChunk.PLTE:
+            case PngChunk.cHRM:
+            case PngChunk.gAMA:
+            case PngChunk.iCCP:
+            case PngChunk.sBIT:
+            case PngChunk.sRGB:
+            case PngChunk.bKGD:
+            case PngChunk.hIST:
+            case PngChunk.tRNS:
+            case PngChunk.pHYs:
+            case PngChunk.sPLT:
+                throw new PngException(name + " cannot appear after IDAT");
+            }
+            switch (state) {
+            case STATE_IN_IDAT:
+                switch (type) {
+                case PngChunk.IEND:
+                    return STATE_END;
+                case PngChunk.IDAT:
+                    return STATE_IN_IDAT;
+                default:
+                    return STATE_AFTER_IDAT;
+                }
+            case STATE_AFTER_IDAT:
+                switch (type) {
+                case PngChunk.IEND:
+                    return STATE_END;
+                case PngChunk.IDAT:
+                    throw new PngException("IDAT chunks must be consecutive");
+                default:
+                    return STATE_AFTER_IDAT;
+                }
+            }
         }
+        // impossible
+        throw new Error();
     }
 
     public int getWidth()

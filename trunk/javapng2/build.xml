@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<project name="Sixlegs PNG" default="jar">
+<project name="Sixlegs PNG" default="compile">
     <property file="${user.home}/build.properties" />
     <property file="build.properties" />
 
