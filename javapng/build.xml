@@ -111,12 +111,16 @@
         <copy todir="${dist}">
             <fileset dir="." includes="*.txt"/>
         </copy>
-        <zip destfile="${dist}/png-sixlegs-${version}.zip">
-            <zipfileset prefix="" dir="${dist}" excludes="*.zip,*.gz"/>
-        </zip>
+
+        <fixcrlf srcDir="${dist}" includes="**/*.txt,**/*.java,**/*.html" eol="unix"/>
         <tar destfile="${dist}/png-sixlegs-${version}.tar.gz" compression="gzip">
-            <tarfileset prefix="" dir="${dist}" excludes="*.zip,*.gz"/>
+            <tarfileset prefix="png-sixlegs-${version}" dir="${dist}" excludes="*.zip,*.gz"/>
         </tar>
+
+        <fixcrlf srcDir="${dist}" includes="**/*.txt,**/*.java,**/*.html" eol="dos"/>
+        <zip destfile="${dist}/png-sixlegs-${version}.zip">
+            <zipfileset prefix="png-sixlegs-${version}" dir="${dist}" excludes="*.zip,*.gz"/>
+        </zip>
     </target>
 
     <target name="pmd" depends="init">
