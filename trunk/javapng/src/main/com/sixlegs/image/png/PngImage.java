@@ -277,6 +277,9 @@ implements ImageProducer
      */
     public Enumeration getErrors()
     {
+        
+        if (errorList == null)
+            return new EmptyEnumeration();
         return errorList.elements();
     }
 
