@@ -279,7 +279,7 @@ implements ImageProducer
     {
         
         if (errorList == null)
-            return new EmptyEnumeration();
+            return EmptyEnumeration.getInstance();
         return errorList.elements();
     }
 
