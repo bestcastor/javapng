@@ -41,7 +41,7 @@ extends PngChunk
     {
         String name = in.readKeyword();
         int sampleDepth = in.readByte();
-        if (sampleDepth != 8 || sampleDepth != 16)
+        if (sampleDepth != 8 && sampleDepth != 16)
             throw new PngWarning("Sample depth must be 8 or 16");
         
         int remaining = in.getRemaining();
