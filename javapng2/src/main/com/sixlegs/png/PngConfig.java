@@ -28,6 +28,7 @@ public interface PngConfig
     float getDisplayExponent();
     float getUserExponent();
     boolean getGammaCorrect();
+    boolean getKeepRawData();
     boolean getMetadataOnly();
     boolean getProgressive();
     boolean getReduce16();
