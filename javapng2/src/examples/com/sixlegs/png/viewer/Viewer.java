@@ -1,4 +1,4 @@
-package com.sixlegs.png.examples;
+package com.sixlegs.png.viewer;
 
 import com.sixlegs.png.BasicPngConfig;
 import com.sixlegs.png.PngImage;

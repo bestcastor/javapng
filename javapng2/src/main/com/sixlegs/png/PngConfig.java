@@ -32,5 +32,5 @@ public interface PngConfig
     boolean getProgressive();
     boolean getReduce16();
     PngChunk getChunk(int type);
-    void handleException(PngException e) throws PngException;
+    void handleWarning(PngWarning e) throws PngWarning;
 }

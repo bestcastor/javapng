@@ -23,23 +23,34 @@ package com.sixlegs.png;
 import java.io.*;
 import java.util.Map;
 
-class Chunk_gAMA
+class Chunk_sRGB
 extends PngChunk
 {
-    public Chunk_gAMA()
+    public Chunk_sRGB()
     {
-        super(gAMA);
+        super(sRGB);
     }
 
     public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        checkLength(length, 4);
-        int gamma = in.readInt();
-        if (gamma == 0)
-            throw new PngWarning("Meaningless zero gAMA chunk value");
+        checkLength(length, 1);
+        int intent = in.readByte();
         Map props = png.getProperties();
-        if (!props.containsKey(PngImage.RENDERING_INTENT))
-            props.put(PngImage.GAMMA, Integers.valueOf(gamma));
+        if (props.containsKey(PngImage.ICC_PROFILE_NAME))
+            throw new PngWarning("Conflicting iCCP and sRGB chunks found");
+        props.put(PngImage.RENDERING_INTENT, Integers.valueOf(intent));
+        props.put(PngImage.GAMMA, Integers.valueOf(45455));
+        /*
+          cHRM:
+               White Point x: 31270
+               White Point y: 32900
+               Red x:         64000
+               Red y:         33000
+               Green x:       30000
+               Green y:       60000
+               Blue x:        15000
+               Blue y:         6000
+        */
     }
 }
