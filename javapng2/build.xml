@@ -18,10 +18,16 @@
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
 
+    <property name="testmethods" value=""/>
+
     <target name="init">
         <tstamp/>
         <path id="path.lib">
             <fileset dir="lib" includes="**/*.jar"/>
+        </path>
+        <path id="path.libdev">
+            <path refid="path.lib"/>
+            <fileset dir="libdev" includes="**/*.jar"/>
         </path>
         <path id="path.run">
             <path refid="path.lib"/>
@@ -30,6 +36,11 @@
         <path id="path.test">
             <path refid="path.run"/>
             <pathelement path="build/test"/>
+        </path>
+        <path id="path.test.emma">
+            <path refid="path.libdev"/>
+            <pathelement path="build/test"/>
+            <pathelement path="build/emma"/>
         </path>
         <path id="path.examples">
             <path refid="path.run"/>
@@ -49,6 +60,8 @@
         <compile module="examples" refid="path.run"/>
     </target>
 
+    <target name="compile-all" depends="compile-test,compile-examples" description="Compile everything"/>
+
     <macrodef name="compile">
         <attribute name="module"/>
         <attribute name="refid"/>
@@ -66,16 +79,52 @@
         </sequential>
     </macrodef>
 
-    <target name="test" depends="compile-test">
-        <junit>
-            <!-- <jvmarg value="-Xprof"/> -->
-            <formatter type="plain" usefile="false"/>
-            <classpath refid="path.test"/>
-            <test name="${testcase}" if="testcase"/>
-            <batchtest unless="testcase">
-                <fileset dir="src/test" includes="**/*Test.java"/>
-            </batchtest>
-        </junit>
+    <macrodef name="mytest">
+        <attribute name="includes" default="**/*Test.java"/>
+        <attribute name="refid"/>
+        <attribute name="fork" default="false"/>
+        <sequential>
+            <junit fork="@{fork}">
+                <sysproperty key="testmethods" value="${testmethods}"/>
+                <formatter type="brief" usefile="false"/>
+                <classpath refid="@{refid}"/>
+                <test name="${testcase}" if="testcase"/>
+                <batchtest unless="testcase">
+                    <fileset dir="src/test" includes="@{includes}"/>
+                </batchtest>
+            </junit>
+        </sequential>
+    </macrodef>
+
+    <target name="test" depends="compile-test" description="Run JUnit tests">
+        <mytest refid="path.test"/>
+    </target>
+
+    <target name="todo" depends="compile-test" description="Known JUnit failures">
+        <mytest refid="path.test" includes="**/*Todo.java"/>
+    </target>
+
+    <target name="emma" depends="compile-test" description="Generate code coverage report using Emma">
+        <taskdef resource="emma_ant.properties" classpathref="path.libdev"/>
+        <mkdir dir="build/emma"/>
+        <copy todir="build/emma">
+            <fileset dir="build/main"/>
+        </copy>
+        <emma enabled="true">
+            <instr
+              instrpath="build/emma"
+              mode="overwrite"
+            />
+        </emma>
+        <mytest refid="path.test.emma" fork="true"/>
+        <mkdir dir="reports"/>
+        <emma enabled="true">
+            <report sourcepath="src/main">
+                <infileset dir="${user.dir}" includes="*.em, *.ec"/>
+                <txt outfile="reports/coverage.txt"/>
+                <html outfile="reports/coverage.html"/>
+            </report>
+        </emma>
     </target>
 
     <macrodef name="viewerImpl">
@@ -87,23 +136,23 @@
         </sequential>
     </macrodef>
 
-    <target name="viewer" depends="compile-examples">
+    <target name="viewer" depends="compile-examples" description="Run PNG Viewer application">
         <viewerImpl file="${viewer.file}"/>
     </target>
 
-    <target name="suite" depends="compile-test, compile-examples">
+    <target name="suite" depends="compile-test, compile-examples" description="Decode and display PngSuite">
         <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
             <arg value="${suite.file}"/>
         </java>
         <viewerImpl file="${suite.file}"/>
     </target>
 
-    <target name="clean">
+    <target name="clean" description="Clean">
         <delete dir="build"/>
         <delete dir="dist"/>
     </target>
 
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
         <jar jarfile="dist/png.jar">
             <fileset dir="build/main"/>
@@ -125,7 +174,7 @@
         />
     </target>
 
-    <target name="dist" depends="clean,test,javadoc,jar">
+    <target name="dist" depends="clean,test,javadoc,jar" description="Create distribution">
         <copy todir="dist/src">
             <fileset dir="src" excludes="test/**,**/*.java~"/>
         </copy>
@@ -144,7 +193,7 @@
         </zip>
     </target>
 
-    <target name="pmd" depends="init">
+    <target name="pmd" depends="init" description="Find bugs using PMD">
         <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="path.lib"/>
         <pmd rulesetfiles="rulesets/basic.xml,rulesets/coupling.xml,rulesets/imports.xml,rulesets/unusedcode.xml">
             <formatter type="html" toFile="pmd.html"/>

@@ -14,7 +14,6 @@ extends TestCase
         png.read(in, true);
         assertEquals(138, png.getWidth());
         assertEquals(180, png.getHeight());
-        System.err.println(png.getProperties());
     }
 
     public SimpleTest(String name)
