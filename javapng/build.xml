@@ -59,10 +59,7 @@
 
     <target name="test" depends="compile-tests">
         <junit>
-            <!-- <jvmarg value="-Xint"/> -->
             <!-- <jvmarg value="-Xprof"/> -->
-            <!-- <jvmarg value="-server"/> -->
-            <!-- <sysproperty key="cglib.debugLocation" value="."/> -->
             <formatter type="plain" usefile="false"/>
             <classpath refid="path.test"/>
             <batchtest>
@@ -83,8 +80,6 @@
         </jar>
     </target>
 
-    <!-- TODO: zip target -->
-
     <target name="javadoc" depends="compile" description="Generate the javadoc">
         <mkdir dir="${dist}/javadoc"/>
         <javadoc 
@@ -100,7 +95,7 @@
         />
     </target>
 
-    <target name="dist" depends="clean,test,javadoc">
+    <target name="dist" depends="clean,test,javadoc,jar">
         <copy todir="${dist}/src">
             <fileset dir="${src}" excludes="test/**,**/*.java~"/>
         </copy>
