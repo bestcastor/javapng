@@ -25,9 +25,9 @@ import java.awt.image.BufferedImage;
 public class BasicPngConfig
 implements PngConfig
 {
-    private int defaultGamma = 45455;
-    private double displayExponent = 2.2;
-    private double userExponent = 1.0;
+    private float defaultGamma = 0.45455f;
+    private float displayExponent = 2.2f;
+    private float userExponent = 1.0f;
     private boolean metadataOnly;
     private boolean warningsFatal;
     private boolean progressive;
@@ -43,12 +43,12 @@ implements PngConfig
         this.reduce16 = reduce16;
     }
 
-    public int getDefaultGamma()
+    public float getDefaultGamma()
     {
         return defaultGamma;
     }
 
-    public void setDefaultGamma(int defaultGamma)
+    public void setDefaultGamma(float defaultGamma)
     {
         this.defaultGamma = defaultGamma;
     }
@@ -63,22 +63,22 @@ implements PngConfig
         this.progressive = progressive;
     }
 
-    public double getDisplayExponent()
+    public float getDisplayExponent()
     {
         return displayExponent;
     }
 
-    public void setDisplayExponent(double displayExponent)
+    public void setDisplayExponent(float displayExponent)
     {
         this.displayExponent = displayExponent;
     }
     
-    public double getUserExponent()
+    public float getUserExponent()
     {
         return userExponent;
     }
 
-    public void setUserExponent(double userExponent)
+    public void setUserExponent(float userExponent)
     {
         this.userExponent = userExponent;
     }
@@ -115,6 +115,7 @@ implements PngConfig
     private static final PngChunk IDAT = new Chunk_IDAT();
     private static final PngChunk IEND = new Chunk_IEND();
     private static final PngChunk bKGD = new Chunk_bKGD();
+    private static final PngChunk cHRM = new Chunk_cHRM();
     private static final PngChunk gAMA = new Chunk_gAMA();
     private static final PngChunk iTXt = new Chunk_iTXt();
     private static final PngChunk pHYs = new Chunk_pHYs();
@@ -132,6 +133,7 @@ implements PngConfig
         case PngChunk.IDAT: return IDAT;
         case PngChunk.IEND: return IEND;
         case PngChunk.bKGD: return bKGD;
+        case PngChunk.cHRM: return cHRM;
         case PngChunk.gAMA: return gAMA;
         case PngChunk.iTXt: return iTXt;
         case PngChunk.pHYs: return pHYs;
@@ -141,7 +143,6 @@ implements PngConfig
         case PngChunk.tRNS: return tRNS;
         case PngChunk.zTXt: return zTXt;
             /*
-        case PngChunk.cHRM: return cHRM;
         case PngChunk.hIST: return hIST;
         case PngChunk.sBIT: return sBIT;
         case PngChunk.sPLT: return sPLT;

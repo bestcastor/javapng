@@ -20,34 +20,34 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Map;
 
-class Chunk_sRGB
+class Chunk_cHRM
 extends PngChunk
 {
-    public Chunk_sRGB()
+    public Chunk_cHRM()
     {
-        super(sRGB);
+        super(cHRM);
     }
 
     public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        checkLength(length, 1);
-        int intent = in.readByte();
+        checkLength(length, 32);
+        float[] array = new float[8];
+        for (int i = 0; i < 8; i++)
+            array[i] = in.readInt() / 100000f;
         Map props = png.getProperties();
-        if (props.containsKey(PngImage.ICC_PROFILE_NAME))
-            throw new PngWarning("Conflicting iCCP and sRGB chunks found");
-        props.put(PngImage.RENDERING_INTENT, Integers.valueOf(intent));
-        props.put(PngImage.GAMMA, new Float(0.45455));
-        props.put(PngImage.WHITE_POINT_X, new Float(0.3127f));
-        props.put(PngImage.WHITE_POINT_Y, new Float(0.329f));
-        props.put(PngImage.RED_X, new Float(0.64f));
-        props.put(PngImage.RED_Y, new Float(0.33f));
-        props.put(PngImage.GREEN_X, new Float(0.3f));
-        props.put(PngImage.GREEN_Y, new Float(0.6f));
-        props.put(PngImage.BLUE_X, new Float(0.15f));
-        props.put(PngImage.BLUE_Y, new Float(0.06f));
+        if (!props.containsKey(PngImage.RENDERING_INTENT)) {
+            props.put(PngImage.WHITE_POINT_X, new Float(array[0]));
+            props.put(PngImage.WHITE_POINT_Y, new Float(array[1]));
+            props.put(PngImage.RED_X, new Float(array[2]));
+            props.put(PngImage.RED_Y, new Float(array[3]));
+            props.put(PngImage.GREEN_X, new Float(array[4]));
+            props.put(PngImage.GREEN_Y, new Float(array[5]));
+            props.put(PngImage.BLUE_X, new Float(array[6]));
+            props.put(PngImage.BLUE_Y, new Float(array[7]));
+        }
     }
 }

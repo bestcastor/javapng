@@ -44,6 +44,6 @@ extends PngChunk
         Map props = png.getProperties();
         props.put(PngImage.PIXELS_PER_UNIT_X, Integers.valueOf(pixelsPerUnitX));
         props.put(PngImage.PIXELS_PER_UNIT_Y, Integers.valueOf(pixelsPerUnitY));
-        props.put(PngImage.UNIT, Integers.valueOf(unit));
+        props.put(PngImage.UNIT_SPECIFIER, Integers.valueOf(unit));
     }    
 }

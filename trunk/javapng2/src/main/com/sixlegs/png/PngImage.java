@@ -25,40 +25,47 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
-// TODO: progressive rendering
 public class PngImage
 {
-    public static final String BACKGROUND_BLUE = "backgroundBlue";
-    public static final String BACKGROUND_GRAY = "backgroundGray";
-    public static final String BACKGROUND_GREEN = "backgroundGreen";
-    public static final String BACKGROUND_INDEX = "backgroundIndex";
-    public static final String BACKGROUND_RED = "backgroundRed";
-    public static final String BIT_DEPTH = "bitDepth";
-    public static final String COLOR_TYPE = "colorType";
+    public static final String BACKGROUND_BLUE = "background_blue";
+    public static final String BACKGROUND_GRAY = "background_gray";
+    public static final String BACKGROUND_GREEN = "background_green";
+    public static final String BACKGROUND_INDEX = "background_index";
+    public static final String BACKGROUND_RED = "background_red";
+    public static final String BIT_DEPTH = "bit_depth";
+    public static final String COLOR_TYPE = "color_type";
     public static final String COMPRESSION = "compression";
     public static final String DATA = "data";
     public static final String FILTER = "filter";
     public static final String GAMMA = "gamma";
     public static final String HEIGHT = "height";
-    public static final String ICC_PROFILE = "iccProfile";
-    public static final String ICC_PROFILE_NAME = "iccProfileName";
+    public static final String ICC_PROFILE = "icc_profile";
+    public static final String ICC_PROFILE_NAME = "icc_profile_name";
     public static final String INTERLACE = "interlace";
-    public static final String PALETTE_ALPHA = "paletteAlpha";
-    public static final String PALETTE_BLUE = "paletteBlue";
-    public static final String PALETTE_GREEN = "paletteGreen";
-    public static final String PALETTE_RED = "paletteRed";
-    public static final String PIXELS_PER_UNIT_X = "pixelsPerUnitX";
-    public static final String PIXELS_PER_UNIT_Y = "pixelsPerUnitY";
-    public static final String RENDERING_INTENT = "renderingIntent";
-    public static final String SIGNIFICANT_BITS = "significantBits";
-    public static final String TEXT_CHUNKS = "textChunks";
+    public static final String PALETTE_ALPHA = "palette_alpha";
+    public static final String PALETTE_BLUE = "palette_blue";
+    public static final String PALETTE_GREEN = "palette_green";
+    public static final String PALETTE_RED = "palette_red";
+    public static final String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
+    public static final String PIXELS_PER_UNIT_Y = "pixels_per_unit_y";
+    public static final String RENDERING_INTENT = "rendering_intent";
+    public static final String SIGNIFICANT_BITS = "significant_bits";
+    public static final String TEXT_CHUNKS = "text_chunks";
     public static final String TIME = "time";
-    public static final String TRANSPARENCY_BLUE = "transparencyBlue";
-    public static final String TRANSPARENCY_GRAY = "transparencyGray";
-    public static final String TRANSPARENCY_GREEN = "transparencyGreen";
-    public static final String TRANSPARENCY_RED = "transparencyRed";
-    public static final String UNIT = "unit";
+    public static final String TRANSPARENCY_BLUE = "transparency_blue";
+    public static final String TRANSPARENCY_GRAY = "transparency_gray";
+    public static final String TRANSPARENCY_GREEN = "transparency_green";
+    public static final String TRANSPARENCY_RED = "transparency_red";
+    public static final String UNIT_SPECIFIER = "unit_specifier";
     public static final String WIDTH = "width";
+    public static final String WHITE_POINT_X = "white_point_x";
+    public static final String WHITE_POINT_Y = "white_point_y";
+    public static final String RED_X = "red_x";
+    public static final String RED_Y = "red_y";
+    public static final String BLUE_X = "blue_x";
+    public static final String BLUE_Y = "blue_y";
+    public static final String GREEN_X = "green_x";
+    public static final String GREEN_Y = "green_y";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -86,7 +93,7 @@ public class PngImage
     public static final int SRGB_ABSOLUTE_COLORIMETRIC = 3;
     
     private PngConfig config;
-    private Map props = new TreeMap();
+    private Map props = new HashMap();
     private boolean read = false;
 
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
@@ -117,6 +124,7 @@ public class PngImage
     {
         try {
             read = true;
+            props.clear();
             CRCInputStream crc = new CRCInputStream(in, new byte[0x2000]);
             PngInputStream data = new PngInputStream(crc);
             long sig = data.readLong();
@@ -318,21 +326,23 @@ public class PngImage
         return 1;
     }
 
-    public int getGamma()
+    public float getGamma()
     {
+        assertRead();
         if (props.containsKey(PngImage.GAMMA))
-            return getInt(PngImage.GAMMA);
+            return ((Number)props.get(PngImage.GAMMA)).floatValue();
         return config.getDefaultGamma();
     }
 
     public short[] getGammaTable()
     {
-        int gamma = getGamma();
+        assertRead();
+        double gamma = getGamma();
         int bitDepth = getBitDepth();
         int size = 1 << ((bitDepth == 16 && !config.getReduce16()) ? 16 : 8);
         short[] gammaTable = new short[size];
         double decodingExponent =
-            (config.getUserExponent() * 100000d / (gamma * config.getDisplayExponent()));
+            (double)config.getUserExponent() / (gamma * (double)config.getDisplayExponent());
         for (int i = 0; i < size; i++)
             gammaTable[i] = (short)(Math.pow((double)i / (size - 1), decodingExponent) * (size - 1));
         return gammaTable;
@@ -341,6 +351,7 @@ public class PngImage
     // TODO: gamma-correct background?
     public Color getBackground()
     {
+        assertRead();
         switch (getColorType()) {
         case COLOR_TYPE_PALETTE:
             if (!props.containsKey(BACKGROUND_INDEX))
@@ -398,6 +409,7 @@ public class PngImage
     // package-protected
     int getInt(String name)
     {
+        assertRead();
         return ((Number)props.get(name)).intValue();
     }
 
