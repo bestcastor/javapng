@@ -28,25 +28,30 @@ import java.util.*;
 // TODO: progressive rendering
 public class PngImage
 {
-    public static final String BACKGROUND = "background";
+    public static final String BACKGROUND_GRAY = "backgroundGray";
+    public static final String BACKGROUND_RED = "backgroundRed";
+    public static final String BACKGROUND_GREEN = "backgroundGreen";
+    public static final String BACKGROUND_BLUE = "backgroundBlue";
     public static final String BACKGROUND_INDEX = "backgroundIndex";
-    public static final String BACKGROUND_LOW_BYTES = "backgroundLowBytes";
+    public static final String DATA = "data";
+    public static final String GAMMA = "gamma";
     public static final String BIT_DEPTH = "bitDepth";
     public static final String COLOR_TYPE = "colorType";
     public static final String COMPRESSION = "compression";
     public static final String FILTER = "filter";
     public static final String HEIGHT = "height";
     public static final String INTERLACE = "interlace";
-    public static final String PALETTE = "palette";
-    public static final String PALETTE_SIZE = "paletteSize";
+    public static final String PALETTE_ALPHA = "paletteAlpha";
+    public static final String PALETTE_RED = "paletteRed";
+    public static final String PALETTE_GREEN = "paletteGreen";
+    public static final String PALETTE_BLUE = "paletteBlue";
     public static final String SIGNIFICANT_BITS = "significantBits";
     public static final String TEXT_CHUNKS = "textChunks";
-    public static final String TRANSPARENCY = "transparency";
-    public static final String TRANSPARENCY_LOW_BYTES = "transparencyLowBytes";
-    public static final String TRANSPARENCY_SIZE = "transparencySize";
+    public static final String TRANSPARENCY_GRAY = "transparencyGray";
+    public static final String TRANSPARENCY_RED = "transparencyRed";
+    public static final String TRANSPARENCY_GREEN = "transparencyGreen";
+    public static final String TRANSPARENCY_BLUE = "transparencyBlue";
     public static final String WIDTH = "width";
-
-    /* package */ static final String DATA = "data";
 
     public static final int COLOR_TYPE_GRAY = 0;
     public static final int COLOR_TYPE_GRAY_ALPHA = 4;
@@ -128,7 +133,7 @@ public class PngImage
                 }
 
                 state = updateState(state, type, name);
-                System.err.println("read chunk " + name + ", state=" + state);
+                // System.err.println("read chunk " + name + ", state=" + state);
                 PngChunk chunk = config.getChunk(type);
 
                 if (chunk == null) {
@@ -154,6 +159,9 @@ public class PngImage
                 if (calcChecksum != fileChecksum)
                     throw new PngError("Bad CRC value for " + name + " chunk");
             }
+            // TODO
+            if (getColorType() == COLOR_TYPE_PALETTE && props.get(PALETTE_RED) == null)
+                throw new PngError("Required PLTE chunk not found");
             return new ImageFactory().create(config, props);
         } finally {
             if (close)
@@ -163,10 +171,11 @@ public class PngImage
 
     private static final int STATE_START = 0;
     private static final int STATE_SAW_IHDR = 1;
-    private static final int STATE_SAW_PLTE = 2;
-    private static final int STATE_IN_IDAT = 3;
-    private static final int STATE_AFTER_IDAT = 4;
-    private static final int STATE_END = 5;
+    private static final int STATE_SAW_IHDR_NO_PLTE = 2;
+    private static final int STATE_SAW_PLTE = 3;
+    private static final int STATE_IN_IDAT = 4;
+    private static final int STATE_AFTER_IDAT = 5;
+    private static final int STATE_END = 6;
 
     private int updateState(int state, int type, String name)
     throws IOException
@@ -174,18 +183,21 @@ public class PngImage
         switch (state) {
         case STATE_START:
             if (type != PngChunk.IHDR)
-                throw new PngError("IHDR chunk must be first chunk");
             return STATE_SAW_IHDR;
         case STATE_SAW_IHDR:
+        case STATE_SAW_IHDR_NO_PLTE:
             switch (type) {
             case PngChunk.PLTE:
+                if (state == STATE_SAW_IHDR_NO_PLTE)
+                    throw new PngError("IHDR chunk must be first chunk");
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
+                // TODO: move "Required PLTE chunk not found here"
                 return STATE_IN_IDAT;
             case PngChunk.bKGD:
             case PngChunk.hIST:
             case PngChunk.tRNS:
-                throw new PngException(name + " cannot appear before PLTE");
+                return STATE_SAW_IHDR_NO_PLTE;
             default:
                 return STATE_SAW_IHDR;
             }
@@ -269,36 +281,36 @@ public class PngImage
         return getInt(COLOR_TYPE);
     }
 
-    public boolean hasAlphaChannel()
-    {
-        switch (getColorType()) {
-        case COLOR_TYPE_GRAY_ALPHA:
-        case COLOR_TYPE_RGB_ALPHA:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public boolean isGrayscale()
-    {
-        switch (getColorType()) {
-        case COLOR_TYPE_GRAY:
-        case COLOR_TYPE_GRAY_ALPHA:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public boolean isIndexedColor()
-    {
-        return getColorType() == COLOR_TYPE_PALETTE;
-    }
-
+    // TODO: gamma-correct background?
     public Color getBackground()
     {
-        return (Color)getProperty(BACKGROUND);
+        switch (getColorType()) {
+        case COLOR_TYPE_PALETTE:
+            if (!props.containsKey(BACKGROUND_INDEX))
+                return null;
+            int index = getInt(BACKGROUND_INDEX);
+            return new Color(0xFF & ((byte[])props.get(PALETTE_RED))[index],
+                             0xFF & ((byte[])props.get(PALETTE_GREEN))[index],
+                             0xFF & ((byte[])props.get(PALETTE_BLUE))[index]);
+        case COLOR_TYPE_GRAY:
+        case COLOR_TYPE_GRAY_ALPHA:
+            if (!props.containsKey(BACKGROUND_GRAY))
+                return null;
+            int gray = getInt(BACKGROUND_GRAY) * 255 / ((1 << getBitDepth()) - 1);
+            return new Color(gray, gray, gray);
+            
+        default:
+            if (!props.containsKey(BACKGROUND_RED))
+                return null;
+            int r = getInt(BACKGROUND_RED);
+            int g = getInt(BACKGROUND_GREEN);
+            int b = getInt(BACKGROUND_BLUE);
+            if (getBitDepth() == 16) {
+                return new Color(r >> 8, g >> 8, b >> 8);
+            } else {
+                return new Color(r, g, b);
+            }
+        }
     }
 
     public Object getProperty(String name)

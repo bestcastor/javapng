@@ -116,11 +116,5 @@ abstract public class PngChunk
                                " chunk length: " + length + " (expected " + correct + ")");
     }
 
-//     protected void badLength(int length)
-//     throws PngException
-//     {
-//         throw new PngError("Bad " + typeToString(type) + " chunk length: " + length);
-//     }
-
     abstract public void read(PngInputStream in, int length, Map props, PngConfig config) throws IOException;
 }

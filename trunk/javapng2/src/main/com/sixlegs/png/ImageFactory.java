@@ -56,78 +56,132 @@ class ImageFactory
         int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
         int interlace = PngImage.getInt(props, PngImage.INTERLACE);
 
+        long gamma = 45455L;
+        if (props.containsKey(PngImage.GAMMA))
+            gamma = ((Number)props.get(PngImage.GAMMA)).longValue();
+
+        int[] gammaTable = calcGammaTable(config, bitDepth, gamma);
         boolean interlaced = interlace == PngImage.INTERLACE_ADAM7;
         int samples = getSamples(colorType);
-        int rowSize = (bitDepth * samples * width + 7) / 8;
-        int[] palette = (int[])props.get(PngImage.PALETTE);
-        ColorModel colorModel = createColorModel(colorType, bitDepth, palette);
-        WritableRaster raster = createRaster(bitDepth, samples, width, height, rowSize);
+        ColorModel colorModel = createColorModel(props, gammaTable);
+        WritableRaster raster = createRaster(bitDepth, samples, width, height);
 
         InputStream in;
-        in = new MultiByteArrayInputStream((List)props.remove(PngImage.DATA));
+        in = new MultiByteArrayInputStream((List)props.get(PngImage.DATA));
         in = new InflaterInputStream(in, new Inflater(), 0x2000);
+        // System.err.println("props=" + props);
+        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
+        // TODO: if not progressive, initialize to fully transparent
 
-        Defilterer d = new Defilterer(in, raster, bitDepth, samples);
+        Defilterer d = new Defilterer(in, raster, bitDepth, samples,
+                                      gammaTable,
+                                      colorModel instanceof ComponentColorModel,
+                                      config.isProgressive() && interlaced);
         if (interlaced) {
             d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8);
+            config.handleFrame(image, 6);
             d.defilter(4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8);
+            config.handleFrame(image, 5);
             d.defilter(0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8);
+            config.handleFrame(image, 4);
             d.defilter(2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4);
+            config.handleFrame(image, 3);
             d.defilter(0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4);
+            config.handleFrame(image, 2);
             d.defilter(1, 0, 2, 2, width / 2, (height + 1) / 2);
+            config.handleFrame(image, 1);
             d.defilter(0, 1, 1, 2, width, height / 2);
+            config.handleFrame(image, 0);
         } else {
             d.defilter(0, 0, 1, 1, width, height);
+            config.handleFrame(image, 0);
         }
-        return new BufferedImage(colorModel, raster, false, null);
+        return image;
     }
 
-    private ColorModel createColorModel(int colorType, int bitDepth, int[] palette)
+    private static int[] calcGammaTable(PngConfig config, int bitDepth, long fileGamma)
     {
-        int colorSpace = ColorSpace.CS_sRGB;
-        boolean hasAlpha = false;
+        int size = 1 << ((bitDepth == 16) ? 16 : 8);
+        int[] gammaTable = new int[size];
+        double decodingExponent =
+            (config.getUserExponent() * 100000d / (fileGamma * config.getDisplayExponent()));
+        for (int i = 0; i < size; i++)
+            gammaTable[i] = (int)(Math.pow((double)i / (size - 1), decodingExponent) * (size - 1));
+        return gammaTable;
+    }
+
+    private static ColorModel createColorModel(Map props, int[] gammaTable)
+    {
+        int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
+        int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
+
+        if (colorType == PngImage.COLOR_TYPE_PALETTE ||
+            (colorType == PngImage.COLOR_TYPE_GRAY && bitDepth < 16)) {
+            byte[] r = applyGamma((byte[])props.get(PngImage.PALETTE_RED), gammaTable);
+            byte[] g = applyGamma((byte[])props.get(PngImage.PALETTE_GREEN), gammaTable);
+            byte[] b = applyGamma((byte[])props.get(PngImage.PALETTE_BLUE), gammaTable);
+            byte[] a = (byte[])props.get(PngImage.PALETTE_ALPHA);
+            if (a != null) {
+                return new IndexColorModel(bitDepth, r.length, r, g, b, a);
+            } else {
+                int trans = -1;
+                if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
+                    trans = PngImage.getInt(props, PngImage.TRANSPARENCY_GRAY);
+                    trans = trans * 255 / ((1 << bitDepth) - 1);
+                }
+                return new IndexColorModel(bitDepth, r.length, r, g, b, trans);
+            }
+        } else {
+            int dataType = (bitDepth == 16) ?
+                DataBuffer.TYPE_USHORT : DataBuffer.TYPE_BYTE;
+            boolean hasAlpha = hasAlpha(colorType);
+            return new ComponentColorModel(getColorSpace(colorType),
+                                           hasAlpha,
+                                           false,
+                                           hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
+                                           dataType);
+        }
+    }
+
+    private static boolean hasAlpha(int colorType)
+    {
         switch (colorType) {
-        case PngImage.COLOR_TYPE_PALETTE:
-            return new IndexColorModel(bitDepth,
-                                       palette.length,
-                                       palette,
-                                       0,
-                                       true, // TODO: any advantage to sometimes using false?
-                                       -1,
-                                       DataBuffer.TYPE_BYTE);
         case PngImage.COLOR_TYPE_RGB_ALPHA:
-            hasAlpha = true;
-            break;
+        case PngImage.COLOR_TYPE_GRAY_ALPHA:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private static ColorSpace getColorSpace(int colorType)
+    {
+        switch (colorType) {
         case PngImage.COLOR_TYPE_GRAY:
         case PngImage.COLOR_TYPE_GRAY_ALPHA:
-            colorSpace = ColorSpace.CS_GRAY;
-            hasAlpha = (colorType == PngImage.COLOR_TYPE_GRAY_ALPHA);
-            if (bitDepth < 8) {
-                int size = (int)Math.pow(2, bitDepth);
-                palette = new int[size];
-                for (int i = 0; i < size; i++) {
-                    int g = i * 255 / (size - 1);
-                    palette[i] = (g << 16) | (g << 8) | g;
-                }
-                return new IndexColorModel(bitDepth,
-                                           palette.length,
-                                           palette,
-                                           0,
-                                           false,
-                                           -1, // TODO: transgray!
-                                           DataBuffer.TYPE_BYTE);
-            }
+            return ColorSpace.getInstance(ColorSpace.CS_GRAY);
+        default:
+            return ColorSpace.getInstance(ColorSpace.CS_sRGB);
         }
-        int dataType = (bitDepth == 16) ? DataBuffer.TYPE_USHORT : DataBuffer.TYPE_BYTE;
-        return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
-                                       hasAlpha,
-                                       false,
-                                       hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
-                                       dataType);
     }
 
-    private WritableRaster createRaster(int bitDepth, int samples, int width, int height, int rowSize)
+    private static byte[] applyGamma(byte[] palette, int[] gammaTable)
     {
+        if (palette == null)
+            return null;
+        if (gammaTable == null)
+            return palette;
+
+        int size = palette.length;
+        byte[] copy = new byte[size];
+        for (int i = 0; i < size; i++)
+            copy[i] = (byte)gammaTable[0xFF & palette[i]];
+        return copy;
+    }
+
+    private WritableRaster createRaster(int bitDepth, int samples, int width, int height)
+    {
+        int rowSize = (bitDepth * samples * width + 7) / 8;
         DataBuffer dbuf;
         Point origin = new Point(0, 0);
         if ((bitDepth < 8) && (samples == 1)) {

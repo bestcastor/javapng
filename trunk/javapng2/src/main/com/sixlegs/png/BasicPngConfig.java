@@ -20,6 +20,8 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+import java.awt.image.BufferedImage;
+
 public class BasicPngConfig
 implements PngConfig
 {
@@ -27,16 +29,20 @@ implements PngConfig
     private double userExponent = 1.0;
     private boolean metadataOnly;
     private boolean warningsFatal;
+    private boolean progressive;
 
     public BasicPngConfig()
     {
-        this(false, false);
     }
 
-    public BasicPngConfig(boolean metadataOnly, boolean warningsFatal)
+    public boolean isProgressive()
     {
-        this.metadataOnly = metadataOnly;
-        this.warningsFatal = warningsFatal;
+        return progressive;
+    }
+
+    public void setProgressive()
+    {
+        this.progressive = progressive;
     }
 
     public double getDisplayExponent()
@@ -71,12 +77,28 @@ implements PngConfig
         return metadataOnly;
     }
 
+    public void setMetadataOnly()
+    {
+        this.metadataOnly = metadataOnly;
+    }
+
+    public boolean getWarningsFatal()
+    {
+        return warningsFatal;
+    }
+
+    public void setWarningsFatal()
+    {
+        this.warningsFatal = warningsFatal;
+    }
+    
     private static final PngChunk IHDR = new Chunk_IHDR();
     private static final PngChunk PLTE = new Chunk_PLTE();
     private static final PngChunk IDAT = new Chunk_IDAT();
     private static final PngChunk IEND = new Chunk_IEND();
     private static final PngChunk bKGD = new Chunk_bKGD();
     private static final PngChunk tRNS = new Chunk_tRNS();
+    private static final PngChunk gAMA = new Chunk_gAMA();
 
     public PngChunk getChunk(int type)
     {
@@ -87,27 +109,31 @@ implements PngConfig
         case PngChunk.IEND: return IEND;
         case PngChunk.bKGD: return bKGD;
         case PngChunk.tRNS: return tRNS;
+        case PngChunk.gAMA: return gAMA;
             /*
-        case PngChunk.cHRM: return new Chunk_cHRM();
-        case PngChunk.gAMA: return new Chunk_gAMA();
-        case PngChunk.hIST: return new Chunk_hIST();
-        case PngChunk.pHYs: return new Chunk_pHYs();
-        case PngChunk.sBIT: return new Chunk_sBIT();
-        case PngChunk.tEXt: return new Chunk_tEXt();
-        case PngChunk.tIME: return new Chunk_tIME();
-        case PngChunk.zTXt: return new Chunk_zTXt();
-        case PngChunk.sRGB: return new Chunk_sRGB();
-        case PngChunk.sPLT: return new Chunk_sPLT();
-        case PngChunk.oFFs: return new Chunk_oFFs();
-        case PngChunk.sCAL: return new Chunk_sCAL();
-        case PngChunk.iCCP: return new Chunk_iCCP();
-        case PngChunk.pCAL: return new Chunk_pCAL();
-        case PngChunk.iTXt: return new Chunk_iTXt();
-        case PngChunk.gIFg: return new Chunk_gIFg();
-        case PngChunk.gIFx: return new Chunk_gIFx();
+        case PngChunk.cHRM: return cHRM;
+        case PngChunk.hIST: return hIST;
+        case PngChunk.pHYs: return pHYs;
+        case PngChunk.sBIT: return sBIT;
+        case PngChunk.tEXt: return tEXt;
+        case PngChunk.tIME: return tIME;
+        case PngChunk.zTXt: return zTXt;
+        case PngChunk.sRGB: return sRGB;
+        case PngChunk.sPLT: return sPLT;
+        case PngChunk.oFFs: return oFFs;
+        case PngChunk.sCAL: return sCAL;
+        case PngChunk.iCCP: return iCCP;
+        case PngChunk.pCAL: return pCAL;
+        case PngChunk.iTXt: return iTXt;
+        case PngChunk.gIFg: return gIFg;
+        case PngChunk.gIFx: return gIFx;
             */
         default:
             return null;
         }
+    }
+
+    public void handleFrame(BufferedImage image, int framesLeft)
+    {
     }
 }

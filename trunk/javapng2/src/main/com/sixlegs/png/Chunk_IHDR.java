@@ -41,13 +41,13 @@ extends PngChunk
         if (width <= 0 || height <= 0)
             throw new PngError("Bad image size: " + width + "x" + height);
 
-        int bitDepth = in.readUnsignedByte();
-        byte byteDepth = (byte)bitDepth;
+        byte bitDepth = in.readByte();
         switch (bitDepth) {
         case 1:
         case 2:
         case 4:
         case 8:
+        case 16:
             break;
         default:
             throw new PngError("Bad bit depth: " + bitDepth);
@@ -58,7 +58,7 @@ extends PngChunk
         switch (colorType) {
         case PngImage.COLOR_TYPE_RGB:
         case PngImage.COLOR_TYPE_GRAY: 
-            sbits = new byte[]{ byteDepth, byteDepth, byteDepth };
+            sbits = new byte[]{ bitDepth, bitDepth, bitDepth };
             break;
         case PngImage.COLOR_TYPE_PALETTE: 
             if (bitDepth == 16)
@@ -69,7 +69,7 @@ extends PngChunk
         case PngImage.COLOR_TYPE_RGB_ALPHA: 
             if (bitDepth <= 4)
                 throw new PngError("Bad bit depth for color type " + colorType + ": " + bitDepth);
-            sbits = new byte[]{ byteDepth, byteDepth, byteDepth, byteDepth };
+            sbits = new byte[]{ bitDepth, bitDepth, bitDepth, bitDepth };
             break;
         default:
             throw new PngError("Bad color type: " + colorType);
@@ -100,5 +100,16 @@ extends PngChunk
         props.put(PngImage.FILTER, Integers.valueOf(filter));
         props.put(PngImage.COLOR_TYPE, Integers.valueOf(colorType));
         props.put(PngImage.SIGNIFICANT_BITS, sbits);
+
+        if (colorType == PngImage.COLOR_TYPE_GRAY && bitDepth < 16) {
+            int size = 1 << bitDepth;
+            byte[] palette = new byte[size];
+            for (int i = 0; i < size; i++) {
+                palette[i] = (byte)(i * 255 / (size - 1));
+            }
+            props.put(PngImage.PALETTE_RED, palette);
+            props.put(PngImage.PALETTE_GREEN, palette);
+            props.put(PngImage.PALETTE_BLUE, palette);
+        }
     }
 }
