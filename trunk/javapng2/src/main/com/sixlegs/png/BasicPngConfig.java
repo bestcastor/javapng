@@ -99,7 +99,7 @@ implements PngConfig
         return metadataOnly;
     }
 
-    public void setMetadataOnly()
+    public void setMetadataOnly(boolean metadataOnly)
     {
         this.metadataOnly = metadataOnly;
     }
@@ -109,7 +109,7 @@ implements PngConfig
         return warningsFatal;
     }
 
-    public void setWarningsFatal()
+    public void setWarningsFatal(boolean warningsFatal)
     {
         this.warningsFatal = warningsFatal;
     }
@@ -153,9 +153,5 @@ implements PngConfig
         default:
             return null;
         }
-    }
-
-    public void handleFrame(BufferedImage image, int framesLeft)
-    {
     }
 }
