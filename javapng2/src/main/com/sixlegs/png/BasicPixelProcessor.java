@@ -22,7 +22,7 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-class BasicPixelProcessor
+final class BasicPixelProcessor
 extends PixelProcessor
 {
     private static final PixelProcessor INSTANCE = new BasicPixelProcessor();

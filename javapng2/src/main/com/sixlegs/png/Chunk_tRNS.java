@@ -33,11 +33,11 @@ extends PngChunk
         super(tRNS);
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
-        int colorType = PngImage.getInt(props, PngImage.COLOR_TYPE);
-        int bitDepth  = PngImage.getInt(props, PngImage.BIT_DEPTH);
+        int colorType = png.getColorType();
+        Map props = png.getProperties();
 
         switch (colorType) {
         case PngImage.COLOR_TYPE_GRAY:
@@ -53,7 +53,7 @@ extends PngChunk
             break;
 
         case PngImage.COLOR_TYPE_PALETTE:
-            byte[] r = (byte[])props.get(PngImage.PALETTE_RED);
+            byte[] r = (byte[])png.getProperty(PngImage.PALETTE_RED);
             if (length > r.length)
                 throw new PngError("Too many transparency palette entries (" + length + " > " + r.length + ")");
 

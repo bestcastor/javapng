@@ -32,6 +32,7 @@ class Defilterer
     private int bitDepth;
     private int samples;
     private PixelProcessor pp;
+    private boolean progressive;
     private int bpp;
 
     public Defilterer(InputStream in, WritableRaster raster, int bitDepth, int samples, PixelProcessor pp)
@@ -57,7 +58,7 @@ class Defilterer
         DataBuffer dbuf = passRow.getDataBuffer();
         byte[] byteData = isShort ? null : ((DataBufferByte)dbuf).getData();
         short[] shortData = isShort ? ((DataBufferUShort)dbuf).getData() : null;
-        int[] pixel = new int[samples];
+        int[] pixel = new int[4];
         
         int bytesPerRow = (bitDepth * samples * passWidth + 7) / 8;
         int rowSize = bytesPerRow + bpp;

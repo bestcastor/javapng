@@ -31,7 +31,7 @@ extends PngChunk
         super(IHDR);
     }
 
-    public void read(PngInputStream in, int length, Map props, PngConfig config)
+    public void read(PngInputStream in, int length, PngImage png)
     throws IOException
     {
         checkLength(length, 13);
@@ -92,6 +92,7 @@ extends PngChunk
             throw new PngError("Unrecognized interlace method: " + interlace);
         }
 
+        Map props = png.getProperties();
         props.put(PngImage.WIDTH, Integers.valueOf(width));
         props.put(PngImage.HEIGHT, Integers.valueOf(height));
         props.put(PngImage.BIT_DEPTH, Integers.valueOf(bitDepth));

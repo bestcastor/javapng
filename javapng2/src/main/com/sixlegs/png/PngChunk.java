@@ -116,5 +116,5 @@ abstract public class PngChunk
                                " chunk length: " + length + " (expected " + correct + ")");
     }
 
-    abstract public void read(PngInputStream in, int length, Map props, PngConfig config) throws IOException;
+    abstract public void read(PngInputStream in, int length, PngImage png) throws IOException;
 }

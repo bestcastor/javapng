@@ -93,6 +93,11 @@ public class PngImage
     {
         this.config = config;
     }
+
+    public PngConfig getConfig()
+    {
+        return config;
+    }
     
     public BufferedImage read(File file)
     throws IOException
@@ -152,7 +157,7 @@ public class PngImage
                             seen.add(key);
                         }
                     }
-                    chunk.read(data, length, props, config);
+                    chunk.read(data, length, this);
                 }
                 long calcChecksum = crc.getValue();
                 long fileChecksum = data.readUnsignedInt();
@@ -162,7 +167,7 @@ public class PngImage
             // TODO
             if (getColorType() == COLOR_TYPE_PALETTE && props.get(PALETTE_RED) == null)
                 throw new PngError("Required PLTE chunk not found");
-            return ImageFactory.create(config, props);
+            return ImageFactory.create(this);
         } finally {
             if (close)
                 in.close();
@@ -271,7 +276,7 @@ public class PngImage
         return getInt(BIT_DEPTH);
     }
 
-    public int getInterlaceType()
+    public int getInterlace()
     {
         return getInt(INTERLACE);
     }
@@ -279,6 +284,36 @@ public class PngImage
     public int getColorType()
     {
         return getInt(COLOR_TYPE);
+    }
+
+    public int getSamples()
+    {
+        switch (getColorType()) {
+        case COLOR_TYPE_GRAY_ALPHA: return 2;
+        case COLOR_TYPE_RGB:        return 3;
+        case COLOR_TYPE_RGB_ALPHA:  return 4;
+        }
+        return 1;
+    }
+
+    public int getGamma()
+    {
+        if (props.containsKey(PngImage.GAMMA))
+            return getInt(PngImage.GAMMA);
+        return config.getDefaultGamma();
+    }
+
+    public short[] getGammaTable()
+    {
+        int gamma = getGamma();
+        int bitDepth = getBitDepth();
+        int size = 1 << ((bitDepth == 16 && !config.getReduce16()) ? 16 : 8);
+        short[] gammaTable = new short[size];
+        double decodingExponent =
+            (config.getUserExponent() * 100000d / (gamma * config.getDisplayExponent()));
+        for (int i = 0; i < size; i++)
+            gammaTable[i] = (short)(Math.pow((double)i / (size - 1), decodingExponent) * (size - 1));
+        return gammaTable;
     }
 
     // TODO: gamma-correct background?
@@ -333,15 +368,10 @@ public class PngImage
     }
     */
 
-    private int getInt(String name)
-    {
-        return getInt(props, name);
-    }
-
     // package-protected
-    static int getInt(Map map, String name)
+    int getInt(String name)
     {
-        return ((Number)map.get(name)).intValue();
+        return ((Number)props.get(name)).intValue();
     }
 
     private void assertRead()

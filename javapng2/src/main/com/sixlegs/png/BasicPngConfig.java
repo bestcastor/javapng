@@ -25,17 +25,39 @@ import java.awt.image.BufferedImage;
 public class BasicPngConfig
 implements PngConfig
 {
+    private int defaultGamma = 45455;
     private double displayExponent = 2.2;
     private double userExponent = 1.0;
     private boolean metadataOnly;
     private boolean warningsFatal;
     private boolean progressive;
+    private boolean reduce16 = true;
 
     public BasicPngConfig()
     {
     }
 
-    public boolean isProgressive()
+    public boolean getReduce16()
+    {
+        return reduce16;
+    }
+
+    public void setReduce16(boolean reduce16)
+    {
+        this.reduce16 = reduce16;
+    }
+
+    public int getDefaultGamma()
+    {
+        return defaultGamma;
+    }
+
+    public void setDefaultGamma(int defaultGamma)
+    {
+        this.defaultGamma = defaultGamma;
+    }
+    
+    public boolean getProgressive()
     {
         return progressive;
     }

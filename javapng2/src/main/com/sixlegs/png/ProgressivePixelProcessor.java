@@ -22,7 +22,7 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-class ProgressivePixelProcessor
+final class ProgressivePixelProcessor
 extends PixelProcessor
 {
     private PixelProcessor pp;
