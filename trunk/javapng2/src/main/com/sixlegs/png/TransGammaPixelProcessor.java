@@ -22,25 +22,38 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-class GammaPixelProcessor
+class TransGammaPixelProcessor
 extends PixelProcessor
 {
     private int[] gammaTable;
+    private int[] trans;
     
-    public GammaPixelProcessor(int[] gammaTable)
+    public TransGammaPixelProcessor(int[] gammaTable, int[] trans)
     {
         this.gammaTable = gammaTable;
+        this.trans = trans;
     }
     
     public void process(Raster src, WritableRaster dst,
                         int xOffset, int xStep, int yStep, int y, int width)
     {
+        int max = gammaTable.length - 1;
         int[] pixel = dst.getPixel(0, 0, (int[])null);
-        int samples = pixel.length;
+        int samples = pixel.length - 1;
         if (samples % 2 == 0)
-            samples--; // don't change alpha channel
+            throw new IllegalStateException("Expecting alpha channel");
         for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
             src.getPixel(srcX, 0, pixel);
+            int transCount = 0;
+            for (;;) {
+                if (pixel[transCount] != trans[transCount]) {
+                    pixel[samples] = max;
+                    break;
+                } else if (++transCount == samples) {
+                    pixel[samples] = 0;
+                    break;
+                }
+            }
             for (int i = 0; i < samples; i++)
                 pixel[i] = gammaTable[pixel[i]];
             dst.setPixel(dstX, y, pixel);
