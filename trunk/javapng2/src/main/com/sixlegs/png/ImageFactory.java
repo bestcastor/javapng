@@ -40,9 +40,8 @@ class ImageFactory
     throws IOException
     {
         PngConfig config = png.getConfig();
-        if (config.getMetadataOnly())
-            return null;
-
+        Map props = png.getProperties();
+        
         int width     = png.getWidth();
         int height    = png.getHeight();
         int colorType = png.getColorType();
@@ -54,13 +53,6 @@ class ImageFactory
         short[] gammaTable = png.getGammaTable();
         ColorModel colorModel = createColorModel(png, gammaTable);
         WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
-        Map props = png.getProperties();
-
-        InputStream in;
-        in = new MultiByteArrayInputStream((List)props.remove(PngImage.DATA));
-        in = new InflaterInputStream(in, new Inflater(), 0x2000);
-        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
-        // TODO: if not progressive, initialize to fully transparent?
 
         PixelProcessor pp = BasicPixelProcessor.getInstance();
         if (colorModel instanceof ComponentColorModel) {
@@ -81,6 +73,12 @@ class ImageFactory
         }
         if (config.getProgressive() && interlaced)
             pp = new ProgressivePixelProcessor(pp);
+
+        InputStream in;
+        in = new MultiByteArrayInputStream((List)props.remove(PngImage.DATA));
+        in = new InflaterInputStream(in, new Inflater(), 0x2000);
+        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
+        // TODO: if not progressive, initialize to fully transparent?
 
         Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
@@ -131,12 +129,17 @@ class ImageFactory
         } else {
             int dataType = (outputDepth == 16) ?
                 DataBuffer.TYPE_USHORT : DataBuffer.TYPE_BYTE;
+            int colorSpace =
+                (colorType == PngImage.COLOR_TYPE_GRAY ||
+                 colorType == PngImage.COLOR_TYPE_GRAY_ALPHA) ?
+                ColorSpace.CS_GRAY :
+                ColorSpace.CS_sRGB;
             boolean hasAlpha =
                 colorType == PngImage.COLOR_TYPE_RGB_ALPHA ||
                 colorType == PngImage.COLOR_TYPE_GRAY_ALPHA ||
                 props.containsKey(PngImage.TRANSPARENCY_GRAY) ||
                 props.containsKey(PngImage.TRANSPARENCY_RED);
-            return new ComponentColorModel(getColorSpace(colorType),
+            return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            hasAlpha,
                                            false,
                                            hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
@@ -144,17 +147,6 @@ class ImageFactory
         }
     }
     
-    private static ColorSpace getColorSpace(int colorType)
-    {
-        switch (colorType) {
-        case PngImage.COLOR_TYPE_GRAY:
-        case PngImage.COLOR_TYPE_GRAY_ALPHA:
-            return ColorSpace.getInstance(ColorSpace.CS_GRAY);
-        default:
-            return ColorSpace.getInstance(ColorSpace.CS_sRGB);
-        }
-    }
-
     private static byte[] applyGamma(byte[] palette, short[] gammaTable)
     {
         if (palette == null)
