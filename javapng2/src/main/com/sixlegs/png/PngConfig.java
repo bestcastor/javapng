@@ -25,9 +25,9 @@ import java.awt.image.BufferedImage;
 public interface PngConfig
 {
     // TODO: add getIgnoreGamma()
-    int getDefaultGamma();
-    double getDisplayExponent();
-    double getUserExponent();
+    float getDefaultGamma();
+    float getDisplayExponent();
+    float getUserExponent();
     boolean getMetadataOnly();
     boolean getProgressive();
     boolean getReduce16();

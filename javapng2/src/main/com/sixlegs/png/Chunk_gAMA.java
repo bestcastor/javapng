@@ -40,6 +40,6 @@ extends PngChunk
             throw new PngWarning("Meaningless zero gAMA chunk value");
         Map props = png.getProperties();
         if (!props.containsKey(PngImage.RENDERING_INTENT))
-            props.put(PngImage.GAMMA, Integers.valueOf(gamma));
+            props.put(PngImage.GAMMA, new Float(gamma / 100000f));
     }
 }
