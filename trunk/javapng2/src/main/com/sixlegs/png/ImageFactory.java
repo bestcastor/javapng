@@ -83,10 +83,13 @@ class ImageFactory
             pp = new ProgressivePixelProcessor(pp, width, height);
 
         InputStream in;
-        in = new MultiByteArrayInputStream((List)props.remove(PngImage.DATA));
+        in = new MultiByteArrayInputStream((List)props.get(PngImage.DATA));
         in = new InflaterInputStream(in, new Inflater(), 0x2000);
         BufferedImage image = new BufferedImage(colorModel, raster, false, null);
         // TODO: if not progressive, initialize to fully transparent?
+
+        if (!config.getKeepRawData())
+            props.remove(PngImage.DATA);
 
         Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
