@@ -20,17 +20,19 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-public interface PngConfig
+class Chunk_zTXt
+extends AbstractTextChunk
 {
-    // TODO: add getIgnoreGamma()
-    int getDefaultGamma();
-    double getDisplayExponent();
-    double getUserExponent();
-    boolean getMetadataOnly();
-    boolean getProgressive();
-    boolean getReduce16();
-    PngChunk getChunk(int type);
-    void handleException(PngException e) throws PngException;
+    public Chunk_zTXt()
+    {
+        super(zTXt);
+    }
+
+    public void read(PngInputStream in, int length, PngImage png)
+    throws IOException
+    {
+        read(in, length, png, true);
+    }
 }

@@ -121,6 +121,10 @@ implements PngConfig
     private static final PngChunk bKGD = new Chunk_bKGD();
     private static final PngChunk tRNS = new Chunk_tRNS();
     private static final PngChunk gAMA = new Chunk_gAMA();
+    private static final PngChunk pHYs = new Chunk_pHYs();
+    private static final PngChunk tEXt = new Chunk_tEXt();
+    private static final PngChunk zTXt = new Chunk_zTXt();
+    private static final PngChunk iTXt = new Chunk_iTXt();
 
     public PngChunk getChunk(int type)
     {
@@ -132,21 +136,21 @@ implements PngConfig
         case PngChunk.bKGD: return bKGD;
         case PngChunk.tRNS: return tRNS;
         case PngChunk.gAMA: return gAMA;
+        case PngChunk.pHYs: return pHYs;
+        case PngChunk.tEXt: return tEXt;
+        case PngChunk.zTXt: return zTXt;
+        case PngChunk.iTXt: return iTXt;
             /*
         case PngChunk.cHRM: return cHRM;
         case PngChunk.hIST: return hIST;
-        case PngChunk.pHYs: return pHYs;
         case PngChunk.sBIT: return sBIT;
-        case PngChunk.tEXt: return tEXt;
         case PngChunk.tIME: return tIME;
-        case PngChunk.zTXt: return zTXt;
         case PngChunk.sRGB: return sRGB;
         case PngChunk.sPLT: return sPLT;
         case PngChunk.oFFs: return oFFs;
         case PngChunk.sCAL: return sCAL;
         case PngChunk.iCCP: return iCCP;
         case PngChunk.pCAL: return pCAL;
-        case PngChunk.iTXt: return iTXt;
         case PngChunk.gIFg: return gIFg;
         case PngChunk.gIFx: return gIFx;
             */
