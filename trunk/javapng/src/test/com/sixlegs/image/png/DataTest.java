@@ -11,6 +11,7 @@ extends TestCase
     public void testImages()
     throws Exception
     {
+        int[] buffer = new int[800 * 600]; // big enough to handle biggest image
         final MessageDigest md5 = MessageDigest.getInstance("MD5");
         BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/images.txt")));
         String line;
@@ -20,33 +21,21 @@ extends TestCase
             String image = line.substring(0, space).trim();
             String result = line.substring(space + 1).trim();
             try {
-                // TODO: raw data api!
                 InputStream in = getClass().getResourceAsStream(image);
                 if (in == null)
                     fail("Cannot find image \"" + image + "\"");
                 PngImage png = new PngImage(in);
-                png.getWidth(); // for read-to-data
-                png.startProduction(new ImageConsumerAdapter() {
-                    public void setPixels(int x, int y, int w, int h,
-                                          ColorModel model,
-                                          int[] pixels,
-                                          int off,
-                                          int scansize)
-                    {
-                        byte[] buf = new byte[4];
-                        for (int yc = 0, i = off, bp = 0; yc < h; yc++) {
-                            for (int xc = 0; xc < w; xc++) {
-                                int pixel = pixels[i++];
-                                buf[3] = (byte)(0xFF & pixel);
-                                buf[2] = (byte)(0xFF & (pixel >>> 8));
-                                buf[1] = (byte)(0xFF & (pixel >>> 16));
-                                buf[0] = (byte)(0xFF & (pixel >>> 24));
-                                md5.update(buf);
-                            }
-                            i += (scansize - w);
-                        }
-                    }
-                });
+                png.setBuffer(buffer);
+                png.getEverything();
+                byte[] pixbuf = new byte[4];
+                for (int i = 0, size = png.getWidth() * png.getHeight(); i < size; i++) {
+                    int pixel = buffer[i];
+                    pixbuf[3] = (byte)(0xFF & pixel);
+                    pixbuf[2] = (byte)(0xFF & (pixel >>> 8));
+                    pixbuf[1] = (byte)(0xFF & (pixel >>> 16));
+                    pixbuf[0] = (byte)(0xFF & (pixel >>> 24));
+                    md5.update(pixbuf);
+                }
                 String hash = toHexString(md5.digest());
                 if (!result.equals(hash)) {
                     System.err.println("Expected digest 0x" + result + " for image " + image + ", got 0x" + hash);

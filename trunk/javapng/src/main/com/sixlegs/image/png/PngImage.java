@@ -36,7 +36,7 @@ import java.util.Vector;
 /**
  * For more information visit <a href="http://www.sixlegs.com/">http://www.sixlegs.com/</a>
  * @see         java.awt.image.ImageProducer
- * @version     1.2.3 May 14, 2002
+ * @version     1.3.0 November 2, 2003
  * @author      Chris Nokleberg <a href="mailto:chris@sixlegs.com">&lt;chris@sixlegs.com&gt;</a>
  */
 
@@ -61,10 +61,11 @@ implements ImageProducer
     final class Data {
         private final Vector consumers = new Vector();
         private final Hashtable chunks = new Hashtable();
-        
+
         private int[] pixels;
+        private boolean produced;
         private boolean produceFailed;
-        private boolean useFlush = false;
+        private boolean useFlush;
 
         /* package */ IDATInputStream in_idat;
         /* package */ Chunk_IHDR header;
@@ -181,9 +182,8 @@ implements ImageProducer
      */
     public void startProduction(ImageConsumer ic)
     {
-        if (data == null) {
-            throw new RuntimeException("Object has been flushed.");
-        }
+        if (data == null)
+            throw new IllegalStateException("Object has been flushed.");
         addConsumer(ic);
         ImageConsumer[] ics = new ImageConsumer[data.consumers.size()];
         data.consumers.copyInto(ics);
@@ -276,10 +276,8 @@ implements ImageProducer
     /**
      * Interlaced images can either be displayed when completely
      * read (default) or progressively. When progressive display is
-     * enabled, a <code>PngImage</code> will call the <code>imageComplete</code> 
-     * method of its registered image consumers with a <code>SINGLEFRAMEDONE</code> 
-     * status after each pass. This, in turn, will trigger an <code>imageUpdate</code>
-     * with the <code>FRAMEBITS</code> flag set to watching <code>ImageObservers</code>.
+     * enabled, a <code>PngImage</code> will call the <code>setPixels</code> 
+     * method of its registered image consumers after each pass.
      * <p>
      * <b>Note:</b> Images are only delivered progressively on the
      * first production of the image data. Subsequent requests for the
@@ -410,7 +408,7 @@ implements ImageProducer
      * <b>Note:</b> This method will only read up to the beginning of
      * the image data unless the image data has already been read,
      * either through the consumer/producer interface or by calling
-     * <code>getEverything</code>.
+     * {@link #getEverything}.
      * <p>
      * The following properties are guaranteed to be defined:
      * <p>
@@ -561,7 +559,6 @@ implements ImageProducer
      *     <td>Miscellaneous comment</td></tr>
      * </table></center>
 
-     * @see #getEverything
      * @see #getWidth
      * @see #getHeight
      * @see #getInterlaceType
@@ -591,32 +588,41 @@ implements ImageProducer
 
     /**
      * Ensures that the entire PNG file has been read. No exceptions
-     * are thrown; errors are available by calling <code>getErrors</code>.
+     * are thrown; errors are available by calling {@link #getErrors}.
      * <p>
      * <b>Note:</b> The consumer/producer interface automatically
      * reads the entire PNG file. It usually is not necessary to call
-     * <code>getEverything</code> unless you do not need the actual
+     * {@link #getEverything} unless you do not need the actual
      * image data.
-     * @see #getErrors
      */
     public void getEverything()
     {
         startProduction(new DummyImageConsumer());
     }
 
+    /**
+     * Check if the specified chunk type appears at least once in this image.
+     * <p>
+     * <b>Note:</b> This method will only reflect chunks seen up to the
+     * beginning of the image data unless the image data has already
+     * been read, either through the consumer/producer interface or by
+     * calling {@link getEverything}.
+     * @param type the PNG chunk name, for example <code>"tRNS"</code>.
+     */
     public boolean hasChunk(String type)
+    throws IOException
     {
+        readToData();
         return data.chunks.get(new Integer(Chunk.stringToType(type))) != null;
     }
 
     /**
-     * Register a <code>ChunkHandler</code> to handle a user defined
+     * Register a {@link ChunkHandler} to handle a user defined
      * chunk type.
      * <p>
      * The chunk type must be four characters, ancillary (lowercase first letter),
      * and may not already be registered. You may register one of the supported 
      * ancillary chunk types (except <code>tRNS</code>) to override the standard behavior.
-     * @see ChunkHandler
      * @param handler object to send chunk data to
      * @param type chunk type
      */
@@ -671,9 +677,8 @@ implements ImageProducer
      * method will only read up to the beginning of the image data
      * unless the image data has already been read, either through the
      * consumer/producer interface or by calling
-     * <code>getEverything</code>.
+     * {@link #getEverything}.
      * @see #getTextChunks
-     * @see #getEverything
      * @see #getProperty
      * @param key the key of the desired chunk
      * @return the text chunk, or null if not present.
@@ -692,9 +697,8 @@ implements ImageProducer
      * method will only read up to the beginning of the image data
      * unless the image data has already been read, either through the
      * consumer/producer interface or by calling
-     * <code>getEverything</code>.
+     * {@link #getEverything}.
      * @see #getTextChunk
-     * @see #getEverything
      * @return an <code>Enumeration</code> of the keys of text chunks read so far.
      */
     public Enumeration getTextChunks()
@@ -711,8 +715,7 @@ implements ImageProducer
      * the file. This method will only read up to the beginning of the
      * image data unless the image data has already been read, either
      * through the consumer/producer interface or by calling
-     * <code>getEverything</code>.
-     * @see #getEverything
+     * {@link #getEverything}.
      * @return an <code>Enumeration</code> of all GifExtension objects read so far.
      * @see GifExtension
      */
@@ -724,24 +727,47 @@ implements ImageProducer
     }
 
     /**
-     * Readies this PngImage to be flushed after the next image
-     * production, to free memory (default false).
+     * Readies this <code>PngImage</code> to be flushed after the next image
+     * production, to free memory.
      * <p>
-     * After flushing, you may only call the <code>getErrors</code>
-     * and <code>hasErrors</code> methods on this object. The pixel
+     * After flushing, you may only call the {@link #getErrors}
+     * and {@link #hasErrors} methods on this object. The pixel
      * data will no longer be available through the consumer/producer
      * interface.
      * <p>
-     * <b>Note:</b> Using a PixelGrabber object on an Image produced
-     * by this PngImage object will ask for a second production of the
+     * <b>Note:</b> Using a <code>PixelGrabber</code> object on an <code>Image</code> produced
+     * by this <code>PngImage</code> object will ask for a second production of the
      * pixel data, which will fail if the object has been flushed.
-     * @see #getErrors
-     * @see #hasErrors
+     * @param useFlush whether to flush after the next production; default is false
      */
     public void setFlushAfterNextProduction(boolean useFlush)
     {
         data.useFlush = useFlush;
     }
+
+    /**
+     * Set the internal pixel buffer to use when decoding the image.
+     * A buffer of size <code>(width * height)</code> is normally automatically allocated
+     * if either the image is progressive or {@link #setFlushAfterNextProduction} has
+     * not been set. For performance or memory use issues you may supply your
+     * own buffer with this method. The pixels are stored in <code>0xAARRGGBB</code>
+     * format.
+     * @param pixels the pixel buffer to use; size must be at least <code>(width * height)</code>
+     * @throws IllegalArgumentException if the pixel buffer is too short
+     * @throws IllegalStateException if this <code>PngImage</code> has been flushed.
+     */
+    public void setBuffer(int[] pixels)
+    throws IOException
+    {
+        if (data == null)
+            throw new IllegalStateException("Object has been flushed.");
+        int size = getWidth() * getHeight();
+        if (pixels.length < size)
+            throw new IllegalArgumentException("Buffer size must be at least " + size  + " (W * H)");
+        data.pixels = pixels;
+    }
+
+    /////////////////// end public ////////////////////////
 
     private void flush()
     {
@@ -754,8 +780,6 @@ implements ImageProducer
             data = null;
         }
     }
-
-    /////////////////// end public ////////////////////////
 
     static {
         registerChunk(new Chunk_IHDR());
@@ -855,7 +879,7 @@ implements ImageProducer
                 if (data.produceFailed) ics[i].imageComplete(ImageConsumer.IMAGEERROR);
             }
             if (data.produceFailed) return;
-            if (data.pixels == null) {
+            if (!data.produced) {
                 firstProduction(ics);
             } else {
                 setHints(ics);
@@ -884,6 +908,7 @@ implements ImageProducer
     private void firstProduction(ImageConsumer[] ics)
     throws IOException
     {
+        data.produced = true;
         UnfilterInputStream in_filter
             = new UnfilterInputStream(this, data.in_idat);
         InputStream is =
@@ -928,9 +953,8 @@ implements ImageProducer
         int w = data.header.width, h = data.header.height;
 
         // if we're going to flush, don't bother saving pixel data
-        if (!data.useFlush) {
+        if (!data.useFlush && data.pixels == null)
             data.pixels = new int[w * h];
-        }
 
         int[] rowbuf = new int[w + 8];
         int pixelsWidth = w;
@@ -939,11 +963,11 @@ implements ImageProducer
         int off = 0;
         for (int y = 0; y < h; y++) {
             pis.read(rowbuf, 0, pixelsWidth);
+            if (data.pixels != null) {
+                System.arraycopy(rowbuf, 0, data.pixels, w * y, w);
+            }
             for (int i = 0; i < ics.length; i++) {
                 ics[i].setPixels(0, y, w, 1, data.header.model, rowbuf, 0, pixelsWidth);
-            }
-            if (!data.useFlush) {
-                System.arraycopy(rowbuf, 0, data.pixels, w * y, w);
             }
         }
     }
@@ -952,7 +976,8 @@ implements ImageProducer
     throws IOException
     {            
         int w = data.header.width, h = data.header.height;
-        data.pixels = new int[w * h];
+        if (data.pixels == null)
+            data.pixels = new int[w * h];
         int[] rowbuf = new int[w + 8];
 
         int numPasses = data.header.interlacer.numPasses();
@@ -996,7 +1021,6 @@ implements ImageProducer
             if (progressive) {
                 for (int i = 0; i < ics.length; i++) {
                     ics[i].setPixels(0, 0, w, h, data.header.model, data.pixels, 0, w);
-                    ics[i].imageComplete(ImageConsumer.SINGLEFRAMEDONE);
                 }
             }
         }

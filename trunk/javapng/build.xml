@@ -10,6 +10,10 @@
 
     <property name="javadoc.access" value="public"/>
 
+    <property name="compile.target" value="1.1"/>
+    <property name="compile.bootclasspath" value=""/> 
+    <property name="compile.extdirs" value=""/>
+
     <property name="compile.debug" value="true"/>
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
@@ -38,6 +42,7 @@
     <target name="compile" depends="init">
         <mkdir dir="${build}/main"/>
         <javac srcdir="${src}/main" destdir="${build}/main"
+          target="${compile.target}" bootclasspath="${compile.bootclasspath}" extdirs="${compile.extdirs}"
           debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
              <classpath refid="path.build"/>
         </javac>
@@ -49,6 +54,7 @@
     <target name="compile-tests" depends="compile">
         <mkdir dir="${build}/test"/>
         <javac srcdir="${src}/test" destdir="${build}/test"
+          target="${compile.target}" bootclasspath="${compile.bootclasspath}" extdirs="${compile.extdirs}"
           debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
              <classpath refid="path.run"/>
         </javac>
