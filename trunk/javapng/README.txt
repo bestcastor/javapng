@@ -1,7 +1,7 @@
-Copyright (C) 1998, 1999, 2001 Chris Nokleberg
+Copyright (C) 1998-2003 Chris Nokleberg
 All rights reserved.
 
-README - com.sixlegs.image.png v1.2.3
+README - com.sixlegs.image.png v1.2.4
 
 Features
 
