@@ -35,7 +35,8 @@ extends PngChunk
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        String id = in.readString(PngInputStream.US_ASCII);
+        byte[] id = new byte[8];
+        in.readFully(id);
         byte[] authCode = new byte[3];
         in.readFully(authCode);
         byte[] data = new byte[in.getRemaining()];
@@ -48,6 +49,6 @@ extends PngChunk
                       extensions = new ArrayList());
         }
                       
-        extensions.add(new GifApplicationExtension(id, authCode, data));
+        extensions.add(new GifApplicationExtension(new String(id, "US-ASCII"), authCode, data));
     }
 }
