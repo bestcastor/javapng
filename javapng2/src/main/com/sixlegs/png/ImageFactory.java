@@ -73,10 +73,13 @@ class ImageFactory
         BufferedImage image = new BufferedImage(colorModel, raster, false, null);
         // TODO: if not progressive, initialize to fully transparent
 
-        Defilterer d = new Defilterer(in, raster, bitDepth, samples,
-                                      gammaTable,
-                                      colorModel instanceof ComponentColorModel,
-                                      config.isProgressive() && interlaced);
+        PixelProcessor pp = BasicPixelProcessor.getInstance();
+        if (colorModel instanceof ComponentColorModel)
+            pp = new GammaPixelProcessor(gammaTable);
+        if (config.isProgressive() && interlaced)
+            pp = new ProgressivePixelProcessor(pp);
+
+        Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
             d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8);
             config.handleFrame(image, 6);
@@ -141,6 +144,16 @@ class ImageFactory
                                            hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
                                            dataType);
         }
+    }
+    
+    private static int getSamples(int colorType)
+    {
+        switch (colorType) {
+        case PngImage.COLOR_TYPE_GRAY_ALPHA: return 2;
+        case PngImage.COLOR_TYPE_RGB:        return 3;
+        case PngImage.COLOR_TYPE_RGB_ALPHA:  return 4;
+        }
+        return 1;
     }
 
     private static boolean hasAlpha(int colorType)
@@ -210,15 +223,5 @@ class ImageFactory
                                                   bandOffsets[samples],
                                                   origin);
         }
-    }
-    
-    private static int getSamples(int colorType)
-    {
-        switch (colorType) {
-        case PngImage.COLOR_TYPE_GRAY_ALPHA: return 2;
-        case PngImage.COLOR_TYPE_RGB:        return 3;
-        case PngImage.COLOR_TYPE_RGB_ALPHA:  return 4;
-        }
-        return 1;
     }
 }

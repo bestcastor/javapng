@@ -30,21 +30,16 @@ class Defilterer
     private WritableRaster raster;
     private int bitDepth;
     private int samples;
-    private boolean gammaCorrect;
-    private boolean progressive;
+    private PixelProcessor pp;
     private int bpp;
-    private int[] gammaTable;
 
-    public Defilterer(InputStream in, WritableRaster raster, int bitDepth, int samples,
-                      int[] gammaTable, boolean gammaCorrect, boolean progressive)
+    public Defilterer(InputStream in, WritableRaster raster, int bitDepth, int samples, PixelProcessor pp)
     {
         this.in = in;
         this.raster = raster;
         this.bitDepth = bitDepth;
         this.samples = samples;
-        this.progressive = progressive;
-        this.gammaCorrect = gammaCorrect;
-        this.gammaTable = gammaTable;
+        this.pp = pp;
         bpp = Math.max(1, (bitDepth * samples) >> 3);
     }
 
@@ -61,14 +56,12 @@ class Defilterer
         DataBuffer dbuf = passRow.getDataBuffer();
         byte[] byteData = isShort ? null : ((DataBufferByte)dbuf).getData();
         short[] shortData = isShort ? ((DataBufferUShort)dbuf).getData() : null;
-        // int[] pixel = passRow.getPixel(0, 0, (int[])null);
         int[] pixel = new int[samples];
         
         int bytesPerRow = (bitDepth * samples * passWidth + 7) / 8;
         int rowSize = bytesPerRow + bpp;
         byte[] prev = new byte[rowSize];
         byte[] cur = new byte[rowSize];
-        int gammaSamples = (samples % 2 == 0) ? samples - 1 : samples;
 
         for (int srcY = 0, dstY = yOffset; srcY < passHeight; srcY++, dstY += yStep) {
             int filterType = in.read();
@@ -82,25 +75,7 @@ class Defilterer
             } else {
                 System.arraycopy(cur, bpp, byteData, 0, bytesPerRow);
             }
-
-            for (int srcX = 0, dstX = xOffset; srcX < passWidth; srcX++) {
-                passRow.getPixel(srcX, 0, pixel);
-                 if (gammaCorrect) {
-                     for (int i = 0; i < gammaSamples; i++)
-                         pixel[i] = gammaTable[pixel[i]];
-                 }
-                if (progressive) {
-                    for (int i = 0; i < xStep; i++) {
-                        for (int j = 0; j < yStep; j++) {
-                            raster.setPixel(dstX + i, dstY + j, pixel);
-                        }
-                    }
-                } else {
-                    raster.setPixel(dstX, dstY, pixel);
-                }
-                dstX += xStep;
-            }
-
+            pp.process(passRow, raster, xOffset, xStep, yStep, dstY, passWidth);
             byte[] tmp = cur;
             cur = prev;
             prev = tmp;
