@@ -26,10 +26,6 @@ import java.util.*;
 abstract class AbstractTextChunk
 extends PngChunk
 {
-    protected static final String ISO_8859_1 = "ISO-8859-1";
-    protected static final String US_ASCII = "US-ASCII";
-    protected static final String UTF_8 = "UTF-8";
-
     protected AbstractTextChunk(int type)
     {
         super(type);
@@ -40,15 +36,13 @@ extends PngChunk
         return true;
     }
     
-    protected void read(PngInputStream in, int length, PngImage png, boolean compressed)
+    protected void read(PngInputStream in, PngImage png, boolean compressed)
     throws IOException
     {
-        String keyword = in.readKeyword();
-        read(in, length - (keyword.length() + 1), png, compressed, ISO_8859_1,
-             keyword, null, null);
+        read(in, png, compressed, PngInputStream.ISO_8859_1, in.readKeyword(), null, null);
     }
 
-    protected void read(PngInputStream in, int length, PngImage png,
+    protected void read(PngInputStream in, PngImage png,
                         boolean compressed, String enc,
                         String keyword,
                         String language,
@@ -57,9 +51,9 @@ extends PngChunk
     {
         byte[] data;
         if (compressed) {
-            data = in.readCompressed(length);
+            data = in.readCompressed(in.getRemaining());
         } else {
-            data = new byte[length];
+            data = new byte[in.getRemaining()];
             in.readFully(data);
         }
         String text = new String(data, enc);

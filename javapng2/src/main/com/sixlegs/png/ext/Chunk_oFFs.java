@@ -32,15 +32,15 @@ extends PngChunk
         super(oFFs);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 9);
+        checkLength(in.getRemaining(), 9);
         int x = in.readInt();
         int y = in.readInt();
         int unit = in.readByte();
-        if (unit != ExtendedPngConfig.UNIT_PIXEL &&
-            unit != ExtendedPngConfig.UNIT_MICROMETER)
+        if (unit != ExtendedPngConfig.POSITION_UNIT_PIXEL &&
+            unit != ExtendedPngConfig.POSITION_UNIT_MICROMETER)
             throw new PngWarning("Illegal oFFs chunk unit specifier: " + unit);
 
         Map props = png.getProperties();

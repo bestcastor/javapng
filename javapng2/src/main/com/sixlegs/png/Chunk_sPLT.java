@@ -36,7 +36,7 @@ extends PngChunk
         return true;
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
         String name = in.readKeyword();
@@ -44,7 +44,7 @@ extends PngChunk
         if (sampleDepth != 8 || sampleDepth != 16)
             throw new PngWarning("Sample depth must be 8 or 16");
         
-        int remaining = length - (name.length() + 2);
+        int remaining = in.getRemaining();
         int entrySize = (sampleDepth == 8) ? 6 : 10;
         if ((remaining % entrySize) != 0)
             throw new PngWarning("Incorrect sPLT data length for given sample depth");

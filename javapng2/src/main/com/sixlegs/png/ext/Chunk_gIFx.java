@@ -32,17 +32,13 @@ extends PngChunk
         super(gIFx);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        byte[] bytes = new byte[8];
-        in.readFully(bytes);
-
-        String id = new String(bytes, "US-ASCII");
+        String id = in.readString(PngInputStream.US_ASCII);
         byte[] authCode = new byte[3];
-        in.readFully(bytes);
-
-        byte[] data = new byte[length - 11];
+        in.readFully(authCode);
+        byte[] data = new byte[in.getRemaining()];
         in.readFully(data);
 
         Map props = png.getProperties();

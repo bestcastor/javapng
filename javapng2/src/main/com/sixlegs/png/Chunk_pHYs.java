@@ -31,10 +31,10 @@ extends PngChunk
         super(pHYs);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 9);
+        checkLength(in.getRemaining(), 9);
         int pixelsPerUnitX = in.readInt();
         int pixelsPerUnitY = in.readInt();
         int unit = in.readUnsignedByte();

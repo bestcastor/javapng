@@ -32,10 +32,10 @@ extends PngChunk
         super(gIFg);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 4);
+        checkLength(in.getRemaining(), 4);
         int disposalMethod = in.readUnsignedByte();
         int userInputFlag = in.readUnsignedByte();
         int delayTime = in.readUnsignedShort();

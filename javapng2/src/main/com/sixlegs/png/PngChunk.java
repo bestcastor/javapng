@@ -118,5 +118,5 @@ abstract public class PngChunk
                                " chunk length: " + length + " (expected " + correct + ")");
     }
 
-    abstract public void read(PngInputStream in, int length, PngImage png) throws IOException;
+    abstract public void read(PngInputStream in, PngImage png) throws IOException;
 }

@@ -31,10 +31,10 @@ extends PngChunk
         super(gAMA);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 4);
+        checkLength(in.getRemaining(), 4);
         int gamma = in.readInt();
         if (gamma == 0)
             throw new PngWarning("Meaningless zero gAMA chunk value");

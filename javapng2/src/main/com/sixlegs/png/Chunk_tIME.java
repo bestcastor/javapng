@@ -33,10 +33,10 @@ extends PngChunk
         super(tIME);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 7);
+        checkLength(in.getRemaining(), 7);
         int year   = in.readUnsignedShort();
         int month  = check(in.readUnsignedByte(), 1, 12);
         int day    = check(in.readUnsignedByte(), 1, 31);
