@@ -31,9 +31,10 @@ extends PngChunk
         super(PLTE);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
+        int length = in.getRemaining();
         if (length % 3 != 0)
             throw new PngError("PLTE chunk length indivisible by 3");
         int size = length / 3;

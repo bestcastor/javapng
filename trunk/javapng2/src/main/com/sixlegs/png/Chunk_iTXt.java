@@ -30,7 +30,7 @@ extends AbstractTextChunk
         super(iTXt);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
         String keyword = in.readKeyword();
@@ -44,11 +44,8 @@ extends AbstractTextChunk
         } else if (flag != 0) {
             throw new PngWarning("Illegal " + this + " compression flag: " + flag);
         }
-        byte[] language = in.readToNull();
-        byte[] translated = in.readToNull();
-        length -= (keyword.length() + language.length + translated.length + 5);
-        read(in, length, png, compressed, UTF_8, keyword,
-             new String(language, US_ASCII),
-             new String(translated, UTF_8));
+        read(in, png, compressed, PngInputStream.UTF_8, keyword,
+             in.readString(PngInputStream.US_ASCII),
+             in.readString(PngInputStream.UTF_8));
     }
 }

@@ -31,13 +31,13 @@ extends PngChunk
         super(hIST);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
         Map props = png.getProperties();
         int count = ((byte[])props.get(PngImage.PALETTE_RED)).length;
 
-        checkLength(length, count * 2);
+        checkLength(in.getRemaining(), count * 2);
         int[] array = new int[count];
         for (int i = 0; i < count; i++)
             array[i] = in.readUnsignedShort();

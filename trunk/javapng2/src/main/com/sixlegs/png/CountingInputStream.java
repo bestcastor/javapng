@@ -32,6 +32,11 @@ extends FilterInputStream
         super(in);
     }
 
+    public void setCount(long count)
+    {
+        this.count = count;
+    }
+
     public long getCount()
     {
         return count;

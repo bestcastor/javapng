@@ -30,9 +30,9 @@ extends AbstractTextChunk
         super(tEXt);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        read(in, length, png, false);
+        read(in, png, false);
     }
 }

@@ -31,12 +31,12 @@ extends PngChunk
         super(sBIT);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
         boolean paletted = png.getColorType() == PngImage.COLOR_TYPE_PALETTE;
         int count = paletted ? 3 : png.getSamples();
-        checkLength(length, count);
+        checkLength(in.getRemaining(), count);
 
         int depth = paletted ? 8 : png.getBitDepth();
         int[] array = new int[count];

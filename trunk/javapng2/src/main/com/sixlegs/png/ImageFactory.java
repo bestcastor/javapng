@@ -147,6 +147,7 @@ class ImageFactory
                 colorType == PngImage.COLOR_TYPE_GRAY_ALPHA ||
                 props.containsKey(PngImage.TRANSPARENCY_GRAY) ||
                 props.containsKey(PngImage.TRANSPARENCY_RED);
+            // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            hasAlpha,
                                            false,

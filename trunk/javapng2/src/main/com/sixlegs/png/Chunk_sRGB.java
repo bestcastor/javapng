@@ -31,10 +31,10 @@ extends PngChunk
         super(sRGB);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 1);
+        checkLength(in.getRemaining(), 1);
         int intent = in.readByte();
         Map props = png.getProperties();
         

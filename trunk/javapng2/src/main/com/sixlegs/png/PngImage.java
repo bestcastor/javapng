@@ -124,9 +124,9 @@ public class PngImage
         try {
             read = true;
             props.clear();
-            CountingInputStream count = new CountingInputStream(in);
-            CRCInputStream crc = new CRCInputStream(count, new byte[0x2000]);
-            PngInputStream data = new PngInputStream(crc);
+            CRCInputStream crc = new CRCInputStream(in, new byte[0x2000]);
+            CountingInputStream count = new CountingInputStream(crc);
+            PngInputStream data = new PngInputStream(count);
             long sig = data.readLong();
             if (sig != SIGNATURE) {
                 throw new PngError("Improper signature, expected 0x" +
@@ -161,7 +161,8 @@ public class PngImage
                         throw new PngError("Critical chunk " + name + " cannot be skipped");
                     data.skipFully(length);
                 } else {
-                    long before = count.getCount();
+                    count.setCount(0);
+                    data.setLength(length);
                     try {
                         Integer key = Integers.valueOf(type);
                         if (!chunk.isMultipleOK()) {
@@ -174,12 +175,11 @@ public class PngImage
                                 seen.add(key);
                             }
                         }
-                        chunk.read(data, length, this);
-                        long diff = length - (count.getCount() - before);
-                        if (diff != 0)
-                            throw new PngError(chunk + " read " + diff + " extra bytes");
+                        chunk.read(data, this);
+                        if (data.getRemaining() != 0)
+                            throw new PngError(chunk + " read " + count.getCount() + " bytes, expected " + length);
                     } catch (PngWarning warning) {
-                        data.skipFully(length - (count.getCount() - before));
+                        data.skipFully(length - count.getCount());
                         config.handleWarning(warning);
                     }
                 }

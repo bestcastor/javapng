@@ -31,10 +31,10 @@ extends PngChunk
         super(IHDR);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 13);
+        checkLength(in.getRemaining(), 13);
 
         int width = in.readInt();
         int height = in.readInt();

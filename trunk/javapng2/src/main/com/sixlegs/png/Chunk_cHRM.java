@@ -31,10 +31,10 @@ extends PngChunk
         super(cHRM);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        checkLength(length, 32);
+        checkLength(in.getRemaining(), 32);
         float[] array = new float[8];
         for (int i = 0; i < 8; i++)
             array[i] = in.readInt() / 100000f;

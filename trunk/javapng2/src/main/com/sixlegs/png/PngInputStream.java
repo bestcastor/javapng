@@ -26,11 +26,26 @@ import java.util.zip.*;
 public class PngInputStream
 extends DataInputStream
 {
+    public static final String ISO_8859_1 = "ISO-8859-1";
+    public static final String US_ASCII = "US-ASCII";
+    public static final String UTF_8 = "UTF-8";
+
     private byte[] tmp = new byte[512];
+    private int length;
     
-    public PngInputStream(InputStream in)
+    PngInputStream(CountingInputStream in)
     {
         super(in);
+    }
+
+    void setLength(int length)
+    {
+        this.length = length;
+    }
+
+    public int getRemaining()
+    {
+        return length - (int)((CountingInputStream)in).getCount();
     }
 
     public long readUnsignedInt()
@@ -60,21 +75,27 @@ extends DataInputStream
         return out.toByteArray();
     }
 
+    public String readString(String enc)
+    throws IOException
+    {
+        return new String(readToNull(), enc);
+    }
+
     public String readKeyword()
     throws IOException
     {
-        byte[] bytes = readToNull();
-        if (bytes.length == 0 || bytes.length > 79)
-            throw new PngWarning("Invalid keyword length: " + bytes.length);
-        return new String(bytes, "ISO-8859-1");
+        String keyword = readString(ISO_8859_1);
+        if (keyword.length() == 0 || keyword.length() > 79)
+            throw new PngWarning("Invalid keyword length: " + keyword.length());
+        return keyword;
     }
 
-    // package protected
-    byte[] readToNull()
+    private byte[] readToNull()
     throws IOException
     {
+        int remaining = getRemaining();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (;;) {
+        for (int i = 0; i < remaining; i++) {
             int c = read();
             switch (c) {
             case 0:
@@ -85,6 +106,7 @@ extends DataInputStream
                 out.write(c);
             }
         }
+        return out.toByteArray();
     }
 
     public void skipFully(long n)
@@ -105,12 +127,11 @@ extends DataInputStream
     public double readFloatingPoint()
     throws IOException
     {
-        String s = new String(readToNull(), "US-ASCII");
+        String s = readString("US-ASCII");
         int e = Math.max(s.indexOf('e'), s.indexOf('E'));
         double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
         if (e > 0)
             d *= Math.pow(10d, Double.valueOf(s.substring(e + 1)).doubleValue());
         return d;
     }
-
 }

@@ -36,10 +36,10 @@ extends PngChunk
         return true;
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        byte[] array = new byte[length];
+        byte[] array = new byte[in.getRemaining()];
         in.readFully(array);
         List data = (List)png.getProperty(PngImage.DATA);
         if (data == null)

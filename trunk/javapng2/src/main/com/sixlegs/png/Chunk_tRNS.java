@@ -33,9 +33,10 @@ extends PngChunk
         super(tRNS);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
+        int length = in.getRemaining();
         Map props = png.getProperties();
 
         switch (png.getColorType()) {

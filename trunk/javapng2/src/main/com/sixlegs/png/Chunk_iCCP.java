@@ -31,11 +31,11 @@ extends PngChunk
         super(iCCP);
     }
 
-    public void read(PngInputStream in, int length, PngImage png)
+    public void read(PngInputStream in, PngImage png)
     throws IOException
     {
         String name = in.readKeyword();
-        byte[] data = in.readCompressed(length - (name.length() + 1));
+        byte[] data = in.readCompressed(in.getRemaining());
         Map props = png.getProperties();
         props.put(PngImage.ICC_PROFILE_NAME, name);
         props.put(PngImage.ICC_PROFILE, data);
