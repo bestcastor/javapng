@@ -36,7 +36,7 @@ import java.util.Vector;
 /**
  * For more information visit <a href="http://www.sixlegs.com/">http://www.sixlegs.com/</a>
  * @see         java.awt.image.ImageProducer
- * @version     1.3.0 November ???, 2003
+ * @version     1.3.0 May 26, 2004
  * @author      Chris Nokleberg <a href="mailto:chris@sixlegs.com">&lt;chris@sixlegs.com&gt;</a>
  */
 
