@@ -26,7 +26,7 @@ extends TestCase
                     fail("Cannot find image \"" + image + "\"");
                 PngImage png = new PngImage(in);
                 png.setBuffer(buffer);
-                png.getEverything();
+                png.getEverything(true);
                 byte[] pixbuf = new byte[4];
                 for (int i = 0, size = png.getWidth() * png.getHeight(); i < size; i++) {
                     int pixel = buffer[i];

@@ -6,9 +6,8 @@ import java.io.IOException;
 
 /**
  * A class implementing the <code>ChunkHandler</code> interface
- * can be registered using the <code>PngImage.registerChunk</code>
+ * can be registered using the {@link PngImage#registerChunk}
  * method. 
- * @see PngImage#registerChunk
  */
 public interface ChunkHandler
 {
