@@ -6,7 +6,7 @@ package com.sixlegs.image.png;
 import java.io.IOException;
 import java.io.InputStream;
 
-final class PixelInputStream
+final class PixelReader
 {
     final private BitMover mover;
     final private InputStream str;
@@ -15,7 +15,7 @@ final class PixelInputStream
 
     /* package */ final int fillSize;
 
-    PixelInputStream(PngImage img, InputStream str)
+    PixelReader(PngImage img, InputStream str)
     throws PngException
     {
         this.str = str;

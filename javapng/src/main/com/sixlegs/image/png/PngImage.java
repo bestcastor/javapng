@@ -66,6 +66,7 @@ implements ImageProducer
         private boolean produced;
         private boolean produceFailed;
         private boolean useFlush;
+        private boolean close;
 
         /* package */ IDATInputStream in_idat;
         /* package */ Chunk_IHDR header;
@@ -113,8 +114,7 @@ implements ImageProducer
     public PngImage(String filename)
     throws IOException
     {
-        FileInputStream fs = new FileInputStream(filename);
-        init(new BufferedInputStream(fs, BUFFER_SIZE));
+        this(new BufferedInputStream(new FileInputStream(filename), BUFFER_SIZE));
     }
 
     /** 
@@ -124,19 +124,36 @@ implements ImageProducer
     public PngImage(URL url)
     throws IOException
     {
-        InputStream is = url.openConnection().getInputStream();
-        init(new BufferedInputStream(is, BUFFER_SIZE));
+        this(new BufferedInputStream(url.openConnection().getInputStream(), BUFFER_SIZE));
     }
   
     /** 
      * Constructs a <code>PngImage</code> object from an input stream.
-     * Buffer the stream for better performance.
+     * Buffer the stream for better performance. The stream will be closed
+     * when the image has been fully read or is flushed.
      * @param is InputStream containing PNG image data
      * @see java.io.BufferedInputStream
      */
     public PngImage(InputStream is)
     {
-        init(is);
+        this(is, true);
+    }
+
+    /** 
+     * Constructs a <code>PngImage</code> object from an input stream.
+     * Buffer the stream for better performance.
+     * @param is InputStream containing PNG image data
+     * @param close Whether to close the input stream when the image
+     * has been fully read or is flushed. When set to false you need
+     * to manage the closing of the stream yourself. This is useful, for example, when
+     * you have a file with multiple images concatenated together.
+     * @see java.io.BufferedInputStream
+     */
+    public PngImage(InputStream is, boolean close)
+    {
+        data.close = close;
+        data.properties.put("gamma", new Long(DEFAULT_GAMMA));
+        data.in_idat = new IDATInputStream(this, is, close);
     }
 
     /**
@@ -787,7 +804,8 @@ implements ImageProducer
     {
         if (data != null) {
             try {
-                data.in_idat.close();
+                if (data.close)
+                    data.in_idat.close();
             } catch (IOException e) {
                 // TODO: ignore?
             }
@@ -801,12 +819,6 @@ implements ImageProducer
         registerChunk(new Chunk_IDAT());
         registerChunk(new Chunk_IEND());
         registerChunk(new Chunk_tRNS());
-    }
-
-    private void init(InputStream in_raw)
-    {
-        data.properties.put("gamma", new Long(DEFAULT_GAMMA));
-        data.in_idat = new IDATInputStream(this, in_raw);
     }
 
     private synchronized void readToData()
@@ -927,8 +939,8 @@ implements ImageProducer
             = new UnfilterInputStream(this, data.in_idat);
         InputStream is =
             new BufferedInputStream(in_filter, BUFFER_SIZE);
-        PixelInputStream pis =
-            new PixelInputStream(this, is);
+        PixelReader pis =
+            new PixelReader(this, is);
 
         setHints(ics);
 
@@ -961,7 +973,7 @@ implements ImageProducer
         }
     }
 
-    private void produceNonInterlaced(ImageConsumer[] ics, PixelInputStream pis)
+    private void produceNonInterlaced(ImageConsumer[] ics, PixelReader pis)
     throws IOException
     {
         int w = data.header.width, h = data.header.height;
@@ -986,7 +998,7 @@ implements ImageProducer
         }
     }
 
-    private void produceInterlaced(ImageConsumer[] ics, PixelInputStream pis)
+    private void produceInterlaced(ImageConsumer[] ics, PixelReader pis)
     throws IOException
     {            
         int w = data.header.width, h = data.header.height;
