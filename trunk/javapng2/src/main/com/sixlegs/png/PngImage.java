@@ -54,7 +54,7 @@ public class PngImage
     public static final String TRANSPARENCY_GRAY = "transparency_gray";
     public static final String TRANSPARENCY_GREEN = "transparency_green";
     public static final String TRANSPARENCY_RED = "transparency_red";
-    public static final String UNIT_SPECIFIER = "unit_specifier";
+    public static final String UNIT = "unit";
     public static final String WIDTH = "width";
     public static final String WHITE_POINT_X = "white_point_x";
     public static final String WHITE_POINT_Y = "white_point_y";
@@ -264,6 +264,9 @@ public class PngImage
             case PngChunk.tRNS:
             case PngChunk.pHYs:
             case PngChunk.sPLT:
+            case PngChunk.oFFs:
+            case PngChunk.pCAL:
+            case PngChunk.sCAL:
                 throw new PngException(name + " cannot appear after IDAT");
             }
             switch (state) {
