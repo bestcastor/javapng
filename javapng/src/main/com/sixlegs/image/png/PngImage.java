@@ -1,6 +1,6 @@
 /*
 com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998, 1999, 2001 Chris Nokleberg
+Copyright (C) 1998-2004 Chris Nokleberg
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
@@ -59,14 +59,14 @@ implements ImageProducer
     private Vector errorList;
 
     final class Data {
-        private final Vector consumers = new Vector();
-        private final Hashtable chunks = new Hashtable();
+        final Vector consumers = new Vector();
+        final Hashtable chunks = new Hashtable();
 
-        private int[] pixels;
-        private boolean produced;
-        private boolean produceFailed;
-        private boolean useFlush;
-        private boolean close;
+        int[] pixels;
+        boolean produced;
+        boolean produceFailed;
+        boolean useFlush;
+        boolean close;
 
         /* package */ IDATInputStream in_idat;
         /* package */ Chunk_IHDR header;
@@ -628,7 +628,7 @@ implements ImageProducer
     {
         startProduction(new DummyImageConsumer());
         if (hasFatalError())
-            throw (IOException)errorList.get(errorList.size() - 1);
+            throw (IOException)errorList.elementAt(errorList.size() - 1);
     }
 
     /**
@@ -986,7 +986,6 @@ implements ImageProducer
         int pixelsWidth = w;
         int extra = w % pis.fillSize;
         if (extra > 0) pixelsWidth += (pis.fillSize - extra);
-        int off = 0;
         for (int y = 0; y < h; y++) {
             pis.read(rowbuf, 0, pixelsWidth);
             if (data.pixels != null) {

@@ -1,4 +1,4 @@
-// Copyright (C) 1998, 1999, 2001 Chris Nokleberg
+// Copyright (C) 1998-2004 Chris Nokleberg
 // Please see included LICENSE.TXT
 
 package com.sixlegs.image.png;
@@ -59,7 +59,7 @@ implements TextChunk
         CharArrayWriter out_chars = new CharArrayWriter(val.length());
         try {
             char[] chs = val.toCharArray();
-            int i = 0, p = 0;
+            int p = 0;
             int L = chs.length;
             String endl = System.getProperty("line.separator");
             while (p < L) {

@@ -1,4 +1,4 @@
-// Copyright (C) 1998, 1999, 2001 Chris Nokleberg
+// Copyright (C) 1998-2004 Chris Nokleberg
 // Please see included LICENSE.TXT
 
 package com.sixlegs.image.png;
@@ -111,9 +111,7 @@ extends Chunk
 
         img.data.properties.put("significant bits", sbit);
 
-        if (paletteUsed) {
-            // set later when we see the PLTE chunk
-        } else {
+        if (!paletteUsed) {
             if (alphaUsed) {
                 model = alphaModel = new DirectColorModel(cmBits, red, green, blue, alpha);
             } else { 

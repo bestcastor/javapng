@@ -1,11 +1,10 @@
-// Copyright (C) 1998, 1999, 2001 Chris Nokleberg
+// Copyright (C) 1998-2004 Chris Nokleberg
 // Please see included LICENSE.TXT
 
 package com.sixlegs.image.png;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
