@@ -20,6 +20,7 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+import com.sixlegs.png.ext.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.*;
@@ -37,7 +38,9 @@ extends TestCase
         Raster raster = argb.getRaster();
         int[] data = new int[800 * 600];
         byte[] pixbuf = new byte[4];
-        
+
+        ExtendedPngConfig config = new ExtendedPngConfig();
+        config.setWarningsFatal(true);
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/images.txt")));
         boolean fail = false;
@@ -53,7 +56,7 @@ extends TestCase
                 InputStream in = getClass().getResourceAsStream(name);
                 if (in == null)
                     fail("Cannot find image \"" + name + "\"");
-                BufferedImage image = new PngImage().read(in, true);
+                BufferedImage image = new PngImage(config).read(in, true);
                 Graphics2D g = argb.createGraphics();
                 g.setPaint(new Color(255, 255, 255, 0));
                 g.fillRect(0, 0, argb.getWidth(), argb.getHeight());
