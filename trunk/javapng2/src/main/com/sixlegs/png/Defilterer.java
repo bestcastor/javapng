@@ -32,7 +32,6 @@ class Defilterer
     private int bitDepth;
     private int samples;
     private PixelProcessor pp;
-    private boolean progressive;
     private int bpp;
 
     public Defilterer(InputStream in, WritableRaster raster, int bitDepth, int samples, PixelProcessor pp)

@@ -76,8 +76,6 @@ extends FilterInputStream
         return x;
     }
 
-    private byte[] byteArray = new byte[0];
-
     public long skip(long n)
     throws IOException
     {
