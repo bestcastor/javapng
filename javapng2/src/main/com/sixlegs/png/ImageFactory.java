@@ -32,19 +32,11 @@ import java.awt.Point;
 
 class ImageFactory
 {
-    private int[][] bandOffsets = {
-        null,
-        { 0 },
-        { 0, 1 },
-        { 0, 1, 2 },
-        { 0, 1, 2, 3 },
-    };
-
-    public ImageFactory()
+    private ImageFactory()
     {
     }
 
-    public BufferedImage create(PngConfig config, Map props)
+    public static BufferedImage create(PngConfig config, Map props)
     throws IOException
     {
         if (config.getMetadataOnly())
@@ -64,7 +56,8 @@ class ImageFactory
         boolean interlaced = interlace == PngImage.INTERLACE_ADAM7;
         int samples = getSamples(colorType);
         ColorModel colorModel = createColorModel(props, gammaTable);
-        WritableRaster raster = createRaster(bitDepth, samples, width, height);
+        WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
+        // WritableRaster raster = createRaster(bitDepth, samples, width, height);
 
         InputStream in;
         in = new MultiByteArrayInputStream((List)props.get(PngImage.DATA));
@@ -74,8 +67,21 @@ class ImageFactory
         // TODO: if not progressive, initialize to fully transparent
 
         PixelProcessor pp = BasicPixelProcessor.getInstance();
-        if (colorModel instanceof ComponentColorModel)
-            pp = new GammaPixelProcessor(gammaTable);
+        if (colorModel instanceof ComponentColorModel) {
+            if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
+                pp = new TransGammaPixelProcessor(gammaTable, new int[]{
+                    PngImage.getInt(props, PngImage.TRANSPARENCY_GRAY),
+                });
+            } else if (props.containsKey(PngImage.TRANSPARENCY_RED)) {
+                pp = new TransGammaPixelProcessor(gammaTable, new int[]{
+                    PngImage.getInt(props, PngImage.TRANSPARENCY_RED),
+                    PngImage.getInt(props, PngImage.TRANSPARENCY_GREEN),
+                    PngImage.getInt(props, PngImage.TRANSPARENCY_BLUE),
+                });
+            } else {
+                pp = new GammaPixelProcessor(gammaTable);
+            }
+        }
         if (config.isProgressive() && interlaced)
             pp = new ProgressivePixelProcessor(pp);
 
@@ -137,7 +143,11 @@ class ImageFactory
         } else {
             int dataType = (bitDepth == 16) ?
                 DataBuffer.TYPE_USHORT : DataBuffer.TYPE_BYTE;
-            boolean hasAlpha = hasAlpha(colorType);
+            boolean hasAlpha =
+                colorType == PngImage.COLOR_TYPE_RGB_ALPHA ||
+                colorType == PngImage.COLOR_TYPE_GRAY_ALPHA ||
+                props.containsKey(PngImage.TRANSPARENCY_GRAY) ||
+                props.containsKey(PngImage.TRANSPARENCY_RED);
             return new ComponentColorModel(getColorSpace(colorType),
                                            hasAlpha,
                                            false,
@@ -154,17 +164,6 @@ class ImageFactory
         case PngImage.COLOR_TYPE_RGB_ALPHA:  return 4;
         }
         return 1;
-    }
-
-    private static boolean hasAlpha(int colorType)
-    {
-        switch (colorType) {
-        case PngImage.COLOR_TYPE_RGB_ALPHA:
-        case PngImage.COLOR_TYPE_GRAY_ALPHA:
-            return true;
-        default:
-            return false;
-        }
     }
 
     private static ColorSpace getColorSpace(int colorType)
@@ -190,38 +189,5 @@ class ImageFactory
         for (int i = 0; i < size; i++)
             copy[i] = (byte)gammaTable[0xFF & palette[i]];
         return copy;
-    }
-
-    private WritableRaster createRaster(int bitDepth, int samples, int width, int height)
-    {
-        int rowSize = (bitDepth * samples * width + 7) / 8;
-        DataBuffer dbuf;
-        Point origin = new Point(0, 0);
-        if ((bitDepth < 8) && (samples == 1)) {
-            dbuf = new DataBufferByte(height * rowSize);
-            return Raster.createPackedRaster(dbuf,
-                                             width,
-                                             height,
-                                             bitDepth,
-                                             origin);
-        } else if (bitDepth <= 8) {
-            dbuf = new DataBufferByte(height * rowSize);
-            return Raster.createInterleavedRaster(dbuf,
-                                                  width,
-                                                  height,
-                                                  rowSize,
-                                                  samples,
-                                                  bandOffsets[samples],
-                                                  origin);
-        } else {
-            dbuf = new DataBufferUShort(height * rowSize / 2);
-            return Raster.createInterleavedRaster(dbuf,
-                                                  width,
-                                                  height,
-                                                  rowSize / 2,
-                                                  samples,
-                                                  bandOffsets[samples],
-                                                  origin);
-        }
     }
 }

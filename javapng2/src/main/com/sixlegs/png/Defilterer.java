@@ -20,6 +20,7 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+import java.awt.Point;
 import java.awt.image.*;
 import java.io.*;
 
@@ -52,7 +53,7 @@ class Defilterer
             return;
 
         boolean isShort = bitDepth == 16;
-        WritableRaster passRow = raster.createCompatibleWritableRaster(passWidth, 1);
+        WritableRaster passRow = createInputRaster(bitDepth, samples, raster.getWidth());
         DataBuffer dbuf = passRow.getDataBuffer();
         byte[] byteData = isShort ? null : ((DataBufferByte)dbuf).getData();
         short[] shortData = isShort ? ((DataBufferUShort)dbuf).getData() : null;
@@ -106,6 +107,8 @@ class Defilterer
             for (xc = bpp, xp = 0; xc < rowSize; xc++, xp++)
                 cur[xc] = (byte)(cur[xc] + paeth(cur[xp], prev[xc], prev[xp]));
             break;
+        case 64:
+            throw new PngError("Intra-pixel filtering not implemented yet");
         default:
             throw new PngError("Unrecognized filter type " + filterType);
         }
@@ -136,6 +139,32 @@ class Defilterer
             if (result == -1)
                 throw new EOFException();
             total += result;
+        }
+    }
+
+    private static int[][] bandOffsets = {
+        null,
+        { 0 },
+        { 0, 1 },
+        { 0, 1, 2 },
+        { 0, 1, 2, 3 },
+    };
+
+    private static WritableRaster createInputRaster(int bitDepth, int samples, int width)
+    {
+        int rowSize = (bitDepth * samples * width + 7) / 8;
+        Point origin = new Point(0, 0);
+        if ((bitDepth < 8) && (samples == 1)) {
+            DataBuffer dbuf = new DataBufferByte(rowSize);
+            return Raster.createPackedRaster(dbuf, width, 1, bitDepth, origin);
+        } else if (bitDepth <= 8) {
+            DataBuffer dbuf = new DataBufferByte(rowSize);
+            return Raster.createInterleavedRaster(dbuf, width, 1, rowSize, samples,
+                                                  bandOffsets[samples], origin);
+        } else {
+            DataBuffer dbuf = new DataBufferUShort(rowSize / 2);
+            return Raster.createInterleavedRaster(dbuf, width, 1, rowSize / 2, samples,
+                                                  bandOffsets[samples], origin);
         }
     }
 }

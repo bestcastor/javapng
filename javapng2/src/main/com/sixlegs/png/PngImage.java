@@ -162,7 +162,7 @@ public class PngImage
             // TODO
             if (getColorType() == COLOR_TYPE_PALETTE && props.get(PALETTE_RED) == null)
                 throw new PngError("Required PLTE chunk not found");
-            return new ImageFactory().create(config, props);
+            return ImageFactory.create(config, props);
         } finally {
             if (close)
                 in.close();

@@ -35,7 +35,7 @@ extends PixelProcessor
     public void process(Raster src, WritableRaster dst,
                         int xOffset, int xStep, int yStep, int y, int width)
     {
-        int[] pixel = src.getPixel(0, 0, (int[])null);
+        int[] pixel = dst.getPixel(0, 0, (int[])null);
         for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
             src.getPixel(srcX, 0, pixel);
             dst.setPixel(dstX, y, pixel);
