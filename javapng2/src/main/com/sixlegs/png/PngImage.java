@@ -146,18 +146,24 @@ public class PngImage
                         throw new PngError("Critical chunk " + name + " cannot be skipped");
                     data.skipFully(length);
                 } else {
-                    Integer key = Integers.valueOf(type);
-                    if (!chunk.isMultipleOK()) {
-                        if (seen.contains(key)) {
-                            String msg = "Multiple " + name + " chunks are not allowed";
-                            if (PngChunk.isAncillary(type))
-                                throw new PngWarning(msg);
-                            throw new PngError(msg);
-                        } else {
-                            seen.add(key);
+                    try {
+                        Integer key = Integers.valueOf(type);
+                        if (!chunk.isMultipleOK()) {
+                            if (seen.contains(key)) {
+                                String msg = "Multiple " + name + " chunks are not allowed";
+                                if (PngChunk.isAncillary(type)) {
+                                    data.skipFully(length);
+                                    throw new PngWarning(msg);
+                                }
+                                throw new PngError(msg);
+                            } else {
+                                seen.add(key);
+                            }
                         }
+                        chunk.read(data, length, this);
+                    } catch (PngWarning warning) {
+                        config.handleException(warning);
                     }
-                    chunk.read(data, length, this);
                 }
                 long calcChecksum = crc.getValue();
                 long fileChecksum = data.readUnsignedInt();
@@ -170,6 +176,9 @@ public class PngImage
             if (config.getMetadataOnly())
                 return null;
             return ImageFactory.create(this);
+        } catch (PngError e) {
+            config.handleException(e);
+            throw e;
         } finally {
             if (close)
                 in.close();

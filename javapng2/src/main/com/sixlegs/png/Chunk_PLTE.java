@@ -39,12 +39,6 @@ extends PngChunk
         int size = length / 3;
 
         int colorType = png.getColorType();
-        switch (colorType) {
-        case PngImage.COLOR_TYPE_GRAY:
-        case PngImage.COLOR_TYPE_GRAY_ALPHA:
-            throw new PngWarning("PLTE chunk found in grayscale image");
-        }
-
         if (colorType == PngImage.COLOR_TYPE_PALETTE) {
             if (size > (2 << png.getBitDepth()) || size > 256)
                 throw new PngError("Too many palette entries");
@@ -57,6 +51,12 @@ extends PngChunk
             r[i] = in.readByte();
             g[i] = in.readByte();
             b[i] = in.readByte();
+        }
+
+        switch (colorType) {
+        case PngImage.COLOR_TYPE_GRAY:
+        case PngImage.COLOR_TYPE_GRAY_ALPHA:
+            throw new PngWarning("PLTE chunk found in grayscale image");
         }
 
         Map props = png.getProperties();
