@@ -155,21 +155,21 @@
     <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
         <jar jarfile="dist/png-${version}.jar">
-            <fileset dir="build/main" excludes="**/opt/**"/>
+            <fileset dir="build/main" excludes="**/ext/**"/>
         </jar>
-        <jar jarfile="dist/pngopt-${version}.jar">
-            <fileset dir="build/main" includes="**/opt/**"/>
+        <jar jarfile="dist/pngext-${version}.jar">
+            <fileset dir="build/main" includes="**/ext/**"/>
         </jar>
     </target>
 
     <target name="javadoc" depends="compile" description="Generate the javadoc">
-        <mkdir dir="dist/javadoc"/>
+        <mkdir dir="dist/api"/>
         <javadoc 
           sourcepath="src/main"
-          destdir="dist/javadoc"
+          destdir="dist/api"
           access="${javadoc.access}"
           failonerror="true"
-          packagenames="com.sixlegs.image.png.*"
+          packagenames="com.sixlegs.png.*"
           classpathref="path.run"
           Author="true"
           Version="true"
