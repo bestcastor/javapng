@@ -13,6 +13,9 @@ Revision History
 
   Changes from v1.2.3 -> v1.3.0 (???):
 
+  * Add new constructor that allows you to disable the automatic
+    closing of the InputStream, useful for when a stream contains
+    multiple images. [David Steigleite]
   * Bug fix: throws EOFException if InputStream is empty (instead of
     NullPointerException).
   * Remove SINGLEFRAMEDONE calls for compatibility with JDK.

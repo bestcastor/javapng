@@ -20,11 +20,13 @@ extends InputStream
     private PngImage img;
     private Chunk cur;
     private int chunk_left;
+    private boolean close;
 
-    public IDATInputStream(PngImage img, InputStream in_raw)
+    public IDATInputStream(PngImage img, InputStream in_raw, boolean close)
     {
         this.img = img;
         this.in_raw = in_raw;
+        this.close = close;
         in_crc  = new CRCInputStream(in_raw);
         in_data = new ExDataInputStream(in_crc);
     }
@@ -90,14 +92,14 @@ extends InputStream
     private Chunk getNextChunk()
     throws IOException
     {
-        if (cur != null) readChunk(cur);
-
-        try {
-            chunk_left = in_data.readInt();
-        } catch (EOFException e) {
-            if (cur.type != Chunk.IEND) throw e;
-            return null;
+        if (cur != null) {
+            readChunk(cur);
+            if (cur.type == Chunk.IEND) {
+                return null;
+            }
         }
+
+        chunk_left = in_data.readInt();
 
         in_crc.reset();
         int type = in_data.readInt();
@@ -143,7 +145,8 @@ extends InputStream
                     throw new PngException(Chunk.typeToString(chunk.type) + " chunk must precede first IDAT chunk");
                 }
             }
-            close();
+            if (close)
+                close();
         }
         return need;
     }
