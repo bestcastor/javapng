@@ -176,6 +176,10 @@ public class PngImage
         }
     }
 
+    public void handleFrame(BufferedImage image, int framesLeft)
+    {
+    }
+
     private static final int STATE_START = 0;
     private static final int STATE_SAW_IHDR = 1;
     private static final int STATE_SAW_IHDR_NO_PLTE = 2;
@@ -200,7 +204,7 @@ public class PngImage
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
                 // TODO: move "Required PLTE chunk not found here"
-                return STATE_IN_IDAT;
+                return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
             case PngChunk.bKGD:
             case PngChunk.hIST:
             case PngChunk.tRNS:
@@ -217,7 +221,7 @@ public class PngImage
             case PngChunk.sRGB:
                 throw new PngException(name + " cannot appear after PLTE");
             case PngChunk.IDAT:
-                return STATE_IN_IDAT;
+                return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
             case PngChunk.IEND:
                 throw new PngException("Required data chunk(s) not found");
             default:

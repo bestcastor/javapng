@@ -72,7 +72,7 @@ class ImageFactory
             }
         }
         if (config.getProgressive() && interlaced)
-            pp = new ProgressivePixelProcessor(pp);
+            pp = new ProgressivePixelProcessor(pp, width, height);
 
         InputStream in;
         in = new MultiByteArrayInputStream((List)props.remove(PngImage.DATA));
@@ -83,22 +83,22 @@ class ImageFactory
         Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
             d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8);
-            config.handleFrame(image, 6);
+            png.handleFrame(image, 6);
             d.defilter(4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8);
-            config.handleFrame(image, 5);
+            png.handleFrame(image, 5);
             d.defilter(0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8);
-            config.handleFrame(image, 4);
+            png.handleFrame(image, 4);
             d.defilter(2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4);
-            config.handleFrame(image, 3);
+            png.handleFrame(image, 3);
             d.defilter(0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4);
-            config.handleFrame(image, 2);
+            png.handleFrame(image, 2);
             d.defilter(1, 0, 2, 2, width / 2, (height + 1) / 2);
-            config.handleFrame(image, 1);
+            png.handleFrame(image, 1);
             d.defilter(0, 1, 1, 2, width, height / 2);
-            config.handleFrame(image, 0);
+            png.handleFrame(image, 0);
         } else {
             d.defilter(0, 0, 1, 1, width, height);
-            config.handleFrame(image, 0);
+            png.handleFrame(image, 0);
         }
         return image;
     }

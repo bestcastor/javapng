@@ -26,10 +26,14 @@ final class ProgressivePixelProcessor
 extends PixelProcessor
 {
     private PixelProcessor pp;
+    private int imgWidth;
+    private int imgHeight;
     
-    public ProgressivePixelProcessor(PixelProcessor pp)
+    public ProgressivePixelProcessor(PixelProcessor pp, int imgWidth, int imgHeight)
     {
         this.pp = pp;
+        this.imgWidth = imgWidth;
+        this.imgHeight = imgHeight;
     }
     
     public void process(Raster src, WritableRaster dst,
@@ -38,16 +42,22 @@ extends PixelProcessor
         // run non-progressive processor first
         pp.process(src, dst, xOffset, xStep, yStep, y, width);
 
-        // then replicate pixels across entire step
-        int[] pixel = src.getPixel(0, 0, (int[])null);
-        for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
-            dst.getPixel(dstX, y, pixel);
-            for (int i = 0; i < xStep; i++) {
-                for (int j = 0; j < yStep; j++) {
-                    dst.setPixel(dstX + i, y + j, pixel);
+        // then replicate pixels across entire block
+        int blockHeight = xStep;
+        int blockWidth = xStep - xOffset;
+        if (blockWidth > 1 || blockHeight > 1) {
+            int[] pixel = dst.getPixel(0, 0, (int[])null);
+            int yMax = Math.min(y + blockHeight, imgHeight);
+            for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
+                dst.getPixel(dstX, y, pixel);
+                int xMax = Math.min(dstX + blockWidth, imgWidth);
+                for (int i = dstX; i < xMax; i++) {
+                    for (int j = y; j < yMax; j++) {
+                        dst.setPixel(i, j, pixel);
+                    }
                 }
+                dstX += xStep;
             }
-            dstX += xStep;
         }
     }
 }
