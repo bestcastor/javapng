@@ -152,6 +152,7 @@ class ImageFactory
                 props.containsKey(PngImage.TRANSPARENCY_RED);
             // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
+                                           null,
                                            hasAlpha,
                                            false,
                                            hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
