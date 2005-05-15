@@ -25,30 +25,53 @@ import java.util.Map;
 
 abstract public class PngChunk
 {
+    /** Image header */
     public static final int IHDR = 0x49484452;
+    /** Palette */
     public static final int PLTE = 0x504c5445;
+    /** Image data */
     public static final int IDAT = 0x49444154;
+    /** Image trailer */
     public static final int IEND = 0x49454e44;
 
+    /** Background color */
     public static final int bKGD = 0x624b4744;
+    /** Primary chromaticities */
     public static final int cHRM = 0x6348524d;
+    /** Image gamma */
     public static final int gAMA = 0x67414d41;
+    /** Palette histogram */
     public static final int hIST = 0x68495354;
+    /** Embedded ICC profile */
     public static final int iCCP = 0x69434350;
+    /** International textual data */
     public static final int iTXt = 0x69545874;
+    /** Physical pixel dimensions */
     public static final int pHYs = 0x70485973;
+    /** Significant bits */
     public static final int sBIT = 0x73424954;
+    /** Suggested palette */
     public static final int sPLT = 0x73504c54;
+    /** Standard RGB color space */
     public static final int sRGB = 0x73524742;
+    /** Textual data */
     public static final int tEXt = 0x74455874;
+    /** Image last-modification time */
     public static final int tIME = 0x74494d45;
+    /** Transparency */
     public static final int tRNS = 0x74524e53;
+    /** Compressed textual data */
     public static final int zTXt = 0x7a545874;
 
+    /** Image offset */
     public static final int oFFs = 0x6f464673;
+    /** Calibration of pixel values */
     public static final int pCAL = 0x7043414c;
+    /** Physical scale of image subject */
     public static final int sCAL = 0x7343414c;
+    /** GIF Graphic Control Extension */
     public static final int gIFg = 0x67494667;
+    /** GIF Application Extension */
     public static final int gIFx = 0x67494678;
 
     abstract public void read(PngInputStream in, PngImage png) throws IOException;
