@@ -53,10 +53,13 @@ extends PngChunk
         byte[] r = new byte[size];
         byte[] g = new byte[size];
         byte[] b = new byte[size];
-        for (int i = 0; i < size; i++) {
-            r[i] = in.readByte();
-            g[i] = in.readByte();
-            b[i] = in.readByte();
+
+        byte[] bytes = new byte[size * 3];
+        in.readFully(bytes);
+        for (int i = 0, j = 0; i < size; i++) {
+            r[i] = bytes[j++];
+            g[i] = bytes[j++];
+            b[i] = bytes[j++];
         }
 
         Map props = png.getProperties();

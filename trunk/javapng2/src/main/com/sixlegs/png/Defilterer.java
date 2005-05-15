@@ -76,7 +76,7 @@ class Defilterer
             } else {
                 System.arraycopy(cur, bpp, byteData, 0, bytesPerRow);
             }
-            pp.process(passRow, raster, xOffset, xStep, yStep, dstY, passWidth);
+            pp.process(passRow, xOffset, xStep, yStep, dstY, passWidth);
             byte[] tmp = cur;
             cur = prev;
             prev = tmp;
@@ -104,28 +104,31 @@ class Defilterer
                 cur[xc] = (byte)(cur[xc] + ((0xFF & cur[xp]) + (0xFF & prev[xc])) / 2);
             break;
         case 4: // Paeth
-            for (xc = bpp, xp = 0; xc < rowSize; xc++, xp++)
-                cur[xc] = (byte)(cur[xc] + paeth(cur[xp], prev[xc], prev[xp]));
+            for (xc = bpp, xp = 0; xc < rowSize; xc++, xp++) {
+                byte L = cur[xp];
+                byte u = prev[xc];
+                byte nw = prev[xp];
+                int a = 0xFF & L; //  inline byte->int
+                int b = 0xFF & u; 
+                int c = 0xFF & nw; 
+                int p = a + b - c;
+                int pa = p - a; if (pa < 0) pa = -pa; // inline Math.abs
+                int pb = p - b; if (pb < 0) pb = -pb; 
+                int pc = p - c; if (pc < 0) pc = -pc;
+                int result;
+                if (pa <= pb && pa <= pc) {
+                    result = a;
+                } else if (pb <= pc) {
+                    result = b;
+                } else {
+                    result = c;
+                }
+                cur[xc] = (byte)(cur[xc] + result);
+            }
             break;
         default:
             throw new PngError("Unrecognized filter type " + filterType);
         }
-    }
-
-    private static int paeth(byte L, byte u, byte nw)
-    {
-        int a = 0xFF & L; //  inline byte->int
-        int b = 0xFF & u; 
-        int c = 0xFF & nw; 
-        int p = a + b - c;
-        int pa = p - a; if (pa < 0) pa = -pa; // inline Math.abs
-        int pb = p - b; if (pb < 0) pb = -pb; 
-        int pc = p - c; if (pc < 0) pc = -pc; 
-        if (pa <= pb && pa <= pc)
-            return a;
-        if (pb <= pc)
-            return b;
-        return c;
     }
 
     private static void readFully(InputStream in, byte[] b, int off, int len)

@@ -22,17 +22,32 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-final class BasicPixelProcessor
-extends BasePixelProcessor
+abstract class BasePixelProcessor
+extends PixelProcessor
 {
-    public BasicPixelProcessor(WritableRaster dst)
+    final protected WritableRaster dst;
+    final protected int[] row;
+    final protected int samples;
+    
+    public BasePixelProcessor(WritableRaster dst)
     {
-        super(dst);
+        this.dst = dst;
+        row = new int[dst.getNumBands() * dst.getWidth()]; // TODO: too big?
+        samples = dst.getNumBands();
     }
 
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    protected void transfer(int xOffset, int xStep, int y, int width)
     {
-        src.getPixels(0, 0, width, 1, row);
-        transfer(xOffset, xStep, y, width);
+        if (xStep == 1) {
+            dst.setPixels(xOffset, y, width, 1, row);
+        } else {
+            int dstX = xOffset;
+            for (int index = 0, total = samples * width; index < total; index += samples) {
+                for (int i = 0; i < samples; i++)
+                    row[i] = row[index + i];
+                dst.setPixel(dstX, y, row);
+                dstX += xStep;
+            }
+        }
     }
 }
