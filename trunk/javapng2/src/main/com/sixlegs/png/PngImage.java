@@ -217,7 +217,7 @@ public class PngImage
         switch (state) {
         case STATE_START:
             if (type != PngChunk.IHDR)
-            return STATE_SAW_IHDR;
+                return STATE_SAW_IHDR;
         case STATE_SAW_IHDR:
         case STATE_SAW_IHDR_NO_PLTE:
             switch (type) {
