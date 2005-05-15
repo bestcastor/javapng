@@ -20,74 +20,11 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-public class SuggestedPalette
+public interface SuggestedPalette
 {
-    private String name;
-    private int sampleDepth;
-    private short[] r;
-    private short[] g;
-    private short[] b;
-    private short[] a;
-    private int[] freq;
-    
-    public SuggestedPalette(String name, int sampleDepth,
-                            short[] r, short[] g, short[] b, short[] a, int[] freq)
-    {
-        this.name = name;
-        this.sampleDepth = sampleDepth;
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
-        this.freq = freq;
-    }
-
-    public short[] getRed()
-    {
-        return r;
-    }
-
-    public short[] getGreen()
-    {
-        return g;
-    }
-
-    public short[] getBlue()
-    {
-        return b;
-    }
-
-    public short[] getAlpha()
-    {
-        return a;
-    }
-
-    public int[] getFrequency()
-    {
-        return freq;
-    }
-
-    public int getSampleDepth()
-    {
-        return sampleDepth;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    public boolean equals(Object o)
-    {
-        if (o == null)
-            return false;
-        if (!(o instanceof SuggestedPalette))
-            return false;
-        return name.equals(((SuggestedPalette)o).name);
-    }
+    String getName();
+    int getSampleCount();
+    int getSampleDepth();
+    void getSample(int index, short[] pixel);
+    int getFrequency(int index);
 }
