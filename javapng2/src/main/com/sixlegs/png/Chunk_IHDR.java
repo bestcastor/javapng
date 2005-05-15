@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_IHDR
 extends PngChunk
 {
-    public Chunk_IHDR()
-    {
-        super(IHDR);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

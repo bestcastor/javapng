@@ -27,11 +27,6 @@ import java.util.Map;
 class Chunk_oFFs
 extends PngChunk
 {
-    public Chunk_oFFs()
-    {
-        super(oFFs);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

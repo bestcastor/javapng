@@ -27,11 +27,6 @@ import java.util.Map;
 class Chunk_bKGD
 extends PngChunk
 {
-    public Chunk_bKGD()
-    {
-        super(bKGD);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

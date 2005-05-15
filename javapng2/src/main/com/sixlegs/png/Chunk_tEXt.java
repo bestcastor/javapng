@@ -25,11 +25,6 @@ import java.io.IOException;
 class Chunk_tEXt
 extends AbstractTextChunk
 {
-    public Chunk_tEXt()
-    {
-        super(tEXt);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

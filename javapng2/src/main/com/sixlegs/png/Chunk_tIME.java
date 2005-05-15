@@ -28,11 +28,6 @@ extends PngChunk
 {
     private static TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+0");
     
-    public Chunk_tIME()
-    {
-        super(tIME);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

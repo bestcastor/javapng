@@ -27,11 +27,6 @@ import java.util.Map;
 class Chunk_sCAL
 extends PngChunk
 {
-    public Chunk_sCAL()
-    {
-        super(sCAL);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

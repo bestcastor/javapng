@@ -26,11 +26,6 @@ import java.util.*;
 abstract class AbstractTextChunk
 extends PngChunk
 {
-    protected AbstractTextChunk(int type)
-    {
-        super(type);
-    }
-
     public boolean isMultipleOK()
     {
         return true;

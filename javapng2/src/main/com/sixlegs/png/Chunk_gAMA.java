@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_gAMA
 extends PngChunk
 {
-    public Chunk_gAMA()
-    {
-        super(gAMA);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

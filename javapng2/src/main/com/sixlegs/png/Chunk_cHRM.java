@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_cHRM
 extends PngChunk
 {
-    public Chunk_cHRM()
-    {
-        super(cHRM);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

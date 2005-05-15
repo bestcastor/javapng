@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_sBIT
 extends PngChunk
 {
-    public Chunk_sBIT()
-    {
-        super(sBIT);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {
