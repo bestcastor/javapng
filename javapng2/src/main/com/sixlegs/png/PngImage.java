@@ -124,7 +124,7 @@ public class PngImage
         try {
             read = true;
             props.clear();
-            CRCInputStream crc = new CRCInputStream(in, new byte[0x2000]);
+            CRCInputStream crc = new CRCInputStream(in, new byte[0x1000]);
             CountingInputStream count = new CountingInputStream(crc);
             PngInputStream data = new PngInputStream(count);
             long sig = data.readLong();

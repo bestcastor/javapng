@@ -24,6 +24,6 @@ import java.awt.image.*;
 
 abstract class PixelProcessor
 {
-    abstract public void process(Raster src, WritableRaster dst,
-                                 int xOffset, int xStep, int yStep, int y, int width);
+    // TODO: replace Raster src with int[] once all processors are using src.getPixels(0, 0, width, 1, row)
+    abstract public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width);
 }

@@ -23,43 +23,43 @@ package com.sixlegs.png;
 import java.awt.image.*;
 
 final class TransGammaPixelProcessor
-extends PixelProcessor
+extends BasePixelProcessor
 {
     final private short[] gammaTable;
     final private int[] trans;
     final private int shift;
     final private int max;
+    final private int samplesNoAlpha;
     
-    public TransGammaPixelProcessor(short[] gammaTable, int[] trans, int shift)
+    public TransGammaPixelProcessor(WritableRaster dst, short[] gammaTable, int[] trans, int shift)
     {
+        super(dst);
         this.gammaTable = gammaTable;
         this.trans = trans;
         this.shift = shift;
         max = gammaTable.length - 1;
+        samplesNoAlpha = samples - 1;
+        if (samplesNoAlpha % 2 == 0)
+            throw new IllegalStateException("Expecting alpha channel");
     }
     
-    public void process(Raster src, WritableRaster dst,
-                        int xOffset, int xStep, int yStep, int y, int width)
+    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
-        int[] pixel = dst.getPixel(0, 0, (int[])null);
-        int samples = pixel.length - 1;
-        if (samples % 2 == 0)
-            throw new IllegalStateException("Expecting alpha channel");
         for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
-            src.getPixel(srcX, 0, pixel);
+            src.getPixel(srcX, 0, row);
             int transCount = 0;
             for (;;) {
-                if (pixel[transCount] != trans[transCount]) {
-                    pixel[samples] = max;
+                if (row[transCount] != trans[transCount]) {
+                    row[samplesNoAlpha] = max;
                     break;
-                } else if (++transCount == samples) {
-                    pixel[samples] = 0;
+                } else if (++transCount == samplesNoAlpha) {
+                    row[samplesNoAlpha] = 0;
                     break;
                 }
             }
-            for (int i = 0; i < samples; i++)
-                pixel[i] = 0xFFFF & gammaTable[pixel[i] >> shift];
-            dst.setPixel(dstX, y, pixel);
+            for (int i = 0; i < samplesNoAlpha; i++)
+                row[i] = 0xFFFF & gammaTable[row[i] >> shift];
+            dst.setPixel(dstX, y, row);
             dstX += xStep;
         }
     }

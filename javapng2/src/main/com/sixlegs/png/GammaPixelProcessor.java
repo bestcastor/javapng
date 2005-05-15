@@ -23,34 +23,33 @@ package com.sixlegs.png;
 import java.awt.image.*;
 
 final class GammaPixelProcessor
-extends PixelProcessor
+extends BasePixelProcessor
 {
     final private short[] gammaTable;
     final private int shift;
+    final private int samplesNoAlpha;
+    final private boolean hasAlpha;
+    final private boolean shiftAlpha;
     
-    public GammaPixelProcessor(short[] gammaTable, int shift)
+    public GammaPixelProcessor(WritableRaster dst, short[] gammaTable, int shift)
     {
+        super(dst);
         this.gammaTable = gammaTable;
         this.shift = shift;
+        hasAlpha = samples % 2 == 0;
+        samplesNoAlpha = hasAlpha ? samples - 1 : samples; // don't change alpha channel
+        shiftAlpha = hasAlpha && shift > 0;
     }
     
-    public void process(Raster src, WritableRaster dst,
-                        int xOffset, int xStep, int yStep, int y, int width)
+    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
-        int[] pixel = dst.getPixel(0, 0, (int[])null);
-        int samples = pixel.length;
-        boolean hasAlpha = samples % 2 == 0;
-        if (hasAlpha)
-            samples--; // don't change alpha channel
-        boolean shiftAlpha = hasAlpha && shift > 0;
-        for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
-            src.getPixel(srcX, 0, pixel);
-            for (int i = 0; i < samples; i++)
-                pixel[i] = 0xFFFF & gammaTable[pixel[i] >> shift];
+        src.getPixels(0, 0, width, 1, row);
+        for (int index = 0, total = samples * width; index < total; index += samples) {
+            for (int i = 0; i < samplesNoAlpha; i++)
+                row[index + i] = 0xFFFF & gammaTable[row[index + i] >> shift];
             if (shiftAlpha)
-                pixel[samples] = pixel[samples] >> shift;
-            dst.setPixel(dstX, y, pixel);
-            dstX += xStep;
+                row[index + samplesNoAlpha] = row[index + samplesNoAlpha] >> shift;
         }
+        transfer(xOffset, xStep, y, width);
     }
 }

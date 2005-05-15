@@ -54,7 +54,7 @@ class ImageFactory
         ColorModel colorModel = createColorModel(png, gammaTable);
         WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
 
-        PixelProcessor pp = BasicPixelProcessor.getInstance();
+        PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
             int[] trans = null;
             if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
@@ -73,18 +73,20 @@ class ImageFactory
                 if (gammaTable == null)
                     gammaTable = getIdentityTable(bitDepth - shift);
                 if (trans != null) {
-                    pp = new TransGammaPixelProcessor(gammaTable, trans, shift);
+                    pp = new TransGammaPixelProcessor(raster, gammaTable, trans, shift);
                 } else {
-                    pp = new GammaPixelProcessor(gammaTable, shift);
+                    pp = new GammaPixelProcessor(raster, gammaTable, shift);
                 }
             }
         }
+        if (pp == null)
+            pp = new BasicPixelProcessor(raster);            
         if (config.getProgressive() && interlaced)
-            pp = new ProgressivePixelProcessor(pp, width, height);
+            pp = new ProgressivePixelProcessor((BasePixelProcessor)pp, width, height);
 
         InputStream in;
         in = new MultiByteArrayInputStream((List)props.get(PngImage.DATA));
-        in = new InflaterInputStream(in, new Inflater(), 0x2000);
+        in = new InflaterInputStream(in, new Inflater(), 0x1000);
         BufferedImage image = new BufferedImage(colorModel, raster, false, null);
         // TODO: if not progressive, initialize to fully transparent?
 
