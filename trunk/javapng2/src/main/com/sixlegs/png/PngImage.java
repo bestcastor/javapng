@@ -230,26 +230,50 @@ public class PngImage
         throw new Error();
     }
 
+    /** 
+     * Returns the image width in pixels.
+     */
     public int getWidth()
     {
         return getInt(PngConstants.WIDTH);
     }
 
+    /** 
+     * Returns the image height in pixels.
+     */
     public int getHeight()
     {
         return getInt(PngConstants.HEIGHT);
     }
 
+    /** 
+     * Returns the image bit depth.
+     * @return 1, 2, 4, 8, or 16.
+     */
     public int getBitDepth()
     {
         return getInt(PngConstants.BIT_DEPTH);
     }
 
+    /**
+     * Returns the image interlace type.
+     * @return {@link PngConstants#INTERLACE_NONE INTERLACE_NONE}
+     *    or {@link PngConstants#INTERLACE_ADAM7 INTERLACE_ADAM7}
+     */
     public int getInterlace()
     {
         return getInt(PngConstants.INTERLACE);
     }
 
+    /**
+     * Returns the image color type.
+     * @return 
+     *    {@link PngConstants#COLOR_TYPE_GRAY COLOR_TYPE_GRAY},<br>
+     *    {@link PngConstants#COLOR_TYPE_GRAY_ALPHA COLOR_TYPE_GRAY_ALPHA},<br>
+     *    {@link PngConstants#COLOR_TYPE_PALETTE COLOR_TYPE_PALETTE},<br>
+     *    {@link PngConstants#COLOR_TYPE_RGB COLOR_TYPE_RGB},<br>
+     *    or {@link PngConstants#COLOR_TYPE_RGB_ALPHA COLOR_TYPE_RGB_ALPHA}
+     */
     public int getColorType()
     {
         return getInt(PngConstants.COLOR_TYPE);
