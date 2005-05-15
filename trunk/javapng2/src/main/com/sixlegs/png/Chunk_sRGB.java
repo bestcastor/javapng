@@ -33,15 +33,15 @@ extends PngChunk
         int intent = in.readByte();
         Map props = png.getProperties();
         
-        props.put(PngImage.RENDERING_INTENT, Integers.valueOf(intent));
-        props.put(PngImage.GAMMA, new Float(0.45455));
-        props.put(PngImage.WHITE_POINT_X, new Float(0.3127f));
-        props.put(PngImage.WHITE_POINT_Y, new Float(0.329f));
-        props.put(PngImage.RED_X, new Float(0.64f));
-        props.put(PngImage.RED_Y, new Float(0.33f));
-        props.put(PngImage.GREEN_X, new Float(0.3f));
-        props.put(PngImage.GREEN_Y, new Float(0.6f));
-        props.put(PngImage.BLUE_X, new Float(0.15f));
-        props.put(PngImage.BLUE_Y, new Float(0.06f));
+        props.put(PngConstants.RENDERING_INTENT, Integers.valueOf(intent));
+        props.put(PngConstants.GAMMA, new Float(0.45455));
+        props.put(PngConstants.WHITE_POINT_X, new Float(0.3127f));
+        props.put(PngConstants.WHITE_POINT_Y, new Float(0.329f));
+        props.put(PngConstants.RED_X, new Float(0.64f));
+        props.put(PngConstants.RED_Y, new Float(0.33f));
+        props.put(PngConstants.GREEN_X, new Float(0.3f));
+        props.put(PngConstants.GREEN_Y, new Float(0.6f));
+        props.put(PngConstants.BLUE_X, new Float(0.15f));
+        props.put(PngConstants.BLUE_Y, new Float(0.06f));
     }
 }

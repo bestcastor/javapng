@@ -41,7 +41,7 @@ extends PngChunk
 
         Calendar cal = Calendar.getInstance(TIME_ZONE);
         cal.set(year, month - 1, day, hour, minute, second);
-        png.getProperties().put(PngImage.TIME, cal.getTime());
+        png.getProperties().put(PngConstants.TIME, cal.getTime());
     }
 
     private static int check(int value, int min, int max)

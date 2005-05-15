@@ -35,8 +35,8 @@ extends PngChunk
         double height = in.readFloatingPoint();
 
         Map props = png.getProperties();
-        props.put(ExtendedPngConfig.SCALE_UNIT, new Integer(unit));
-        props.put(ExtendedPngConfig.PIXEL_WIDTH, new Double(width));
-        props.put(ExtendedPngConfig.PIXEL_HEIGHT, new Double(height));
+        props.put(ExtendedPngConstants.SCALE_UNIT, new Integer(unit));
+        props.put(ExtendedPngConstants.PIXEL_WIDTH, new Double(width));
+        props.put(ExtendedPngConstants.PIXEL_HEIGHT, new Double(height));
     }
 }

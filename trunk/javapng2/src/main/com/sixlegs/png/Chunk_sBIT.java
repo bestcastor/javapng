@@ -29,7 +29,7 @@ extends PngChunk
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {
-        boolean paletted = png.getColorType() == PngImage.COLOR_TYPE_PALETTE;
+        boolean paletted = png.getColorType() == PngConstants.COLOR_TYPE_PALETTE;
         int count = paletted ? 3 : png.getSamples();
         checkLength(in.getRemaining(), count);
 
@@ -42,6 +42,6 @@ extends PngChunk
             array[i] = bits;
         }
 
-        png.getProperties().put(PngImage.SIGNIFICANT_BITS, array);
+        png.getProperties().put(PngConstants.SIGNIFICANT_BITS, array);
     }
 }

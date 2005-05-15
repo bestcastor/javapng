@@ -25,22 +25,6 @@ import com.sixlegs.png.*;
 public class ExtendedPngConfig
 extends CompletePngConfig
 {
-    public static final String GIF_DISPOSAL_METHOD = "gif_disposal_method";
-    public static final String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
-    public static final String GIF_DELAY_TIME = "gif_delay_time";
-    public static final String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
-    public static final String POSITION_UNIT = "position_unit";
-    public static final String POSITION_X = "position_x";
-    public static final String POSITION_Y = "position_y";
-    public static final String SCALE_UNIT = "scale_unit";
-    public static final String PIXEL_WIDTH = "pixel_width";
-    public static final String PIXEL_HEIGHT = "pixel_height";
-    
-    public static final int POSITION_UNIT_PIXEL = 0;
-    public static final int POSITION_UNIT_MICROMETER = 1;
-    public static final int SCALE_UNIT_METER = 1;
-    public static final int SCALE_UNIT_RADIAN = 2;
-
     private static final PngChunk gIFg = new Chunk_gIFg();
     private static final PngChunk gIFx = new Chunk_gIFx();
     private static final PngChunk oFFs = new Chunk_oFFs();

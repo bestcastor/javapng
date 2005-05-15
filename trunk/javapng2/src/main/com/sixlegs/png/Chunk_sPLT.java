@@ -46,9 +46,9 @@ extends PngChunk
         in.readFully(bytes);
 
         Map props = png.getProperties();
-        List palettes = (List)props.get(PngImage.SUGGESTED_PALETTES);
+        List palettes = (List)props.get(PngConstants.SUGGESTED_PALETTES);
         if (palettes == null)
-            props.put(PngImage.SUGGESTED_PALETTES, palettes = new ArrayList());
+            props.put(PngConstants.SUGGESTED_PALETTES, palettes = new ArrayList());
 
         for (Iterator it = palettes.iterator(); it.hasNext();) {
             if (name.equals(((SuggestedPalette)it.next()).getName()))

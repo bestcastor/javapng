@@ -36,9 +36,9 @@ extends PngChunk
     {
         byte[] array = new byte[in.getRemaining()];
         in.readFully(array);
-        List data = (List)png.getProperty(PngImage.DATA);
+        List data = (List)png.getProperty(PngConstants.DATA);
         if (data == null)
-            png.getProperties().put(PngImage.DATA, data = new ArrayList());
+            png.getProperties().put(PngConstants.DATA, data = new ArrayList());
         data.add(array);
     }
 }

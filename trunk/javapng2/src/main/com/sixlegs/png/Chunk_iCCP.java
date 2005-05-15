@@ -32,7 +32,7 @@ extends PngChunk
         String name = in.readKeyword();
         byte[] data = in.readCompressed(in.getRemaining());
         Map props = png.getProperties();
-        props.put(PngImage.ICC_PROFILE_NAME, name);
-        props.put(PngImage.ICC_PROFILE, data);
+        props.put(PngConstants.ICC_PROFILE_NAME, name);
+        props.put(PngConstants.ICC_PROFILE, data);
     }
 }

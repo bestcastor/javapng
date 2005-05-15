@@ -38,12 +38,41 @@ extends PngChunk
         in.readFully(data);
 
         Map props = png.getProperties();
-        List extensions = (List)props.get(ExtendedPngConfig.GIF_APPLICATION_EXTENSIONS);
+        List extensions = (List)props.get(ExtendedPngConstants.GIF_APPLICATION_EXTENSIONS);
         if (extensions == null) {
-            props.put(ExtendedPngConfig.GIF_APPLICATION_EXTENSIONS,
+            props.put(ExtendedPngConstants.GIF_APPLICATION_EXTENSIONS,
                       extensions = new ArrayList());
         }
-                      
-        extensions.add(new GifApplicationExtension(new String(id, "US-ASCII"), authCode, data));
+        extensions.add(new ExtensionImpl(new String(id, "US-ASCII"), authCode, data));
+    }
+
+    private static class ExtensionImpl
+    implements GifApplicationExtension
+    {
+        private String id;
+        private byte[] authCode;
+        private byte[] data;
+
+        public ExtensionImpl(String id, byte[] authCode, byte[] data)
+        {
+            this.id = id;
+            this.authCode = authCode;
+            this.data = data;
+        }
+
+        public String getId()
+        {
+            return id;
+        }
+
+        public byte[] getAuthenticationCode()
+        {
+            return (byte[])authCode.clone();
+        }
+        
+        public byte[] getApplicationData()
+        {
+            return (byte[])data.clone();
+        }
     }
 }

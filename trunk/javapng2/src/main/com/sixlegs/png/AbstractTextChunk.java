@@ -53,9 +53,9 @@ extends PngChunk
         }
         String text = new String(data, enc);
         Map props = png.getProperties();
-        List chunks = (List)props.get(PngImage.TEXT_CHUNKS);
+        List chunks = (List)props.get(PngConstants.TEXT_CHUNKS);
         if (chunks == null)
-            props.put(PngImage.TEXT_CHUNKS, chunks = new ArrayList());
-        chunks.add(new TextChunk(keyword, text, language, translated));
+            props.put(PngConstants.TEXT_CHUNKS, chunks = new ArrayList());
+        chunks.add(new TextChunkImpl(keyword, text, language, translated));
     }
 }
