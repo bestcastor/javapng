@@ -45,46 +45,80 @@ extends PngChunk
             throw new PngWarning("Sample depth must be 8 or 16");
         
         int remaining = in.getRemaining();
-        int entrySize = (sampleDepth == 8) ? 6 : 10;
-        if ((remaining % entrySize) != 0)
+        if ((remaining % ((sampleDepth == 8) ? 6 : 10)) != 0)
             throw new PngWarning("Incorrect sPLT data length for given sample depth");
-
-        int entries = remaining / entrySize;
-        short[] r = new short[entries];
-        short[] g = new short[entries];
-        short[] b = new short[entries];
-        short[] a = new short[entries];
-        int[] freq = new int[entries];
-
-        if (sampleDepth == 8) {
-            for (int i = 0; i < entries; i++) {
-                r[i] = (short)in.readUnsignedByte();
-                g[i] = (short)in.readUnsignedByte();
-                b[i] = (short)in.readUnsignedByte();
-                a[i] = (short)in.readUnsignedByte();
-                freq[i] = in.readUnsignedShort();
-            }
-        } else {
-            for (int i = 0; i < entries; i++) {
-                r[i] = in.readShort();
-                g[i] = in.readShort();
-                b[i] = in.readShort();
-                a[i] = in.readShort();
-                freq[i] = in.readUnsignedShort();
-            }
-        }
+        byte[] bytes = new byte[remaining];
+        in.readFully(bytes);
 
         Map props = png.getProperties();
-        Set palettes = (Set)props.get(PngImage.SUGGESTED_PALETTES);
+        List palettes = (List)props.get(PngImage.SUGGESTED_PALETTES);
         if (palettes == null)
-            props.put(PngImage.SUGGESTED_PALETTES, palettes = new HashSet());
+            props.put(PngImage.SUGGESTED_PALETTES, palettes = new ArrayList());
 
-        SuggestedPalette palette =
-            new SuggestedPalette(name, sampleDepth, r, g, b, a, freq);
+        for (Iterator it = palettes.iterator(); it.hasNext();) {
+            if (name.equals(((SuggestedPalette)it.next()).getName()))
+                throw new PngWarning("Duplicate suggested palette name " + name);
+        }
 
-        if (palettes.contains(palette))
-            throw new PngWarning("Duplicate suggested palette name " + name);
+        palettes.add(new SuggestedPaletteImpl(name, sampleDepth, bytes));
+    }
 
-        palettes.add(palette);
+    private static class SuggestedPaletteImpl
+    implements SuggestedPalette
+    {
+        private String name;
+        private int sampleDepth;
+        private byte[] bytes;
+        private int entrySize;
+        private int sampleCount;
+        
+        public SuggestedPaletteImpl(String name, int sampleDepth, byte[] bytes)
+        {
+            this.name = name;
+            this.sampleDepth = sampleDepth;
+            this.bytes = bytes;
+            entrySize = (sampleDepth == 8) ? 6 : 10;
+            sampleCount = bytes.length / entrySize;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+        
+        public int getSampleCount()
+        {
+            return sampleCount;
+        }
+        
+        public int getSampleDepth()
+        {
+            return sampleDepth;
+        }
+
+        public void getSample(int index, short[] pixel)
+        {
+            int from = index * entrySize;
+            if (sampleDepth == 8) {
+                for (int j = 0; j < 4; j++) {
+                    int a = 0xFF & bytes[from++];
+                    pixel[j] = (short)a;
+                }
+            } else {
+                for (int j = 0; j < 4; j++) {
+                    int a = 0xFF & bytes[from++];
+                    int b = 0xFF & bytes[from++];
+                    pixel[j] = (short)((a << 8) | b);
+                }
+            }
+        }
+        
+        public int getFrequency(int index)
+        {
+            int from = index * (entrySize + 1) - 2;
+            int a = 0xFF & bytes[from++];
+            int b = 0xFF & bytes[from++];
+            return ((a << 8) | b);
+        }
     }
 }
