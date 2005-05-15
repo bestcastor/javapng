@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_iCCP
 extends PngChunk
 {
-    public Chunk_iCCP()
-    {
-        super(iCCP);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

@@ -26,11 +26,6 @@ import java.util.*;
 class Chunk_sPLT
 extends PngChunk
 {
-    public Chunk_sPLT()
-    {
-        super(sPLT);
-    }
-
     public boolean isMultipleOK()
     {
         return true;

@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_sRGB
 extends PngChunk
 {
-    public Chunk_sRGB()
-    {
-        super(sRGB);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

@@ -26,11 +26,6 @@ import java.util.*;
 class Chunk_IDAT
 extends PngChunk
 {
-    public Chunk_IDAT()
-    {
-        super(IDAT);
-    }
-
     public boolean isMultipleOK()
     {
         return true;

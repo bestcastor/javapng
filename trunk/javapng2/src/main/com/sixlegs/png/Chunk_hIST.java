@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_hIST
 extends PngChunk
 {
-    public Chunk_hIST()
-    {
-        super(hIST);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_PLTE
 extends PngChunk
 {
-    public Chunk_PLTE()
-    {
-        super(PLTE);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

@@ -51,17 +51,7 @@ abstract public class PngChunk
     public static final int gIFg = 0x67494667;
     public static final int gIFx = 0x67494678;
 
-    private int type;
-    
-    public PngChunk(int type)
-    {
-        this.type = type;
-    }
-
-    public int getType()
-    {
-        return type;
-    }
+    abstract public void read(PngInputStream in, PngImage png) throws IOException;
 
     public boolean isMultipleOK()
     {
@@ -88,11 +78,6 @@ abstract public class PngChunk
         return ((type & 0x00000020) != 0);
     }
 
-    public String toString()
-    {
-        return typeToString(type);
-    }
-
     public static String typeToString(int x)
     {
         return ("" + 
@@ -114,9 +99,6 @@ abstract public class PngChunk
     throws PngError
     {
         if (length != correct)
-            throw new PngError("Bad " + typeToString(type) +
-                               " chunk length: " + length + " (expected " + correct + ")");
+            throw new PngError("Bad chunk length: " + length + " (expected " + correct + ")");
     }
-
-    abstract public void read(PngInputStream in, PngImage png) throws IOException;
 }

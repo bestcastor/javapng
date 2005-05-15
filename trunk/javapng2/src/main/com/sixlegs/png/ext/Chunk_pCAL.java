@@ -27,11 +27,6 @@ import java.util.Map;
 class Chunk_pCAL
 extends PngChunk
 {
-    public Chunk_pCAL()
-    {
-        super(pCAL);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

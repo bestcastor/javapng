@@ -25,11 +25,6 @@ import java.io.IOException;
 class Chunk_iTXt
 extends AbstractTextChunk
 {
-    public Chunk_iTXt()
-    {
-        super(iTXt);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

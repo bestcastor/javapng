@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_pHYs
 extends PngChunk
 {
-    public Chunk_pHYs()
-    {
-        super(pHYs);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

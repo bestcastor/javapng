@@ -26,11 +26,6 @@ import java.util.Map;
 class Chunk_IEND
 extends PngChunk
 {
-    public Chunk_IEND()
-    {
-        super(IEND);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {

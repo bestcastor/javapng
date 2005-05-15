@@ -32,7 +32,7 @@ extends TestCase
         private static final String ORIGINAL_GIF = "original_gif";
         private static final int msOG = PngChunk.stringToType("msOG");
 
-        private static final PngChunk CHUNK = new PngChunk(msOG){
+        private static final PngChunk CHUNK = new PngChunk(){
             public void read(PngInputStream in, PngImage png) throws IOException {
                 byte[] bytes = new byte[in.getRemaining()];
                 in.readFully(bytes);

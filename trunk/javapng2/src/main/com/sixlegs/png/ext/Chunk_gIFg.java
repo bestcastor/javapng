@@ -27,11 +27,6 @@ import java.util.*;
 class Chunk_gIFg
 extends PngChunk
 {
-    public Chunk_gIFg()
-    {
-        super(gIFg);
-    }
-
     public void read(PngInputStream in, PngImage png)
     throws IOException
     {
