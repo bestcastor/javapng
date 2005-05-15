@@ -30,13 +30,13 @@ extends PngChunk
     throws IOException
     {
         Map props = png.getProperties();
-        int count = ((byte[])props.get(PngImage.PALETTE_RED)).length;
+        int count = ((byte[])props.get(PngConstants.PALETTE_RED)).length;
 
         checkLength(in.getRemaining(), count * 2);
         int[] array = new int[count];
         for (int i = 0; i < count; i++)
             array[i] = in.readUnsignedShort();
 
-        props.put(PngImage.HISTOGRAM, array);
+        props.put(PngConstants.HISTOGRAM, array);
     }
 }

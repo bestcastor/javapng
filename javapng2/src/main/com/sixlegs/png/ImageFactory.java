@@ -49,7 +49,7 @@ class ImageFactory
         int interlace = png.getInterlace();
         int samples   = png.getSamples();
 
-        boolean interlaced = interlace == PngImage.INTERLACE_ADAM7;
+        boolean interlaced = interlace == PngConstants.INTERLACE_ADAM7;
         short[] gammaTable = config.getGammaCorrect() ? png.getGammaTable() : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
         WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
@@ -57,15 +57,15 @@ class ImageFactory
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
             int[] trans = null;
-            if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
+            if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
                 trans = new int[]{
-                    png.getInt(PngImage.TRANSPARENCY_GRAY),
+                    png.getInt(PngConstants.TRANSPARENCY_GRAY),
                 };
-            } else if (props.containsKey(PngImage.TRANSPARENCY_RED)) {
+            } else if (props.containsKey(PngConstants.TRANSPARENCY_RED)) {
                 trans = new int[]{
-                    png.getInt(PngImage.TRANSPARENCY_RED),
-                    png.getInt(PngImage.TRANSPARENCY_GREEN),
-                    png.getInt(PngImage.TRANSPARENCY_BLUE),
+                    png.getInt(PngConstants.TRANSPARENCY_RED),
+                    png.getInt(PngConstants.TRANSPARENCY_GREEN),
+                    png.getInt(PngConstants.TRANSPARENCY_BLUE),
                 };
             }
             int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
@@ -85,13 +85,13 @@ class ImageFactory
             pp = new ProgressivePixelProcessor((BasePixelProcessor)pp, width, height);
 
         InputStream in;
-        in = new MultiByteArrayInputStream((List)props.get(PngImage.DATA));
+        in = new MultiByteArrayInputStream((List)props.get(PngConstants.DATA));
         in = new InflaterInputStream(in, new Inflater(), 0x1000);
         BufferedImage image = new BufferedImage(colorModel, raster, false, null);
         // TODO: if not progressive, initialize to fully transparent?
 
         if (!config.getKeepRawData())
-            props.remove(PngImage.DATA);
+            props.remove(PngConstants.DATA);
 
         Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
@@ -123,18 +123,18 @@ class ImageFactory
         int bitDepth = png.getBitDepth();
         int outputDepth = (bitDepth == 16 && png.getConfig().getReduce16()) ? 8 : bitDepth;
 
-        if (colorType == PngImage.COLOR_TYPE_PALETTE ||
-            (colorType == PngImage.COLOR_TYPE_GRAY && bitDepth < 16)) {
-            byte[] r = applyGamma((byte[])props.get(PngImage.PALETTE_RED), gammaTable);
-            byte[] g = applyGamma((byte[])props.get(PngImage.PALETTE_GREEN), gammaTable);
-            byte[] b = applyGamma((byte[])props.get(PngImage.PALETTE_BLUE), gammaTable);
-            byte[] a = (byte[])props.get(PngImage.PALETTE_ALPHA);
+        if (colorType == PngConstants.COLOR_TYPE_PALETTE ||
+            (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
+            byte[] r = applyGamma((byte[])props.get(PngConstants.PALETTE_RED), gammaTable);
+            byte[] g = applyGamma((byte[])props.get(PngConstants.PALETTE_GREEN), gammaTable);
+            byte[] b = applyGamma((byte[])props.get(PngConstants.PALETTE_BLUE), gammaTable);
+            byte[] a = (byte[])props.get(PngConstants.PALETTE_ALPHA);
             if (a != null) {
                 return new IndexColorModel(outputDepth, r.length, r, g, b, a);
             } else {
                 int trans = -1;
-                if (props.containsKey(PngImage.TRANSPARENCY_GRAY)) {
-                    trans = png.getInt(PngImage.TRANSPARENCY_GRAY);
+                if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
+                    trans = png.getInt(PngConstants.TRANSPARENCY_GRAY);
                     trans = trans * 255 / ((1 << bitDepth) - 1);
                 }
                 return new IndexColorModel(outputDepth, r.length, r, g, b, trans);
@@ -143,15 +143,15 @@ class ImageFactory
             int dataType = (outputDepth == 16) ?
                 DataBuffer.TYPE_USHORT : DataBuffer.TYPE_BYTE;
             int colorSpace =
-                (colorType == PngImage.COLOR_TYPE_GRAY ||
-                 colorType == PngImage.COLOR_TYPE_GRAY_ALPHA) ?
+                (colorType == PngConstants.COLOR_TYPE_GRAY ||
+                 colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA) ?
                 ColorSpace.CS_GRAY :
                 ColorSpace.CS_sRGB;
             boolean hasAlpha =
-                colorType == PngImage.COLOR_TYPE_RGB_ALPHA ||
-                colorType == PngImage.COLOR_TYPE_GRAY_ALPHA ||
-                props.containsKey(PngImage.TRANSPARENCY_GRAY) ||
-                props.containsKey(PngImage.TRANSPARENCY_RED);
+                colorType == PngConstants.COLOR_TYPE_RGB_ALPHA ||
+                colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA ||
+                props.containsKey(PngConstants.TRANSPARENCY_GRAY) ||
+                props.containsKey(PngConstants.TRANSPARENCY_RED);
             // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            null,

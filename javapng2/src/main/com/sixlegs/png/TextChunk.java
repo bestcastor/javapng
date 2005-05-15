@@ -23,53 +23,28 @@ package com.sixlegs.png;
 /**
  * Common interface to all PNG text chunk data (tEXt, zTXt, iTXt).
  */
-public class TextChunk
+public interface TextChunk
 {
-    private String keyword;
-    private String text;
-    private String language;
-    private String translated;
-    
-    public TextChunk(String keyword, String text, String language, String translated)
-    {
-        this.keyword = keyword;
-        this.text = text;
-        this.language = language;
-        this.translated = translated;
-    }
-    
     /** 
      * Returns the Latin-1 [ISO-8859-1] encoded keyword
      * of this TextChunk.
      */
-    public String getKeyword()
-    {
-        return keyword;
-    }
+    String getKeyword();
 
     /** 
      * Returns a translation of the keyword into the language
      * used by this TextChunk, or null if unspecified.
      */
-    public String getTranslatedKeyword()
-    {
-        return translated;
-    }
+    String getTranslatedKeyword();
 
     /** 
      * Returns the language [RFC-1766] used by the translated 
      * keyword and the text, or null if unspecified.
      */
-    public String getLanguage()
-    {
-        return language;
-    }
+    String getLanguage();
 
     /**
      * Returns the text of this TextChunk.
      */
-    public String getText()
-    {
-        return text;
-    }
+    String getText();
 }

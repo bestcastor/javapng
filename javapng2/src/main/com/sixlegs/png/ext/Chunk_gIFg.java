@@ -36,8 +36,8 @@ extends PngChunk
         int delayTime = in.readUnsignedShort();
 
         Map props = png.getProperties();
-        props.put(ExtendedPngConfig.GIF_DISPOSAL_METHOD, new Integer(disposalMethod));
-        props.put(ExtendedPngConfig.GIF_USER_INPUT_FLAG, new Integer(userInputFlag));
-        props.put(ExtendedPngConfig.GIF_DELAY_TIME, new Integer(delayTime));
+        props.put(ExtendedPngConstants.GIF_DISPOSAL_METHOD, new Integer(disposalMethod));
+        props.put(ExtendedPngConstants.GIF_USER_INPUT_FLAG, new Integer(userInputFlag));
+        props.put(ExtendedPngConstants.GIF_DELAY_TIME, new Integer(delayTime));
     }
 }

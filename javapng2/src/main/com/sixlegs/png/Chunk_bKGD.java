@@ -34,23 +34,23 @@ extends PngChunk
         Map props = png.getProperties();
         
         switch (png.getColorType()) {
-        case PngImage.COLOR_TYPE_PALETTE:
+        case PngConstants.COLOR_TYPE_PALETTE:
             checkLength(length, 1);
-            props.put(PngImage.BACKGROUND_INDEX, Integers.valueOf(in.readUnsignedByte()));
+            props.put(PngConstants.BACKGROUND_INDEX, Integers.valueOf(in.readUnsignedByte()));
             break;
             
-        case PngImage.COLOR_TYPE_GRAY:
-        case PngImage.COLOR_TYPE_GRAY_ALPHA:
+        case PngConstants.COLOR_TYPE_GRAY:
+        case PngConstants.COLOR_TYPE_GRAY_ALPHA:
             checkLength(length, 2);
-            props.put(PngImage.BACKGROUND_GRAY, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.BACKGROUND_GRAY, Integers.valueOf(in.readUnsignedShort()));
             break;
             
         default:
             // truecolor
             checkLength(length, 6);
-            props.put(PngImage.BACKGROUND_RED,   Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngImage.BACKGROUND_GREEN, Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngImage.BACKGROUND_BLUE,  Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.BACKGROUND_RED,   Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.BACKGROUND_GREEN, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.BACKGROUND_BLUE,  Integers.valueOf(in.readUnsignedShort()));
         }
     }
 }

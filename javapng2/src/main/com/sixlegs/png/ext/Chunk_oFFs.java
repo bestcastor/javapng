@@ -34,13 +34,13 @@ extends PngChunk
         int x = in.readInt();
         int y = in.readInt();
         int unit = in.readByte();
-        if (unit != ExtendedPngConfig.POSITION_UNIT_PIXEL &&
-            unit != ExtendedPngConfig.POSITION_UNIT_MICROMETER)
+        if (unit != ExtendedPngConstants.POSITION_UNIT_PIXEL &&
+            unit != ExtendedPngConstants.POSITION_UNIT_MICROMETER)
             throw new PngWarning("Illegal oFFs chunk unit specifier: " + unit);
 
         Map props = png.getProperties();
-        props.put(ExtendedPngConfig.POSITION_X, new Integer(x));
-        props.put(ExtendedPngConfig.POSITION_Y, new Integer(y));
-        props.put(ExtendedPngConfig.POSITION_UNIT, new Integer(unit));
+        props.put(ExtendedPngConstants.POSITION_X, new Integer(x));
+        props.put(ExtendedPngConstants.POSITION_Y, new Integer(y));
+        props.put(ExtendedPngConstants.POSITION_UNIT, new Integer(unit));
     }
 }

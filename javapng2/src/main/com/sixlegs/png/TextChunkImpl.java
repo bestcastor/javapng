@@ -18,11 +18,44 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png.ext;
+package com.sixlegs.png;
 
-public interface GifApplicationExtension
+/**
+ * Common interface to all PNG text chunk data (tEXt, zTXt, iTXt).
+ */
+class TextChunkImpl
+implements TextChunk
 {
-    String getId();
-    byte[] getAuthenticationCode();
-    byte[] getApplicationData();
+    private String keyword;
+    private String text;
+    private String language;
+    private String translated;
+    
+    public TextChunkImpl(String keyword, String text, String language, String translated)
+    {
+        this.keyword = keyword;
+        this.text = text;
+        this.language = language;
+        this.translated = translated;
+    }
+    
+    public String getKeyword()
+    {
+        return keyword;
+    }
+
+    public String getTranslatedKeyword()
+    {
+        return translated;
+    }
+
+    public String getLanguage()
+    {
+        return language;
+    }
+
+    public String getText()
+    {
+        return text;
+    }
 }

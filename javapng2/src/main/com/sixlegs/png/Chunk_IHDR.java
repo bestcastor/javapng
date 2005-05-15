@@ -51,17 +51,17 @@ extends PngChunk
         byte[] sbits = null;
         int colorType = in.readUnsignedByte();
         switch (colorType) {
-        case PngImage.COLOR_TYPE_RGB:
-        case PngImage.COLOR_TYPE_GRAY: 
+        case PngConstants.COLOR_TYPE_RGB:
+        case PngConstants.COLOR_TYPE_GRAY: 
             sbits = new byte[]{ bitDepth, bitDepth, bitDepth };
             break;
-        case PngImage.COLOR_TYPE_PALETTE: 
+        case PngConstants.COLOR_TYPE_PALETTE: 
             if (bitDepth == 16)
                 throw new PngError("Bad bit depth for color type " + colorType + ": " + bitDepth);
             sbits = new byte[]{ 8, 8, 8 };
             break;
-        case PngImage.COLOR_TYPE_GRAY_ALPHA: 
-        case PngImage.COLOR_TYPE_RGB_ALPHA: 
+        case PngConstants.COLOR_TYPE_GRAY_ALPHA: 
+        case PngConstants.COLOR_TYPE_RGB_ALPHA: 
             if (bitDepth <= 4)
                 throw new PngError("Bad bit depth for color type " + colorType + ": " + bitDepth);
             sbits = new byte[]{ bitDepth, bitDepth, bitDepth, bitDepth };
@@ -71,41 +71,41 @@ extends PngChunk
         }
 
         int compression = in.readUnsignedByte();
-        if (compression != PngImage.COMPRESSION_BASE) 
+        if (compression != PngConstants.COMPRESSION_BASE) 
             throw new PngError("Unrecognized compression method: " + compression);
 
         int filter = in.readUnsignedByte();
-        if (filter != PngImage.FILTER_BASE)
+        if (filter != PngConstants.FILTER_BASE)
             throw new PngError("Unrecognized filter method: " + filter);
 
         int interlace = in.readUnsignedByte();
         switch (interlace) {
-        case PngImage.INTERLACE_NONE:
-        case PngImage.INTERLACE_ADAM7:
+        case PngConstants.INTERLACE_NONE:
+        case PngConstants.INTERLACE_ADAM7:
             break;
         default:
             throw new PngError("Unrecognized interlace method: " + interlace);
         }
 
         Map props = png.getProperties();
-        props.put(PngImage.WIDTH, Integers.valueOf(width));
-        props.put(PngImage.HEIGHT, Integers.valueOf(height));
-        props.put(PngImage.BIT_DEPTH, Integers.valueOf(bitDepth));
-        props.put(PngImage.INTERLACE, Integers.valueOf(interlace));
-        props.put(PngImage.COMPRESSION, Integers.valueOf(compression));
-        props.put(PngImage.FILTER, Integers.valueOf(filter));
-        props.put(PngImage.COLOR_TYPE, Integers.valueOf(colorType));
-        props.put(PngImage.SIGNIFICANT_BITS, sbits);
+        props.put(PngConstants.WIDTH, Integers.valueOf(width));
+        props.put(PngConstants.HEIGHT, Integers.valueOf(height));
+        props.put(PngConstants.BIT_DEPTH, Integers.valueOf(bitDepth));
+        props.put(PngConstants.INTERLACE, Integers.valueOf(interlace));
+        props.put(PngConstants.COMPRESSION, Integers.valueOf(compression));
+        props.put(PngConstants.FILTER, Integers.valueOf(filter));
+        props.put(PngConstants.COLOR_TYPE, Integers.valueOf(colorType));
+        props.put(PngConstants.SIGNIFICANT_BITS, sbits);
 
-        if (colorType == PngImage.COLOR_TYPE_GRAY && bitDepth < 16) {
+        if (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16) {
             int size = 1 << bitDepth;
             byte[] palette = new byte[size];
             for (int i = 0; i < size; i++) {
                 palette[i] = (byte)(i * 255 / (size - 1));
             }
-            props.put(PngImage.PALETTE_RED, palette);
-            props.put(PngImage.PALETTE_GREEN, palette);
-            props.put(PngImage.PALETTE_BLUE, palette);
+            props.put(PngConstants.PALETTE_RED, palette);
+            props.put(PngConstants.PALETTE_GREEN, palette);
+            props.put(PngConstants.PALETTE_BLUE, palette);
         }
     }
 }

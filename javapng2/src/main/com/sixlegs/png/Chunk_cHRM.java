@@ -34,15 +34,15 @@ extends PngChunk
         for (int i = 0; i < 8; i++)
             array[i] = in.readInt() / 100000f;
         Map props = png.getProperties();
-        if (!props.containsKey(PngImage.RENDERING_INTENT)) {
-            props.put(PngImage.WHITE_POINT_X, new Float(array[0]));
-            props.put(PngImage.WHITE_POINT_Y, new Float(array[1]));
-            props.put(PngImage.RED_X, new Float(array[2]));
-            props.put(PngImage.RED_Y, new Float(array[3]));
-            props.put(PngImage.GREEN_X, new Float(array[4]));
-            props.put(PngImage.GREEN_Y, new Float(array[5]));
-            props.put(PngImage.BLUE_X, new Float(array[6]));
-            props.put(PngImage.BLUE_Y, new Float(array[7]));
+        if (!props.containsKey(PngConstants.RENDERING_INTENT)) {
+            props.put(PngConstants.WHITE_POINT_X, new Float(array[0]));
+            props.put(PngConstants.WHITE_POINT_Y, new Float(array[1]));
+            props.put(PngConstants.RED_X, new Float(array[2]));
+            props.put(PngConstants.RED_Y, new Float(array[3]));
+            props.put(PngConstants.GREEN_X, new Float(array[4]));
+            props.put(PngConstants.GREEN_Y, new Float(array[5]));
+            props.put(PngConstants.BLUE_X, new Float(array[6]));
+            props.put(PngConstants.BLUE_Y, new Float(array[7]));
         }
     }
 }

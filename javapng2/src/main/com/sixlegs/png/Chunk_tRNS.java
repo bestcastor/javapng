@@ -35,20 +35,20 @@ extends PngChunk
         Map props = png.getProperties();
 
         switch (png.getColorType()) {
-        case PngImage.COLOR_TYPE_GRAY:
+        case PngConstants.COLOR_TYPE_GRAY:
             checkLength(length, 2);
-            props.put(PngImage.TRANSPARENCY_GRAY, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_GRAY, Integers.valueOf(in.readUnsignedShort()));
             break;
 
-        case PngImage.COLOR_TYPE_RGB:
+        case PngConstants.COLOR_TYPE_RGB:
             checkLength(length, 6);
-            props.put(PngImage.TRANSPARENCY_RED,   Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngImage.TRANSPARENCY_GREEN, Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngImage.TRANSPARENCY_BLUE,  Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_RED,   Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_GREEN, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_BLUE,  Integers.valueOf(in.readUnsignedShort()));
             break;
 
-        case PngImage.COLOR_TYPE_PALETTE:
-            byte[] r = (byte[])png.getProperty(PngImage.PALETTE_RED);
+        case PngConstants.COLOR_TYPE_PALETTE:
+            byte[] r = (byte[])png.getProperty(PngConstants.PALETTE_RED);
             if (length > r.length)
                 throw new PngError("Too many transparency palette entries (" + length + " > " + r.length + ")");
 
@@ -57,7 +57,7 @@ extends PngChunk
             for (int i = 0; i < length; i++)
                 alpha[i] = in.readByte();
 
-            props.put(PngImage.PALETTE_ALPHA, alpha);
+            props.put(PngConstants.PALETTE_ALPHA, alpha);
             break;
 
         default:

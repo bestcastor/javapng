@@ -33,12 +33,12 @@ extends PngChunk
         int pixelsPerUnitX = in.readInt();
         int pixelsPerUnitY = in.readInt();
         int unit = in.readUnsignedByte();
-        if (unit != PngImage.UNIT_UNKNOWN && unit != PngImage.UNIT_METER)
+        if (unit != PngConstants.UNIT_UNKNOWN && unit != PngConstants.UNIT_METER)
             throw new PngWarning("Illegal pHYs chunk unit specifier: " + unit);
 
         Map props = png.getProperties();
-        props.put(PngImage.PIXELS_PER_UNIT_X, Integers.valueOf(pixelsPerUnitX));
-        props.put(PngImage.PIXELS_PER_UNIT_Y, Integers.valueOf(pixelsPerUnitY));
-        props.put(PngImage.UNIT, Integers.valueOf(unit));
+        props.put(PngConstants.PIXELS_PER_UNIT_X, Integers.valueOf(pixelsPerUnitX));
+        props.put(PngConstants.PIXELS_PER_UNIT_Y, Integers.valueOf(pixelsPerUnitY));
+        props.put(PngConstants.UNIT, Integers.valueOf(unit));
     }    
 }
