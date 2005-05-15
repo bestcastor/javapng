@@ -34,13 +34,19 @@ public class Benchmark
         abstract public void read(File file) throws IOException;
     }
 
-    private static PngReader SIXLEGS = new PngReader(){
+    private static PngReader SIXLEGS2 = new PngReader(){
         private PngConfig config = new BasicPngConfig();
         public void read(File file) throws IOException {
             new PngImage(config).read(file);
         }
     };
 
+    private static PngReader SIXLEGS1 = new PngReader(){
+        public void read(File file) throws IOException {
+            new com.sixlegs.image.png.PngImage(file.toURL()).getEverything();
+        }
+    };
+    
     private static PngReader IMAGEIO = new PngReader(){
         public void read(File file) throws IOException {
             ImageIO.read(file);
@@ -48,12 +54,12 @@ public class Benchmark
     };
 
     private static PngReader TOOLKIT = new PngReader(){
-        private Toolkit toolkit = Toolkit.getDefaultToolkit();
         private MediaTracker tracker = new MediaTracker(new Component(){});
+        private Toolkit toolkit = Toolkit.getDefaultToolkit();
         public void read(File file) throws IOException {
             try {
                 tracker.addImage(toolkit.createImage(file.toURL()), 0);
-                tracker.waitForAll();
+                tracker.waitForID(0);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -70,9 +76,10 @@ public class Benchmark
         while ((line = r.readLine()) != null)
             list.add(new File(line));
         File[] files = (File[])list.toArray(new File[list.size()]);
-        benchmark(files, loop, SIXLEGS, "Sixlegs");
-        benchmark(files, loop, IMAGEIO, "ImageIO");
-        benchmark(files, loop, TOOLKIT, "Toolkit");
+        benchmark(files, loop, TOOLKIT, " Toolkit");
+        benchmark(files, loop, IMAGEIO, " ImageIO");
+        benchmark(files, loop, SIXLEGS1, "Sixlegs1");
+        benchmark(files, loop, SIXLEGS2, "Sixlegs2");
     }
 
     private static void benchmark(File[] files, int loop, PngReader reader, String desc)
@@ -87,7 +94,8 @@ public class Benchmark
                 }
             }
             t = System.currentTimeMillis() - t;
-            System.err.println(desc + ": read " + (files.length * loop) + " images in " + t + " ms");
+            if (desc != null)
+                System.err.println(desc + ": read " + (files.length * loop) + " images in " + t + " ms");
         } catch (IOException e) {
             System.err.println("Error reading " + cur);
             throw e;
