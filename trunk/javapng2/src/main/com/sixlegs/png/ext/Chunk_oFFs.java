@@ -27,7 +27,7 @@ import java.util.Map;
 class Chunk_oFFs
 extends PngChunk
 {
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         checkLength(in.getRemaining(), 9);

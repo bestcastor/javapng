@@ -55,7 +55,7 @@ extends TestCase
         private static final int msOG = PngChunk.stringToType("msOG");
 
         private static final PngChunk CHUNK = new PngChunk(){
-            public void read(PngInputStream in, PngImage png) throws IOException {
+            public void read(int type, PngInputStream in, PngImage png) throws IOException {
                 byte[] bytes = new byte[in.getRemaining()];
                 in.readFully(bytes);
                 png.getProperties().put(ORIGINAL_GIF, bytes);

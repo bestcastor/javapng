@@ -172,14 +172,12 @@ implements PngConfig
     private static final PngChunk bKGD = new Chunk_bKGD();
     private static final PngChunk cHRM = new Chunk_cHRM();
     private static final PngChunk gAMA = new Chunk_gAMA();
-    private static final PngChunk iTXt = new Chunk_iTXt();
     private static final PngChunk pHYs = new Chunk_pHYs();
     private static final PngChunk sBIT = new Chunk_sBIT();
     private static final PngChunk sRGB = new Chunk_sRGB();
-    private static final PngChunk tEXt = new Chunk_tEXt();
     private static final PngChunk tIME = new Chunk_tIME();
     private static final PngChunk tRNS = new Chunk_tRNS();
-    private static final PngChunk zTXt = new Chunk_zTXt();
+    private static final PngChunk text = new TextChunkReader();
 
     public PngChunk getChunk(int type)
     {
@@ -191,14 +189,15 @@ implements PngConfig
         case PngChunk.bKGD: return bKGD;
         case PngChunk.cHRM: return cHRM;
         case PngChunk.gAMA: return gAMA;
-        case PngChunk.iTXt: return iTXt;
         case PngChunk.pHYs: return pHYs;
         case PngChunk.sBIT: return sBIT;
         case PngChunk.sRGB: return sRGB;
-        case PngChunk.tEXt: return tEXt;
         case PngChunk.tIME: return tIME;
         case PngChunk.tRNS: return tRNS;
-        case PngChunk.zTXt: return zTXt;
+        case PngChunk.iTXt:
+        case PngChunk.tEXt:
+        case PngChunk.zTXt:
+            return text;
         }
         return null;
     }

@@ -80,12 +80,12 @@ abstract public class PngChunk
     /**
      * TODO
      */
-    abstract public void read(PngInputStream in, PngImage png) throws IOException;
+    abstract public void read(int type, PngInputStream in, PngImage png) throws IOException;
 
     /**
      * TODO
      */
-    public boolean isMultipleOK()
+    public boolean isMultipleOK(int type)
     {
         return false;
     }

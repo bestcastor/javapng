@@ -18,7 +18,7 @@ extends BasicPngConfig
     private class HookChunk
     extends PngChunk
     {
-        public void read(PngInputStream in, PngImage png)
+        public void read(int type, PngInputStream in, PngImage png)
         throws IOException
         {
             process(png);

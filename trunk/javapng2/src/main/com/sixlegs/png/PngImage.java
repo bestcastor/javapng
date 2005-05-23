@@ -119,7 +119,7 @@ public class PngImage
                     data.setLength(length);
                     try {
                         Integer key = Integers.valueOf(type);
-                        if (!chunk.isMultipleOK()) {
+                        if (!chunk.isMultipleOK(type)) {
                             if (seen.contains(key)) {
                                 String msg = "Multiple " + name + " chunks are not allowed";
                                 if (PngChunk.isAncillary(type))
@@ -129,7 +129,7 @@ public class PngImage
                                 seen.add(key);
                             }
                         }
-                        chunk.read(data, this);
+                        chunk.read(type, data, this);
                         if (data.getRemaining() != 0)
                             throw new PngError(chunk + " read " + count.getCount() + " bytes, expected " + length);
                     } catch (PngWarning warning) {
