@@ -26,7 +26,7 @@ import java.util.Map;
 class Chunk_iCCP
 extends PngChunk
 {
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         String name = in.readKeyword();

@@ -26,7 +26,7 @@ import java.util.Map;
 class Chunk_sBIT
 extends PngChunk
 {
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         boolean paletted = png.getColorType() == PngConstants.COLOR_TYPE_PALETTE;

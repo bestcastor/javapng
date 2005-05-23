@@ -26,12 +26,12 @@ import java.util.*;
 class Chunk_IDAT
 extends PngChunk
 {
-    public boolean isMultipleOK()
+    public boolean isMultipleOK(int type)
     {
         return true;
     }
 
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         byte[] array = new byte[in.getRemaining()];

@@ -28,7 +28,7 @@ import java.util.Map;
 class Chunk_tRNS
 extends PngChunk
 {
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         int length = in.getRemaining();

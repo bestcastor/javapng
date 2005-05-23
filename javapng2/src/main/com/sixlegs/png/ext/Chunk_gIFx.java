@@ -27,7 +27,7 @@ import java.util.*;
 class Chunk_gIFx
 extends PngChunk
 {
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         byte[] id = new byte[8];

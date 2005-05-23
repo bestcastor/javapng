@@ -28,7 +28,7 @@ extends PngChunk
 {
     private static TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+0");
     
-    public void read(PngInputStream in, PngImage png)
+    public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
         checkLength(in.getRemaining(), 7);
