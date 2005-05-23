@@ -23,6 +23,9 @@ package com.sixlegs.png;
 import java.io.*;
 import java.util.Map;
 
+/**
+ * TODO
+ */
 abstract public class PngChunk
 {
     /** Image header */
@@ -74,33 +77,70 @@ abstract public class PngChunk
     /** GIF Application Extension */
     public static final int gIFx = 0x67494678;
 
+    /**
+     * TODO
+     */
     abstract public void read(PngInputStream in, PngImage png) throws IOException;
 
+    /**
+     * TODO
+     */
     public boolean isMultipleOK()
     {
         return false;
     }
 
+    /**
+     * Returns <code>true</code> if the given type has the ancillary bit set
+     * (the first letter is lowercase).
+     * An ancillary chunk is once which is not strictly necessary
+     * in order to meaningfully display the contents of the file.
+     * @param type the chunk type
+     */
     public static boolean isAncillary(int type)
     {
         return ((type & 0x20000000) != 0);
     }
 
+    /**
+     * Returns <code>true</code> if the given type has the private bit set
+     * (the second letter is lowercase).
+     * All unregistered chunk types should have this bit set.
+     * @param type the chunk type
+     */
     public static boolean isPrivate(int type)
     {
         return ((type & 0x00200000) != 0);
     }
 
-    public static boolean isReservedSet(int type)
+    /**
+     * Returns <code>true</code> if the given type has the reserved bit set
+     * (the third letter is lowercase).
+     * The meaning of this bit is currently undefined, but reserved for future use.
+     * Images conforming to the current version of the PNG specification must
+     * not have this bit set.
+     * @param type the chunk type
+     */
+    public static boolean isReserved(int type)
     {
         return ((type & 0x00002000) != 0);
     }
 
+    /**
+     * Returns <code>true</code> if the given type has the safe-to-copy bit set
+     * (the fourth letter is lowercase).
+     * Chunks marked as safe-to-copy may be copied to a modified PNG file
+     * whether or not the software recognizes the chunk type.
+     * @param type the chunk type
+     */
     public static boolean isSafeToCopy(int type)
     {
         return ((type & 0x00000020) != 0);
     }
 
+    /**
+     * TODO
+     */
     public static String typeToString(int x)
     {
         return ("" + 
@@ -110,6 +150,9 @@ abstract public class PngChunk
                 (char)((x       ) & 0xFF));
     }
 
+    /**
+     * TODO
+     */
     public static int stringToType(String id)
     {
         return ((((int)id.charAt(0) & 0xFF) << 24) | 

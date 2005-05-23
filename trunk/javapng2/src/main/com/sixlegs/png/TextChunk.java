@@ -21,12 +21,14 @@ Boston, MA  02111-1307, USA.
 package com.sixlegs.png;
 
 /**
- * Common interface to all PNG text chunk data (tEXt, zTXt, iTXt).
+ * Common interface to all PNG text chunk data ({@link PngChunk#tEXt tEXt},
+ * {@link PngChunk#zTXt zTXt}, {@link PngChunk#iTXt iTXt}).
+ * @see PngImage#getTextChunk
  */
 public interface TextChunk
 {
     /** 
-     * Returns the Latin-1 [ISO-8859-1] encoded keyword
+     * Returns the Latin-1 (ISO-8859-1) encoded keyword
      * of this TextChunk.
      */
     String getKeyword();
@@ -38,7 +40,7 @@ public interface TextChunk
     String getTranslatedKeyword();
 
     /** 
-     * Returns the language [RFC-1766] used by the translated 
+     * Returns the language (RFC-1766) used by the translated 
      * keyword and the text, or null if unspecified.
      */
     String getLanguage();

@@ -22,6 +22,9 @@ package com.sixlegs.png;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * TODO
+ */
 public class CompletePngConfig
 extends BasicPngConfig
 {

@@ -20,6 +20,13 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+/**
+ * This interface defines the keys used in the property map
+ * of a decoded {@link PngImage}. Where applicable, the enumerated values
+ * of properties are also defined here.
+ * @see PngImage#getProperty
+ * @see PngImage#getProperties
+ */
 public interface PngConstants
 {
     /** {@link PngChunk#bKGD bKGD}: Background blue sample */

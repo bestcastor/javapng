@@ -25,6 +25,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
+    /**
+     * TODO
+     */
 public class PngImage
 {
     private PngConfig config;
@@ -33,27 +36,42 @@ public class PngImage
 
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
+    /**
+     * TODO
+     */
     public PngImage()
     {
         this(new BasicPngConfig());
     }
 
+    /**
+     * TODO
+     */
     public PngImage(PngConfig config)
     {
         this.config = config;
     }
 
+    /**
+     * TODO
+     */
     public PngConfig getConfig()
     {
         return config;
     }
     
+    /**
+     * TODO
+     */
     public BufferedImage read(File file)
     throws IOException
     {
         return read(new BufferedInputStream(new FileInputStream(file)), true);
     }
 
+    /**
+     * TODO
+     */
     public BufferedImage read(InputStream in, boolean close)
     throws IOException
     {
@@ -135,6 +153,9 @@ public class PngImage
         }
     }
 
+    /**
+     * TODO
+     */
     public void handleFrame(BufferedImage image, int framesLeft)
     {
     }
@@ -179,11 +200,11 @@ public class PngImage
             case PngChunk.iCCP:
             case PngChunk.sBIT:
             case PngChunk.sRGB:
-                throw new PngException(name + " cannot appear after PLTE");
+                throw new PngError(name + " cannot appear after PLTE");
             case PngChunk.IDAT:
                 return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
             case PngChunk.IEND:
-                throw new PngException("Required data chunk(s) not found");
+                throw new PngError("Required data chunk(s) not found");
             default:
                 return STATE_SAW_PLTE;
             }
@@ -203,7 +224,7 @@ public class PngImage
             case PngChunk.oFFs:
             case PngChunk.pCAL:
             case PngChunk.sCAL:
-                throw new PngException(name + " cannot appear after IDAT");
+                throw new PngError(name + " cannot appear after IDAT");
             }
             switch (state) {
             case STATE_IN_IDAT:
@@ -220,7 +241,7 @@ public class PngImage
                 case PngChunk.IEND:
                     return STATE_END;
                 case PngChunk.IDAT:
-                    throw new PngException("IDAT chunks must be consecutive");
+                    throw new PngError("IDAT chunks must be consecutive");
                 default:
                     return STATE_AFTER_IDAT;
                 }
@@ -290,6 +311,9 @@ public class PngImage
         return 1;
     }
 
+    /**
+     * TODO
+     */
     public float getGamma()
     {
         assertRead();
@@ -298,6 +322,9 @@ public class PngImage
         return config.getDefaultGamma();
     }
 
+    /**
+     * TODO
+     */
     public short[] getGammaTable()
     {
         assertRead();
@@ -313,6 +340,9 @@ public class PngImage
     }
 
     // TODO: gamma-correct background?
+    /**
+     * TODO
+     */
     public Color getBackground()
     {
         assertRead();
@@ -345,18 +375,27 @@ public class PngImage
         }
     }
 
+    /**
+     * TODO
+     */
     public Object getProperty(String name)
     {
         assertRead();
         return props.get(name);
     }
 
+    /**
+     * TODO
+     */
     public Map getProperties()
     {
         assertRead();
         return props;
     }
 
+    /**
+     * TODO
+     */
     public TextChunk getTextChunk(String key)
     {
         List list = (List)getProperty(PngConstants.TEXT_CHUNKS);
