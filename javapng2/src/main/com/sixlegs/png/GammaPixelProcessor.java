@@ -44,12 +44,13 @@ extends BasePixelProcessor
     public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         src.getPixels(0, 0, width, 1, row);
-        for (int index = 0, total = samples * width; index < total; index += samples) {
-            for (int i = 0; i < samplesNoAlpha; i++)
-                row[index + i] = 0xFFFF & gammaTable[row[index + i] >> shift];
-            if (shiftAlpha)
-                row[index + samplesNoAlpha] = row[index + samplesNoAlpha] >> shift;
-        }
+        int total = samples * width;
+        for (int i = 0; i < samplesNoAlpha; i++)
+            for (int index = i; index < total; index += samples)
+                row[index] = 0xFFFF & gammaTable[row[index] >> shift];
+        if (shiftAlpha)
+            for (int index = samplesNoAlpha; index < total; index += samples)
+                row[index] >>= shift;
         transfer(xOffset, xStep, y, width);
     }
 }

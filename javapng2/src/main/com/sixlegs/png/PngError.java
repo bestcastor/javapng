@@ -20,6 +20,9 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+/**
+ * A fatal decoding exception.
+ */
 public class PngError
 extends PngException
 {

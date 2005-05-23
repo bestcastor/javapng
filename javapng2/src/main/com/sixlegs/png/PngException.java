@@ -22,7 +22,10 @@ package com.sixlegs.png;
 
 import java.io.IOException;
 
-public class PngException
+/**
+ * The superclass for all decoding exceptions.
+ */
+abstract public class PngException
 extends IOException
 {
     public PngException(String message)

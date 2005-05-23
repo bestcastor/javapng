@@ -23,6 +23,9 @@ package com.sixlegs.png;
 import java.io.*;
 import java.util.zip.*;
 
+/**
+ * TODO
+ */
 public class PngInputStream
 extends DataInputStream
 {
@@ -43,17 +46,26 @@ extends DataInputStream
         this.length = length;
     }
 
+    /**
+     * TODO
+     */
     public int getRemaining()
     {
         return length - (int)((CountingInputStream)in).getCount();
     }
 
+    /**
+     * TODO
+     */
     public long readUnsignedInt()
     throws IOException
     {
         return 0xFFFFFFFFL & readInt();
     }
 
+    /**
+     * TODO
+     */
     public byte[] readCompressed(int length)
     throws IOException
     {
@@ -75,12 +87,18 @@ extends DataInputStream
         return out.toByteArray();
     }
 
+    /**
+     * TODO
+     */
     public String readString(String enc)
     throws IOException
     {
         return new String(readToNull(), enc);
     }
 
+    /**
+     * TODO
+     */
     public String readKeyword()
     throws IOException
     {
@@ -109,6 +127,9 @@ extends DataInputStream
         return out.toByteArray();
     }
 
+    /**
+     * TODO
+     */
     public void skipFully(long n)
     throws IOException
     {
@@ -124,6 +145,9 @@ extends DataInputStream
         }
     }
 
+    /**
+     * TODO
+     */
     public double readFloatingPoint()
     throws IOException
     {

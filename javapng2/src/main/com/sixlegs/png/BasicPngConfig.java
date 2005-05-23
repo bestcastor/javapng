@@ -22,6 +22,9 @@ package com.sixlegs.png;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * TODO
+ */
 public class BasicPngConfig
 implements PngConfig
 {
@@ -40,6 +43,9 @@ implements PngConfig
         return keepRawData;
     }
 
+    /**
+     * TODO
+     */
     public void setKeepRawData(boolean keepRawData)
     {
         this.keepRawData = keepRawData;
@@ -50,6 +56,9 @@ implements PngConfig
         return reduce16;
     }
 
+    /**
+     * TODO
+     */
     public void setReduce16(boolean reduce16)
     {
         this.reduce16 = reduce16;
@@ -60,6 +69,9 @@ implements PngConfig
         return defaultGamma;
     }
 
+    /**
+     * TODO
+     */
     public void setDefaultGamma(float defaultGamma)
     {
         this.defaultGamma = defaultGamma;
@@ -70,6 +82,9 @@ implements PngConfig
         return gammaCorrect;
     }
 
+    /**
+     * TODO
+     */
     public void setGammaCorrect(boolean gammaCorrect)
     {
         this.gammaCorrect = gammaCorrect;
@@ -80,6 +95,9 @@ implements PngConfig
         return progressive;
     }
 
+    /**
+     * TODO
+     */
     public void setProgressive(boolean progressive)
     {
         this.progressive = progressive;
@@ -90,6 +108,9 @@ implements PngConfig
         return displayExponent;
     }
 
+    /**
+     * TODO
+     */
     public void setDisplayExponent(float displayExponent)
     {
         this.displayExponent = displayExponent;
@@ -100,6 +121,9 @@ implements PngConfig
         return userExponent;
     }
 
+    /**
+     * TODO
+     */
     public void setUserExponent(float userExponent)
     {
         this.userExponent = userExponent;
@@ -117,16 +141,25 @@ implements PngConfig
         return metadataOnly;
     }
 
+    /**
+     * TODO
+     */
     public void setMetadataOnly(boolean metadataOnly)
     {
         this.metadataOnly = metadataOnly;
     }
 
+    /**
+     * TODO
+     */
     public boolean getWarningsFatal()
     {
         return warningsFatal;
     }
 
+    /**
+     * TODO
+     */
     public void setWarningsFatal(boolean warningsFatal)
     {
         this.warningsFatal = warningsFatal;
