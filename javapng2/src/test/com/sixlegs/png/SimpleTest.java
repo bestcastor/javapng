@@ -1,17 +1,39 @@
 package com.sixlegs.png;
 
+import com.sixlegs.png.examples.AfterReadHook;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Map;
 import junit.framework.*;
 
 public class SimpleTest
 extends TestCase
 {
+    public void testRecolorMonochrome()
+    throws Exception
+    {
+        PngImage png = new PngImage(new AfterReadHook(){
+            public void process(PngImage png) throws IOException {
+                if (png.getBitDepth() == 1 &&
+                    png.getColorType() == PngConstants.COLOR_TYPE_GRAY) {
+                    Map props = png.getProperties();
+                    props.put(PngConstants.COLOR_TYPE,
+                              new Integer(PngConstants.COLOR_TYPE_PALETTE));
+                    props.put(PngConstants.PALETTE_RED, new byte[]{ (byte)255, (byte)255 });
+                    props.put(PngConstants.PALETTE_GREEN, new byte[]{ 0, (byte)255 });
+                    props.put(PngConstants.PALETTE_BLUE, new byte[]{ 0, 0 });
+                }
+            }
+        });
+        InputStream in = getClass().getResourceAsStream("/images/suite/basn0g01.png");
+        BufferedImage img = png.read(in, true);
+        javax.imageio.ImageIO.write(img, "PNG", File.createTempFile("recolor", ".png"));
+    }
+
     public void testPrivateChunk()
     throws Exception
     {
-        PngImage png = new PngImage(new MyPngConfig());
-        png.read(getClass().getResourceAsStream("/images/misc/anigif.png"), true);
+        PngImage png = readResource("/images/misc/anigif.png", new MyPngConfig());
         byte[] bytes = (byte[])png.getProperty(MyPngConfig.ORIGINAL_GIF);
 
         assertEquals("MSOFFICE9.0", new String(bytes, 0, 11, "US-ASCII"));
@@ -76,7 +98,13 @@ extends TestCase
     private PngImage readResource(String path)
     throws IOException
     {
-        PngImage png = new PngImage();
+        return readResource(path, new BasicPngConfig());
+    }
+
+    private PngImage readResource(String path, PngConfig config)
+    throws IOException
+    {
+        PngImage png = new PngImage(config);
         InputStream in = getClass().getResourceAsStream(path);
         png.read(in, true);
         return png;
