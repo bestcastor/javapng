@@ -95,7 +95,7 @@ public class PngImage
                 if (chunk == null && type == PngChunk.IDAT) {
                     if (config.getMetadataOnly())
                         return null;
-                    image = ImageFactory.createImage(in, this, machine);
+                    image = createImage(new ImageDataInputStream(in, machine));
                     type = machine.getType();
                     chunk = config.getChunk(this, type);
                 }
@@ -136,7 +136,16 @@ public class PngImage
     /**
      * TODO
      */
-    public void handleFrame(BufferedImage image, int framesLeft)
+    protected BufferedImage createImage(InputStream in)
+    throws IOException
+    {
+        return ImageFactory.createImage(this, in);
+    }
+
+    /**
+     * TODO
+     */
+    protected void handleFrame(BufferedImage image, int framesLeft)
     {
     }
 
@@ -189,7 +198,7 @@ public class PngImage
         return getInt(PngConstants.COLOR_TYPE);
     }
 
-    // package protected
+    // package-protected
     int getSamples()
     {
         switch (getColorType()) {
