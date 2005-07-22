@@ -23,23 +23,23 @@ package com.sixlegs.png;
 import java.io.*;
 import java.util.zip.*;
 
+/**
+ * TODO
+ */
 public class PngInputStream
 extends InputStream
 implements DataInput
 {
-    public static final String ISO_8859_1 = "ISO-8859-1";
-    public static final String US_ASCII = "US-ASCII";
-    public static final String UTF_8 = "UTF-8";
-
-    private CRCInputStream in;
+    private CRC32 crc = new CRC32();
+    private InputStream in;
     private DataInputStream data;
-    private byte[] tmp = new byte[512];
+    private byte[] tmp = new byte[0x1000];
     private long count;
     private int length;
     
     PngInputStream(InputStream in)
     {
-        this.in = new CRCInputStream(in, new byte[0x1000]);
+        this.in = in;
         data = new DataInputStream(this);
     }
 
@@ -48,7 +48,7 @@ implements DataInput
     {
         if (length < 0)
             throw new PngError("Bad chunk length: " + length);
-        in.reset();
+        crc.reset();
         int type = readInt();
         count = 0;
         this.length = length;
@@ -60,20 +60,20 @@ implements DataInput
     {
         if (getRemaining() != 0)
             throw new PngError(PngChunk.getName(type) + " read " + count + " bytes, expected " + length);
-        long calcChecksum = in.getValue();
-        long fileChecksum = readUnsignedInt();
-        if (calcChecksum != fileChecksum)
+        if ((int)crc.getValue() != readInt())
             throw new PngError("Bad CRC value for " + PngChunk.getName(type) + " chunk");
     }
 
-    ////////// counted InputStream methods //////////
+    ////////// count/crc InputStream methods //////////
 
     public int read()
     throws IOException
     {
         int result = in.read();
-        if (result != -1)
+        if (result != -1) {
+            crc.update(result);
             count++;
+        }
         return result;
     }
     
@@ -81,17 +81,18 @@ implements DataInput
     throws IOException
     {
         int result = in.read(b, off, len);
-        if (result > 0)
+        if (result != -1) {
+            crc.update(b, off, result);
             count += result;
+        }
         return result;
     }
 
     public long skip(long n)
     throws IOException
     {
-        long result = in.skip(n);
-        count += result;
-        return result;
+        int result = read(tmp, 0, (int)Math.min(Integer.MAX_VALUE, n));
+        return (result < 0) ? 0 : result;
     }
 
     public void close()
@@ -160,7 +161,7 @@ implements DataInput
     public long readLong()
     throws IOException
     {
-        return (readUnsignedInt() << 32) | readUnsignedInt();
+        return ((0xFFFFFFFFL & readInt()) << 32) | (0xFFFFFFFFL & readInt());
     }
 
     public float readFloat()
@@ -206,100 +207,11 @@ implements DataInput
     {
         return data.readUTF();
     }
-        
-    ////////// missing DataInput methods //////////
-
-    public long readUnsignedInt()
-    throws IOException
-    {
-        return 0xFFFFFFFFL & readInt();
-    }
-
-    public void skipFully(long n)
-    throws IOException
-    {
-        while (n > 0) {
-            long amt = skip(n);
-            if (amt == 0) {
-                if (read() == -1)
-                    throw new EOFException();
-                n--;
-            } else {
-                n -= amt;
-            }
-        }
-    }
 
     ////////// PNG-specific methods //////////
     
     public int getRemaining()
     {
         return (int)(length - count);
-    }
-
-    public byte[] readCompressed(int length)
-    throws IOException
-    {
-        byte[] data = new byte[length];
-        readFully(data);
-        if (data[0] != 0)
-            throw new PngWarning("Unrecognized compression method: " + data[0]);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Inflater inf = new Inflater();
-        inf.reset();
-        inf.setInput(data, 1, length - 1);
-        try {
-            while (!inf.needsInput()) {
-                out.write(tmp, 0, inf.inflate(tmp));
-            }
-        } catch (DataFormatException e) {
-            throw new PngWarning(e.getMessage());
-        }
-        return out.toByteArray();
-    }
-
-    public String readString(String enc)
-    throws IOException
-    {
-        return new String(readToNull(), enc);
-    }
-
-    public String readKeyword()
-    throws IOException
-    {
-        String keyword = readString(ISO_8859_1);
-        if (keyword.length() == 0 || keyword.length() > 79)
-            throw new PngWarning("Invalid keyword length: " + keyword.length());
-        return keyword;
-    }
-
-    private byte[] readToNull()
-    throws IOException
-    {
-        int remaining = getRemaining();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (int i = 0; i < remaining; i++) {
-            int c = read();
-            switch (c) {
-            case 0:
-                return out.toByteArray();
-            case -1:
-                throw new EOFException();
-            default:
-                out.write(c);
-            }
-        }
-        return out.toByteArray();
-    }
-
-    public double readFloatingPoint()
-    throws IOException
-    {
-        String s = readString("US-ASCII");
-        int e = Math.max(s.indexOf('e'), s.indexOf('E'));
-        double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
-        if (e > 0)
-            d *= Math.pow(10d, Double.valueOf(s.substring(e + 1)).doubleValue());
-        return d;
     }
 }
