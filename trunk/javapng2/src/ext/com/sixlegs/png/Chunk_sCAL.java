@@ -18,30 +18,24 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png.ext;
+package com.sixlegs.png;
 
-import com.sixlegs.png.*;
 import java.io.*;
 import java.util.Map;
 
-class Chunk_pCAL
+class Chunk_sCAL
 extends PngChunk
 {
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
-        String calibrationName = in.readKeyword();
-        int originalZero = in.readInt();
-        int originalMax = in.readInt();
-        int equationType = in.readByte();
-        String unitName = in.readString(PngInputStream.ISO_8859_1);
-        int numParams = in.readByte();
-        double[] params = new double[numParams];
-        for (int i = 0; i < numParams; i++) {
-            params[i] = in.readFloatingPoint();
-        }
-        
+        int unit = in.readByte();
+        double width = PngUtils.readFloatingPoint(in);
+        double height = PngUtils.readFloatingPoint(in);
+
         Map props = png.getProperties();
-        // TODO
+        props.put(ExtendedPngConstants.SCALE_UNIT, new Integer(unit));
+        props.put(ExtendedPngConstants.PIXEL_WIDTH, new Double(width));
+        props.put(ExtendedPngConstants.PIXEL_HEIGHT, new Double(height));
     }
 }

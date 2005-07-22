@@ -22,26 +22,30 @@
 
     <property name="testmethods" value=""/>
 
-    <target name="init">
+    <target name="init" unless="path.lib">
         <tstamp/>
         <path id="path.lib">
             <fileset dir="lib" includes="**/*.jar"/>
         </path>
-        <path id="path.libdev">
-            <path refid="path.lib"/>
-            <fileset dir="libdev" includes="**/*.jar"/>
-        </path>
-        <path id="path.run">
+        <path id="path.main">
             <path refid="path.lib"/>
             <pathelement path="build/main"/>
         </path>
+        <path id="path.ext">
+            <path refid="path.main"/>
+            <pathelement path="build/ext"/>
+        </path>
         <path id="path.examples">
-            <path refid="path.run"/>
+            <path refid="path.ext"/>
             <pathelement path="build/examples"/>
         </path>
         <path id="path.test">
             <path refid="path.examples"/>
             <pathelement path="build/test"/>
+        </path>
+        <path id="path.libdev">
+            <path refid="path.lib"/>
+            <fileset dir="libdev" includes="**/*.jar"/>
         </path>
         <path id="path.test.emma">
             <path refid="path.libdev"/>
@@ -52,14 +56,15 @@
 
     <target name="compile" depends="init" description="Compile">
         <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath}"/>
+        <compile module="ext" refid="path.main" bootclasspath="${compile.bootclasspath}"/>
+    </target>
+
+    <target name="compile-examples" depends="compile" description="Compile examples">
+        <compile module="examples" refid="path.ext"/>
     </target>
 
     <target name="compile-test" depends="compile-examples" description="Compile tests">
         <compile module="test" refid="path.examples"/>
-    </target>
-
-    <target name="compile-examples" depends="compile" description="Compile examples">
-        <compile module="examples" refid="path.run"/>
     </target>
 
     <macrodef name="compile">
@@ -110,6 +115,8 @@
         <mkdir dir="build/emma"/>
         <copy todir="build/emma">
             <fileset dir="build/main"/>
+            <fileset dir="build/ext"/>
+            <fileset dir="build/examples"/>
         </copy>
         <emma enabled="true">
             <instr
@@ -120,7 +127,7 @@
         <mytest refid="path.test.emma" fork="true"/>
         <mkdir dir="reports"/>
         <emma enabled="true">
-            <report sourcepath="src/main">
+            <report sourcepath="src/main,src/ext">
                 <infileset dir="${user.dir}" includes="*.em, *.ec"/>
                 <txt outfile="reports/coverage.txt"/>
                 <html outfile="reports/coverage.html"/>
@@ -164,28 +171,29 @@
     <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
 	<jar jarfile="dist/png-${version}.jar">
-	    <fileset dir="build/main" excludes="**/ext/**"/>
+	    <fileset dir="build/main"/>
 	</jar>
 	<jar jarfile="dist/pngext-${version}.jar">
-	    <fileset dir="build/main" includes="**/ext/**"/>
+	    <fileset dir="build/ext"/>
 	</jar>
     </target>
 
     <target name="javadoc" depends="compile" description="Generate the javadoc">
         <mkdir dir="dist/api"/>
         <javadoc 
-          sourcepath="src/main"
+          sourcepath="src/main:src/ext"
           destdir="dist/api"
           access="${javadoc.access}"
           failonerror="true"
           packagenames="com.sixlegs.png.*"
-          classpathref="path.run"
+          classpathref="path.ext"
           Author="true"
           Version="true"
           Use="true"
         />
     </target>
 
+<!--
     <target name="dist" depends="clean,test,javadoc,jar" description="Create distribution">
         <copy todir="dist/src">
             <fileset dir="src" excludes="test/**,**/*.java~"/>
@@ -204,4 +212,5 @@
             <zipfileset prefix="png-sixlegs-${version}" dir="dist" excludes="*.zip,*.gz"/>
         </zip>
     </target>
+-->
 </project>
