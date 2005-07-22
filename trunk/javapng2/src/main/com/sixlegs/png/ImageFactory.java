@@ -32,7 +32,7 @@ import java.awt.Point;
 
 class ImageFactory
 {
-    public static BufferedImage createImage(PngInputStream in, PngImage png, StateMachine machine)
+    public static BufferedImage createImage(PngImage png, InputStream in)
     throws IOException
     {
         PngConfig config = png.getConfig();
@@ -82,8 +82,7 @@ class ImageFactory
         if (config.getProgressive() && interlaced)
             pp = new ProgressivePixelProcessor((BasePixelProcessor)pp, width, height);
 
-        ImageDataInputStream data = new ImageDataInputStream(in, machine);
-        InflaterInputStream inflate = new InflaterInputStream(data, new Inflater(), 0x1000);
+        InflaterInputStream inflate = new InflaterInputStream(in, new Inflater(), 0x1000);
         Defilterer d = new Defilterer(inflate, raster, bitDepth, samples, pp);
         
         // TODO: if not progressive, initialize to fully transparent?

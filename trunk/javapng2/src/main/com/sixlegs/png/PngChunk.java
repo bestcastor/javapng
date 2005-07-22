@@ -161,7 +161,7 @@ abstract public class PngChunk
                 (((int)name.charAt(3) & 0xFF)      ));
     }
 
-    protected void checkLength(int length, int correct)
+    void checkLength(int length, int correct)
     throws PngError
     {
         if (length != correct)
