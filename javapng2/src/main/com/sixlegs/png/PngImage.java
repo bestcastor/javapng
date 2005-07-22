@@ -91,17 +91,18 @@ public class PngImage
             while (machine.getState() != StateMachine.STATE_END) {
                 int type = in.startChunk(in.readInt());
                 machine.nextState(type);
-                PngChunk chunk = config.getChunk(type);
+                PngChunk chunk = config.getChunk(this, type);
+                if (chunk == null && type == PngChunk.IDAT) {
+                    if (config.getMetadataOnly())
+                        return null;
+                    image = ImageFactory.createImage(in, this, machine);
+                    type = machine.getType();
+                    chunk = config.getChunk(this, type);
+                }
                 if (chunk == null) {
-                    if (type == PngChunk.IDAT) {
-                        if (config.getMetadataOnly())
-                            return null;
-                        image = ImageFactory.createImage(in, this, machine);
-                        type = machine.getType();
-                    }
                     if (!PngChunk.isAncillary(type))
                         throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
-                    in.skipFully(in.getRemaining());
+                    in.skipBytes(in.getRemaining());
                 } else {
                     try {
                         Integer key = Integers.valueOf(type);
@@ -117,7 +118,7 @@ public class PngImage
                         }
                         chunk.read(type, in, this);
                     } catch (PngWarning warning) {
-                        in.skipFully(in.getRemaining());
+                        in.skipBytes(in.getRemaining());
                         config.handleWarning(warning);
                     }
                 }

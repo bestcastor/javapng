@@ -1,5 +1,6 @@
 package com.sixlegs.png;
 
+import com.sixlegs.png.examples.BeforeDataHook;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Map;
@@ -8,12 +9,11 @@ import junit.framework.*;
 public class SimpleTest
 extends PngTestCase
 {
-    /*
     public void testRecolorMonochrome()
     throws Exception
     {
-        PngImage png = new PngImage(new AfterReadHook(){
-            public void process(PngImage png) throws IOException {
+        PngImage png = new PngImage(new BeforeDataHook(){
+            public void process(PngImage png) {
                 if (png.getBitDepth() == 1 &&
                     png.getColorType() == PngConstants.COLOR_TYPE_GRAY) {
                     Map props = png.getProperties();
@@ -29,7 +29,6 @@ extends PngTestCase
         BufferedImage img = png.read(in, true);
         javax.imageio.ImageIO.write(img, "PNG", File.createTempFile("recolor", ".png"));
     }
-    */
 
     public void testPrivateChunk()
     throws Exception
@@ -63,9 +62,9 @@ extends PngTestCase
             }
         };
         
-        public PngChunk getChunk(int type)
+        public PngChunk getChunk(PngImage png, int type)
         {
-            return (type == msOG) ? CHUNK : super.getChunk(type);
+            return (type == msOG) ? CHUNK : super.getChunk(png, type);
         }
     }
 

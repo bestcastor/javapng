@@ -32,13 +32,13 @@ extends BasicPngConfig
     private static final PngChunk iCCP = new Chunk_iCCP();
     private static final PngChunk sPLT = new Chunk_sPLT();
 
-    public PngChunk getChunk(int type)
+    public PngChunk getChunk(PngImage png, int type)
     {
         switch (type) {
         case PngChunk.hIST: return hIST;
         case PngChunk.iCCP: return iCCP;
         case PngChunk.sPLT: return sPLT;
         }
-        return super.getChunk(type);
+        return super.getChunk(png, type);
     }
 }

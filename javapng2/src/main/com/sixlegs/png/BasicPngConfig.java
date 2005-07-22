@@ -34,23 +34,9 @@ implements PngConfig
     private boolean metadataOnly;
     private boolean warningsFatal;
     private boolean progressive;
-    private boolean keepRawData;
     private boolean reduce16 = true;
     private boolean gammaCorrect = true;
     
-    public boolean getKeepRawData()
-    {
-        return keepRawData;
-    }
-
-    /**
-     * TODO
-     */
-    public void setKeepRawData(boolean keepRawData)
-    {
-        this.keepRawData = keepRawData;
-    }
-
     public boolean getReduce16()
     {
         return reduce16;
@@ -178,7 +164,7 @@ implements PngConfig
     private static final PngChunk tRNS = new Chunk_tRNS();
     private static final PngChunk text = new TextChunkReader();
 
-    public PngChunk getChunk(int type)
+    public PngChunk getChunk(PngImage png, int type)
     {
         switch (type) {
         case PngChunk.IHDR: return IHDR;
