@@ -18,10 +18,11 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png.ext;
+package com.sixlegs.png;
 
-import com.sixlegs.png.*;
-
+/**
+ * TODO
+ */
 public class ExtendedPngConfig
 extends CompletePngConfig
 {
@@ -31,7 +32,7 @@ extends CompletePngConfig
     private static final PngChunk pCAL = new Chunk_pCAL();
     private static final PngChunk sCAL = new Chunk_sCAL();
     
-    public PngChunk getChunk(int type)
+    public PngChunk getChunk(PngImage png, int type)
     {
         switch (type) {
         case PngChunk.gIFg: return gIFg;
@@ -40,6 +41,6 @@ extends CompletePngConfig
         case PngChunk.pCAL: return pCAL;
         case PngChunk.sCAL: return sCAL;
         }
-        return super.getChunk(type);
+        return super.getChunk(png, type);
     }
 }

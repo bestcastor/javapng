@@ -20,7 +20,6 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import com.sixlegs.png.ext.*;
 import java.awt.*;
 import java.io.*;
 import java.util.*;

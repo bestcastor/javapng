@@ -18,9 +18,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-package com.sixlegs.png.ext;
-
-import com.sixlegs.png.PngConstants;
+package com.sixlegs.png;
 
 public interface ExtendedPngConstants
 extends PngConstants
