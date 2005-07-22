@@ -98,10 +98,13 @@ public interface PngConfig
      * exception.
      * <p>
      * {@link BasicPngConfig} has a default implementation for all of the chunk
-     * types defined in Version 1.2 of the PNG Specification
+     * types defined in Version 1.2 of the PNG Specification except
+     * {@link PngChunk#hIST hIST}, {@link PngChunk#iCCP iCCP}, and
+     * {@link PngChunk#sPLT sPLT}. Those three are added by {@link CompletePngConfig}.
+     * @param png the image requesting the chunk
      * @param type the chunk type
      */
-    PngChunk getChunk(int type);
+    PngChunk getChunk(PngImage png, int type);
 
     /**
      * Callback for customized handling of warnings. Whenever a non-fatal
