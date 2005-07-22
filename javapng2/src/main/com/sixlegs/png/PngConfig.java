@@ -20,8 +20,6 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.awt.image.BufferedImage;
-
 /**
  * An interface which defines all of the customizable parameters
  * used by {@link PngImage} when decoding an image.
