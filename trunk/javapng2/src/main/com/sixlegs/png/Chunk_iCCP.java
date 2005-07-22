@@ -29,8 +29,8 @@ extends PngChunk
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
-        String name = in.readKeyword();
-        byte[] data = in.readCompressed(in.getRemaining());
+        String name = PngUtils.readKeyword(in);
+        byte[] data = PngUtils.readCompressed(in, in.getRemaining());
         Map props = png.getProperties();
         props.put(PngConstants.ICC_PROFILE_NAME, name);
         props.put(PngConstants.ICC_PROFILE, data);

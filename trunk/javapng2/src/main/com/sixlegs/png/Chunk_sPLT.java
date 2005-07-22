@@ -34,7 +34,7 @@ extends PngChunk
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
-        String name = in.readKeyword();
+        String name = PngUtils.readKeyword(in);
         int sampleDepth = in.readByte();
         if (sampleDepth != 8 && sampleDepth != 16)
             throw new PngWarning("Sample depth must be 8 or 16");

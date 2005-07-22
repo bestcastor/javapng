@@ -34,8 +34,8 @@ extends PngChunk
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
-        String keyword = in.readKeyword();
-        String enc = PngInputStream.ISO_8859_1;
+        String keyword = PngUtils.readKeyword(in);
+        String enc = PngUtils.ISO_8859_1;
         boolean compressed = false;
         String language = null;
         String translated = null;
@@ -46,7 +46,7 @@ extends PngChunk
             compressed = true;
             break;
         case iTXt:
-            enc = PngInputStream.UTF_8;
+            enc = PngUtils.UTF_8;
             int flag = in.readByte();
             int method = in.readByte();
             if (flag == 1) {
@@ -56,13 +56,13 @@ extends PngChunk
             } else if (flag != 0) {
                 throw new PngWarning("Illegal " + this + " compression flag: " + flag);
             }
-            language = in.readString(PngInputStream.US_ASCII);
-            translated = in.readString(PngInputStream.UTF_8);
+            language = PngUtils.readString(in, PngUtils.US_ASCII);
+            translated = PngUtils.readString(in, PngUtils.UTF_8);
         }
 
         byte[] data;
         if (compressed) {
-            data = in.readCompressed(in.getRemaining());
+            data = PngUtils.readCompressed(in, in.getRemaining());
         } else {
             data = new byte[in.getRemaining()];
             in.readFully(data);
