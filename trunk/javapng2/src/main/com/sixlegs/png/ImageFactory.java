@@ -20,7 +20,6 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
-import java.awt.Color;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.*;
@@ -28,7 +27,6 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-import java.awt.Point;
 
 class ImageFactory
 {
