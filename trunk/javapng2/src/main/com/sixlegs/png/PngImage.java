@@ -25,9 +25,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
-    /**
-     * TODO
-     */
+/**
+ * TODO
+ */
 public class PngImage
 {
     private PngConfig config;
@@ -37,7 +37,7 @@ public class PngImage
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
     /**
-     * TODO
+     * Constructor which uses a new instance of {@link BasicPngConfig}.
      */
     public PngImage()
     {
@@ -45,7 +45,7 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Constructor which uses the specified configuration.
      */
     public PngImage(PngConfig config)
     {
@@ -72,56 +72,43 @@ public class PngImage
     /**
      * TODO
      */
-    public BufferedImage read(InputStream in, boolean close)
+    public BufferedImage read(InputStream raw, boolean close)
     throws IOException
     {
+        BufferedImage image = null;
+        StateMachine machine = new StateMachine(this);
         try {
             read = true;
             props.clear();
-            CRCInputStream crc = new CRCInputStream(in, new byte[0x1000]);
-            CountingInputStream count = new CountingInputStream(crc);
-            PngInputStream data = new PngInputStream(count);
-            long sig = data.readLong();
+            PngInputStream in = new PngInputStream(raw);
+            long sig = in.readLong();
             if (sig != SIGNATURE) {
                 throw new PngError("Improper signature, expected 0x" +
                                    Long.toHexString(SIGNATURE).toUpperCase() + ", got 0x" +
                                    Long.toHexString(sig).toUpperCase());
             }
             Set seen = new HashSet();
-            int state = STATE_START;
-            while (state != STATE_END) {
-                int length = data.readInt();
-                if (length < 0)
-                    throw new PngError("Bad chunk length: " + length);
-                crc.reset();
-
-                int type = data.readInt();
-                String name = PngChunk.typeToString(type);
-                
-                if (PngChunk.isPrivate(type) && !PngChunk.isAncillary(type))
-                    throw new PngError("Private critical chunk encountered: " + name);
-                for (int i = 0; i < 4; i++) {
-                    int c = 0xFF & (type >>> (8 * i));
-                    if (c < 65 || (c > 90 && c < 97) || c > 122)
-                        throw new PngError("Corrupted chunk type: " + name);
+            while (machine.getState() != StateMachine.STATE_END) {
+                int type = in.startChunk(in.readInt());
+                machine.nextState(type);
+                if (type == PngChunk.IDAT) {
+                    if (config.getMetadataOnly())
+                        return null;
+                    image = ImageFactory.createImage(in, this, machine);
+                    type = machine.getType();
                 }
 
-                state = updateState(state, type, name);
-                // System.err.println("read chunk " + name + ", state=" + state);
                 PngChunk chunk = config.getChunk(type);
-
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
-                        throw new PngError("Critical chunk " + name + " cannot be skipped");
-                    data.skipFully(length);
+                        throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
+                    in.skipFully(in.getRemaining());
                 } else {
-                    count.setCount(0);
-                    data.setLength(length);
                     try {
                         Integer key = Integers.valueOf(type);
                         if (!chunk.isMultipleOK(type)) {
                             if (seen.contains(key)) {
-                                String msg = "Multiple " + name + " chunks are not allowed";
+                                String msg = "Multiple " + PngChunk.getName(type) + " chunks are not allowed";
                                 if (PngChunk.isAncillary(type))
                                     throw new PngWarning(msg);
                                 throw new PngError(msg);
@@ -129,27 +116,20 @@ public class PngImage
                                 seen.add(key);
                             }
                         }
-                        chunk.read(type, data, this);
-                        if (data.getRemaining() != 0)
-                            throw new PngError(chunk + " read " + count.getCount() + " bytes, expected " + length);
+                        chunk.read(type, in, this);
                     } catch (PngWarning warning) {
-                        data.skipFully(length - count.getCount());
+                        in.skipFully(in.getRemaining());
                         config.handleWarning(warning);
                     }
                 }
-                long calcChecksum = crc.getValue();
-                long fileChecksum = data.readUnsignedInt();
-                if (calcChecksum != fileChecksum)
-                    throw new PngError("Bad CRC value for " + name + " chunk");
+                in.endChunk(type);
             }
-            if (config.getMetadataOnly())
-                return null;
-            return ImageFactory.create(this);
+            return image;
         } catch (PngError e) {
             throw e;
         } finally {
             if (close)
-                in.close();
+                raw.close();
         }
     }
 
@@ -158,97 +138,6 @@ public class PngImage
      */
     public void handleFrame(BufferedImage image, int framesLeft)
     {
-    }
-
-    private static final int STATE_START = 0;
-    private static final int STATE_SAW_IHDR = 1;
-    private static final int STATE_SAW_IHDR_NO_PLTE = 2;
-    private static final int STATE_SAW_PLTE = 3;
-    private static final int STATE_IN_IDAT = 4;
-    private static final int STATE_AFTER_IDAT = 5;
-    private static final int STATE_END = 6;
-
-    private int updateState(int state, int type, String name)
-    throws IOException
-    {
-        switch (state) {
-        case STATE_START:
-            if (type != PngChunk.IHDR)
-                return STATE_SAW_IHDR;
-        case STATE_SAW_IHDR:
-        case STATE_SAW_IHDR_NO_PLTE:
-            switch (type) {
-            case PngChunk.PLTE:
-                if (state == STATE_SAW_IHDR_NO_PLTE)
-                    throw new PngError("IHDR chunk must be first chunk");
-                return STATE_SAW_PLTE;
-            case PngChunk.IDAT:
-                if (getColorType() == PngConstants.COLOR_TYPE_PALETTE)
-                    throw new PngError("Required PLTE chunk not found");
-                return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
-            case PngChunk.bKGD:
-            case PngChunk.hIST:
-            case PngChunk.tRNS:
-                return STATE_SAW_IHDR_NO_PLTE;
-            default:
-                return STATE_SAW_IHDR;
-            }
-        case STATE_SAW_PLTE:
-            switch (type) {
-            case PngChunk.cHRM:
-            case PngChunk.gAMA:
-            case PngChunk.iCCP:
-            case PngChunk.sBIT:
-            case PngChunk.sRGB:
-                throw new PngError(name + " cannot appear after PLTE");
-            case PngChunk.IDAT:
-                return config.getMetadataOnly() ? STATE_END : STATE_IN_IDAT;
-            case PngChunk.IEND:
-                throw new PngError("Required data chunk(s) not found");
-            default:
-                return STATE_SAW_PLTE;
-            }
-        default:
-            switch (type) {
-            case PngChunk.PLTE:
-            case PngChunk.cHRM:
-            case PngChunk.gAMA:
-            case PngChunk.iCCP:
-            case PngChunk.sBIT:
-            case PngChunk.sRGB:
-            case PngChunk.bKGD:
-            case PngChunk.hIST:
-            case PngChunk.tRNS:
-            case PngChunk.pHYs:
-            case PngChunk.sPLT:
-            case PngChunk.oFFs:
-            case PngChunk.pCAL:
-            case PngChunk.sCAL:
-                throw new PngError(name + " cannot appear after IDAT");
-            }
-            switch (state) {
-            case STATE_IN_IDAT:
-                switch (type) {
-                case PngChunk.IEND:
-                    return STATE_END;
-                case PngChunk.IDAT:
-                    return STATE_IN_IDAT;
-                default:
-                    return STATE_AFTER_IDAT;
-                }
-            case STATE_AFTER_IDAT:
-                switch (type) {
-                case PngChunk.IEND:
-                    return STATE_END;
-                case PngChunk.IDAT:
-                    throw new PngError("IDAT chunks must be consecutive");
-                default:
-                    return STATE_AFTER_IDAT;
-                }
-            }
-        }
-        // impossible
-        throw new Error();
     }
 
     /** 

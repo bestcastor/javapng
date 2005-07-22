@@ -1,14 +1,14 @@
 package com.sixlegs.png;
 
-import com.sixlegs.png.examples.AfterReadHook;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Map;
 import junit.framework.*;
 
 public class SimpleTest
-extends TestCase
+extends PngTestCase
 {
+    /*
     public void testRecolorMonochrome()
     throws Exception
     {
@@ -29,6 +29,7 @@ extends TestCase
         BufferedImage img = png.read(in, true);
         javax.imageio.ImageIO.write(img, "PNG", File.createTempFile("recolor", ".png"));
     }
+    */
 
     public void testPrivateChunk()
     throws Exception
@@ -52,7 +53,7 @@ extends TestCase
     extends BasicPngConfig
     {
         private static final String ORIGINAL_GIF = "original_gif";
-        private static final int msOG = PngChunk.stringToType("msOG");
+        private static final int msOG = PngChunk.getType("msOG");
 
         private static final PngChunk CHUNK = new PngChunk(){
             public void read(int type, PngInputStream in, PngImage png) throws IOException {
@@ -76,6 +77,14 @@ extends TestCase
         assertEquals(180, png.getHeight());
     }
 
+    public void testReadAncillary()
+    throws Exception
+    {
+        PngImage png = readResource("/images/misc/anigif.png");
+        assertEquals(32, png.getWidth());
+        assertEquals(32, png.getHeight());
+    }
+    
     public void testErrors()
     throws Exception
     {
@@ -117,6 +126,6 @@ extends TestCase
 
     public static Test suite()
     {
-        return new TestSuite(SimpleTest.class);
+        return getSuite(SimpleTest.class);
     }
 }

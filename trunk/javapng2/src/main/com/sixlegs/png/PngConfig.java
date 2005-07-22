@@ -63,16 +63,6 @@ public interface PngConfig
     boolean getGammaCorrect();
 
     /**
-     * If true, the raw <code>IDAT</code> image data is retained after image
-     * production. The data is available under the {#link PngConstants#DATA}
-     * property key, and the value is an ordered <code>java.util.List</code> of
-     * <code>byte</code> arrays.
-     * {@link BasicPngConfig} defaults to false.
-     * @see PngImage#getProperty
-     */
-    boolean getKeepRawData();
-
-    /**
      * If true, image data will not be decoded.
      * Instead, {@link PngImage#read(java.io.File)} and
      * {@link PngImage#read(java.io.InputStream, boolean)} will return

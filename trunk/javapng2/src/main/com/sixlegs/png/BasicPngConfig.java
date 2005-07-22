@@ -167,7 +167,6 @@ implements PngConfig
     
     private static final PngChunk IHDR = new Chunk_IHDR();
     private static final PngChunk PLTE = new Chunk_PLTE();
-    private static final PngChunk IDAT = new Chunk_IDAT();
     private static final PngChunk IEND = new Chunk_IEND();
     private static final PngChunk bKGD = new Chunk_bKGD();
     private static final PngChunk cHRM = new Chunk_cHRM();
@@ -184,7 +183,6 @@ implements PngConfig
         switch (type) {
         case PngChunk.IHDR: return IHDR;
         case PngChunk.PLTE: return PLTE;
-        case PngChunk.IDAT: return IDAT;
         case PngChunk.IEND: return IEND;
         case PngChunk.bKGD: return bKGD;
         case PngChunk.cHRM: return cHRM;

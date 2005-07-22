@@ -141,24 +141,24 @@ abstract public class PngChunk
     /**
      * TODO
      */
-    public static String typeToString(int x)
+    public static String getName(int type)
     {
         return ("" + 
-                (char)((x >>> 24) & 0xFF) + 
-                (char)((x >>> 16) & 0xFF) + 
-                (char)((x >>>  8) & 0xFF) + 
-                (char)((x       ) & 0xFF));
+                (char)((type >>> 24) & 0xFF) + 
+                (char)((type >>> 16) & 0xFF) + 
+                (char)((type >>>  8) & 0xFF) + 
+                (char)((type       ) & 0xFF));
     }
 
     /**
      * TODO
      */
-    public static int stringToType(String id)
+    public static int getType(String name)
     {
-        return ((((int)id.charAt(0) & 0xFF) << 24) | 
-                (((int)id.charAt(1) & 0xFF) << 16) | 
-                (((int)id.charAt(2) & 0xFF) <<  8) | 
-                (((int)id.charAt(3) & 0xFF)      ));
+        return ((((int)name.charAt(0) & 0xFF) << 24) | 
+                (((int)name.charAt(1) & 0xFF) << 16) | 
+                (((int)name.charAt(2) & 0xFF) <<  8) | 
+                (((int)name.charAt(3) & 0xFF)      ));
     }
 
     protected void checkLength(int length, int correct)

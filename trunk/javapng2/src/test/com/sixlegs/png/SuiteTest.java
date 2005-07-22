@@ -4,7 +4,7 @@ import java.io.*;
 import junit.framework.*;
 
 public class SuiteTest
-extends TestCase
+extends PngTestCase
 {
     public void testRead()
     throws Exception
@@ -22,6 +22,6 @@ extends TestCase
 
     public static Test suite()
     {
-        return new TestSuite(SuiteTest.class);
+        return getSuite(SuiteTest.class);
     }
 }
