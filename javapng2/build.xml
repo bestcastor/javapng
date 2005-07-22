@@ -5,7 +5,7 @@
 
     <property name="javadoc.access" value="public"/>
 
-    <property name="compile.source" value="1.3"/>
+    <property name="compile.source" value="1.2"/>
     <property name="compile.target" value="1.2"/>
     <property name="compile.bootclasspath" value="${java.home}/lib/rt.jar"/>
     <property name="compile.extdirs" value=""/>
@@ -14,9 +14,11 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
-    <property name="version" value="2.0.0-dev"/>
+    <property name="version" value="2.0-rc1"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
+    <property name="benchmark.file" value="benchmark.txt"/>
+    <property name="benchmark.loop" value="1"/>
 
     <property name="testmethods" value=""/>
 
@@ -33,8 +35,12 @@
             <path refid="path.lib"/>
             <pathelement path="build/main"/>
         </path>
-        <path id="path.test">
+        <path id="path.examples">
             <path refid="path.run"/>
+            <pathelement path="build/examples"/>
+        </path>
+        <path id="path.test">
+            <path refid="path.examples"/>
             <pathelement path="build/test"/>
         </path>
         <path id="path.test.emma">
@@ -42,25 +48,19 @@
             <pathelement path="build/test"/>
             <pathelement path="build/emma"/>
         </path>
-        <path id="path.examples">
-            <path refid="path.run"/>
-            <pathelement path="build/examples"/>
-        </path>
     </target>
 
     <target name="compile" depends="init" description="Compile">
         <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath}"/>
     </target>
 
-    <target name="compile-test" depends="compile" description="Compile tests">
-        <compile module="test" refid="path.run"/>
+    <target name="compile-test" depends="compile-examples" description="Compile tests">
+        <compile module="test" refid="path.examples"/>
     </target>
 
     <target name="compile-examples" depends="compile" description="Compile examples">
         <compile module="examples" refid="path.run"/>
     </target>
-
-    <target name="compile-all" depends="compile-test,compile-examples" description="Compile everything"/>
 
     <macrodef name="compile">
         <attribute name="module"/>
@@ -131,9 +131,9 @@
     <macrodef name="viewerImpl">
         <attribute name="file"/>
         <sequential>
-	    <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.examples" fork="yes">
-		<arg value="@{file}"/>
-	    </java>
+            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.examples" fork="yes">
+                <arg value="@{file}"/>
+            </java>
         </sequential>
     </macrodef>
 
@@ -148,6 +148,12 @@
         <viewerImpl file="${suite.file}"/>
     </target>
 
+    <target name="benchmark" depends="compile-test" description="Run simple benchmark">
+        <java classname="com.sixlegs.png.Benchmark" classpathref="path.test" input="${benchmark.file}">
+            <arg value="${benchmark.loop}"/>
+        </java>
+    </target>
+
     <target name="clean" description="Clean">
         <delete dir="build"/>
         <delete dir="dist"/>
@@ -157,12 +163,12 @@
 
     <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
-        <jar jarfile="dist/png-${version}.jar">
-            <fileset dir="build/main" excludes="**/ext/**"/>
-        </jar>
-        <jar jarfile="dist/pngext-${version}.jar">
-            <fileset dir="build/main" includes="**/ext/**"/>
-        </jar>
+	<jar jarfile="dist/png-${version}.jar">
+	    <fileset dir="build/main" excludes="**/ext/**"/>
+	</jar>
+	<jar jarfile="dist/pngext-${version}.jar">
+	    <fileset dir="build/main" includes="**/ext/**"/>
+	</jar>
     </target>
 
     <target name="javadoc" depends="compile" description="Generate the javadoc">

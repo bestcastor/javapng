@@ -45,8 +45,6 @@ public interface PngConstants
     static final String COLOR_TYPE = "color_type";
     /** {@link PngChunk#IHDR IHDR}: Compression method */
     static final String COMPRESSION = "compression";
-    /** {@link PngChunk#IDAT IDAT}: Image data */
-    static final String DATA = "data";
     /** {@link PngChunk#IHDR IHDR}: Filter method */
     static final String FILTER = "filter";
     /** {@link PngChunk#gAMA gAMA}: Gamma */

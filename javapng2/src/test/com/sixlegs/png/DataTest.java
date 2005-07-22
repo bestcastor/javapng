@@ -29,7 +29,7 @@ import java.security.MessageDigest;
 import junit.framework.*;
 
 public class DataTest
-extends TestCase
+extends PngTestCase
 {
     public void testImages()
     throws Exception
@@ -110,11 +110,6 @@ extends TestCase
 
     public static Test suite()
     {
-        return new TestSuite(DataTest.class);
-    }
-
-    public static void main(String args[])
-    {
-        junit.textui.TestRunner.run(suite());
+        return getSuite(DataTest.class);
     }
 }

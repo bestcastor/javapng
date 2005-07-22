@@ -32,11 +32,7 @@ import java.awt.Point;
 
 class ImageFactory
 {
-    private ImageFactory()
-    {
-    }
-
-    public static BufferedImage create(PngImage png)
+    public static BufferedImage createImage(PngInputStream in, PngImage png, StateMachine machine)
     throws IOException
     {
         PngConfig config = png.getConfig();
@@ -53,6 +49,7 @@ class ImageFactory
         short[] gammaTable = config.getGammaCorrect() ? png.getGammaTable() : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
         WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
+        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
 
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
@@ -79,21 +76,17 @@ class ImageFactory
                 }
             }
         }
+
         if (pp == null)
             pp = new BasicPixelProcessor(raster);            
         if (config.getProgressive() && interlaced)
             pp = new ProgressivePixelProcessor((BasePixelProcessor)pp, width, height);
 
-        InputStream in;
-        in = new MultiByteArrayInputStream((List)props.get(PngConstants.DATA));
-        in = new InflaterInputStream(in, new Inflater(), 0x1000);
-        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
+        ImageDataInputStream data = new ImageDataInputStream(in, machine);
+        InflaterInputStream inflate = new InflaterInputStream(data, new Inflater(), 0x1000);
+        Defilterer d = new Defilterer(inflate, raster, bitDepth, samples, pp);
+        
         // TODO: if not progressive, initialize to fully transparent?
-
-        if (!config.getKeepRawData())
-            props.remove(PngConstants.DATA);
-
-        Defilterer d = new Defilterer(in, raster, bitDepth, samples, pp);
         if (interlaced) {
             d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8);
             png.handleFrame(image, 6);
@@ -125,6 +118,7 @@ class ImageFactory
 
         if (colorType == PngConstants.COLOR_TYPE_PALETTE ||
             (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
+
             byte[] r = applyGamma((byte[])props.get(PngConstants.PALETTE_RED), gammaTable);
             byte[] g = applyGamma((byte[])props.get(PngConstants.PALETTE_GREEN), gammaTable);
             byte[] b = applyGamma((byte[])props.get(PngConstants.PALETTE_BLUE), gammaTable);

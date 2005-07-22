@@ -24,7 +24,6 @@ import java.awt.Point;
 import java.awt.image.*;
 import java.io.*;
 
-// TODO: add support for FILTER_TYPE_INTRAPIXEL
 class Defilterer
 {
     private InputStream in;
