@@ -39,6 +39,10 @@
             <path refid="path.ext"/>
             <pathelement path="build/examples"/>
         </path>
+        <path id="path.viewer">
+            <path refid="path.ext"/>
+            <pathelement path="build/viewer"/>
+        </path>
         <path id="path.test">
             <path refid="path.examples"/>
             <pathelement path="build/test"/>
@@ -63,11 +67,15 @@
         <compile module="examples" refid="path.ext"/>
     </target>
 
+    <target name="compile-viewer" depends="compile" description="Compile viewer">
+        <compile module="viewer" refid="path.ext"/>
+    </target>
+
     <target name="compile-test" depends="compile-examples" description="Compile tests">
         <compile module="test" refid="path.examples"/>
     </target>
 
-    <target name="compile-all" depends="compile-test" description="Compile all classes"/>
+    <target name="compile-all" depends="compile-test,compile-viewer" description="Compile all classes"/>
 
     <macrodef name="compile">
         <attribute name="module"/>
@@ -140,17 +148,17 @@
     <macrodef name="viewerImpl">
         <attribute name="file"/>
         <sequential>
-            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.examples" fork="yes">
+            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.viewer" fork="yes">
                 <arg value="@{file}"/>
             </java>
         </sequential>
     </macrodef>
 
-    <target name="viewer" depends="compile-examples" description="Run PNG Viewer application">
+    <target name="viewer" depends="compile-viewer" description="Run PNG Viewer application">
         <viewerImpl file="${viewer.file}"/>
     </target>
 
-    <target name="suite" depends="compile-test, compile-examples" description="Decode and display PngSuite">
+    <target name="suite" depends="compile-test,compile-viewer" description="Decode and display PngSuite">
         <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
             <arg value="${suite.file}"/>
         </java>
@@ -168,6 +176,7 @@
         <delete dir="dist"/>
         <delete file="${user.dir}/coverage.em"/>
         <delete file="${user.dir}/coverage.ec"/>
+        <delete file="${suite.file}"/>
     </target>
 
     <target name="jar" depends="compile" description="Create Jar">
