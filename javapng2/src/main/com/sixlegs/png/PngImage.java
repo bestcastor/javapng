@@ -72,7 +72,7 @@ public class PngImage
     /**
      * TODO
      */
-    public BufferedImage read(InputStream raw, boolean close)
+    public BufferedImage read(InputStream in, boolean close)
     throws IOException
     {
         BufferedImage image = null;
@@ -80,8 +80,8 @@ public class PngImage
         try {
             read = true;
             props.clear();
-            PngInputStream in = new PngInputStream(raw);
-            long sig = in.readLong();
+            PngInputStream pin = new PngInputStream(in);
+            long sig = pin.readLong();
             if (sig != SIGNATURE) {
                 throw new PngError("Improper signature, expected 0x" +
                                    Long.toHexString(SIGNATURE).toUpperCase() + ", got 0x" +
@@ -89,20 +89,20 @@ public class PngImage
             }
             Set seen = new HashSet();
             while (machine.getState() != StateMachine.STATE_END) {
-                int type = in.startChunk(in.readInt());
+                int type = pin.startChunk(pin.readInt());
                 machine.nextState(type);
                 PngChunk chunk = config.getChunk(this, type);
                 if (chunk == null && type == PngChunk.IDAT) {
                     if (config.getMetadataOnly())
                         return null;
-                    image = createImage(new ImageDataInputStream(in, machine));
+                    image = createImage(new ImageDataInputStream(pin, machine));
                     type = machine.getType();
                     chunk = config.getChunk(this, type);
                 }
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
                         throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
-                    in.skipBytes(in.getRemaining());
+                    pin.skipBytes(pin.getRemaining());
                 } else {
                     try {
                         Integer key = Integers.valueOf(type);
@@ -116,20 +116,20 @@ public class PngImage
                                 seen.add(key);
                             }
                         }
-                        chunk.read(type, in, this);
+                        chunk.read(type, pin, this);
                     } catch (PngWarning warning) {
-                        in.skipBytes(in.getRemaining());
+                        pin.skipBytes(pin.getRemaining());
                         config.handleWarning(warning);
                     }
                 }
-                in.endChunk(type);
+                pin.endChunk(type);
             }
             return image;
         } catch (PngError e) {
             throw e;
         } finally {
             if (close)
-                raw.close();
+                in.close();
         }
     }
 
