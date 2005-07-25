@@ -41,9 +41,7 @@ public class PngConfig
     private boolean gammaCorrect = true;
     
     /**
-     * If true, 16-bit samples are reduced to 8-bit samples by
-     * shifting to the right by 8 bits.
-     * Default is true.
+     * @see #setReduce16
      */
     public boolean getReduce16()
     {
@@ -51,7 +49,8 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Enable or disable 16-bit reduction. If enabled, 16-bit samples are reduced to 8-bit samples by
+     * shifting to the right by 8 bits. Default is <i>enabled</i>.
      */
     public void setReduce16(boolean reduce16)
     {
@@ -59,8 +58,7 @@ public class PngConfig
     }
 
     /**
-     * The default gamma value to use if the image does not contain
-     * an explicit gamma value. Initially set to 1/45455.
+     * @see #setDefaultGamma
      */
     public float getDefaultGamma()
     {
@@ -68,7 +66,8 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Set the default gamma value to use if the image does not contain
+     * an explicit gamma value. Initial value is <i>1/45455</i>.
      */
     public void setDefaultGamma(float defaultGamma)
     {
@@ -76,12 +75,7 @@ public class PngConfig
     }
     
     /**
-     * If true, decoded images will be gamma corrected.
-     * Return false if your application will perform the gamma
-     * correctly manually.
-     * Default is true.
-     * @see PngImage#getGamma
-     * @see PngImage#getGammaTable
+     * @see #setGammaCorrect
      */
     public boolean getGammaCorrect()
     {
@@ -89,7 +83,11 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Enable or disable gamma correction. If enabled, decoded images will be gamma corrected.
+     * Set to false if your application will perform gamma correctly manually.
+     * Default is <i>enabled</i>.
+     * @see PngImage#getGamma
+     * @see PngImage#getGammaTable
      */
     public void setGammaCorrect(boolean gammaCorrect)
     {
@@ -97,13 +95,7 @@ public class PngConfig
     }
 
     /**
-     * If true, enables progressive display for interlaced images.
-     * Each received pixel is expanded (replicated) to fill a rectangle
-     * covering the yet-to-be-transmitted pixel positions below and to the right
-     * of the received pixel. This produces a "fade-in" effect as the new image
-     * gradually replaces the old, at the cost of some additional processing time.
-     * Default is false.
-     * @see PngImage#handleFrame
+     * @see #setProgressive
      */
     public boolean getProgressive()
     {
@@ -111,7 +103,13 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Enable or disable progressive display for interlaced images.
+     * If enabled, each received pixel is expanded (replicated) to fill a rectangle
+     * covering the yet-to-be-transmitted pixel positions below and to the right
+     * of the received pixel. This produces a "fade-in" effect as the new image
+     * gradually replaces the old, at the cost of some additional processing time.
+     * Default is <i>disabled</i>.
+     * @see PngImage#handleFrame
      */
     public void setProgressive(boolean progressive)
     {
@@ -119,10 +117,7 @@ public class PngConfig
     }
 
     /**
-     * The default display exponent. Depends on monitor and gamma lookup
-     * table settings, if any. The default value of 2.2 should
-     * work well with most PC displays. If the operating system has
-     * a gamma lookup table (e.g. Macintosh) the display exponent should be lower.
+     * @see #setDisplayExponent
      */
     public float getDisplayExponent()
     {
@@ -130,7 +125,10 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Set the default display exponent. The proper setting depends on monitor and OS gamma lookup
+     * table settings, if any. The default value of <i>2.2</i> should
+     * work well with most PC displays. If the operating system has
+     * a gamma lookup table (e.g. Macintosh) the display exponent should be lower.
      */
     public void setDisplayExponent(float displayExponent)
     {
@@ -138,9 +136,7 @@ public class PngConfig
     }
     
     /**
-     * The user gamma exponent. The ideal setting depends on the user's
-     * particular viewing conditions. Set to greater than 1.0 to darken the mid-level
-     * tones, or less than 1.0 to lighten them. Default is 1.0.
+     * @see #setUserExponent
      */
     public float getUserExponent()
     {
@@ -148,7 +144,9 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * Set the user gamma exponent. The proper setting depends on the user's
+     * particular viewing conditions. Set to greater than 1.0 to darken the mid-level
+     * tones, or less than 1.0 to lighten them. Default is <i>1.0</i>.
      */
     public void setUserExponent(float userExponent)
     {
@@ -160,6 +158,9 @@ public class PngConfig
      * error is found, an instance of {@link PngWarning} is created and
      * passed to this method. To signal that the exception should be treated
      * as a fatal exception, an implementation should re-throw the exception.
+     * <p>
+     * By default, this method will re-throw the warning if the
+     * {@link #setWarningsFatal warningsFatal} property has been enabled.
      * @throws PngWarning if the warning should be treated as fatal
      */
     public void handleWarning(PngWarning e)
@@ -170,7 +171,7 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * @see #setReadLimit
      */
     public int getReadLimit()
     {
@@ -186,7 +187,7 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * @see #setWarningsFatal
      */
     public boolean getWarningsFatal()
     {
