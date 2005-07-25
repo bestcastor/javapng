@@ -24,7 +24,7 @@ package com.sixlegs.png;
  * TODO
  */
 public class ExtendedPngConfig
-extends CompletePngConfig
+extends PngConfig
 {
     private static final PngChunk gIFg = new Chunk_gIFg();
     private static final PngChunk gIFx = new Chunk_gIFx();

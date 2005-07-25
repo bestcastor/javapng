@@ -169,13 +169,9 @@ public class PngConfig
             throw e;
     }
 
-//     /**
-//      * If true, image data will not be decoded.
-//      * Instead, {@link PngImage#read(java.io.File)} and
-//      * {@link PngImage#read(java.io.InputStream, boolean)} will return
-//      * null after reading all of the image metadata.
-//      * {@link BasicPngConfig} defaults to false.
-//      */
+    /**
+     * TODO
+     */
     public int getReadLimit()
     {
         return readLimit;
@@ -216,14 +212,17 @@ public class PngConfig
     private static final PngChunk sRGB = loadChunk(PngChunk.sRGB);
     private static final PngChunk tIME = loadChunk(PngChunk.tIME);
     private static final PngChunk tRNS = loadChunk(PngChunk.tRNS);
+    private static final PngChunk hIST = loadChunk(PngChunk.hIST);
+    private static final PngChunk iCCP = loadChunk(PngChunk.iCCP);
+    private static final PngChunk sPLT = loadChunk(PngChunk.sPLT);
     private static final PngChunk text = loadChunk("com.sixlegs.png.TextChunkReader");
 
-    static PngChunk loadChunk(int chunk)
+    private static PngChunk loadChunk(int chunk)
     {
         return loadChunk("com.sixlegs.png.Chunk_" + PngChunk.getName(chunk));
     }
 
-    static PngChunk loadChunk(String className)
+    private static PngChunk loadChunk(String className)
     {
         try {
             return (PngChunk)Class.forName(className).newInstance();
@@ -244,12 +243,11 @@ public class PngConfig
      * Note that skipping certain critical chunks will guarantee an eventual
      * exception.
      * <p>
-     * {@link BasicPngConfig} has a default implementation for all of the chunk
-     * types defined in Version 1.2 of the PNG Specification except
-     * {@link PngChunk#hIST hIST}, {@link PngChunk#iCCP iCCP}, and
-     * {@link PngChunk#sPLT sPLT}. Those three are added by {@link CompletePngConfig}.
+     * By default this method will return a {@code PngChunk} implementation
+     * for all of the chunk types defined in Version 1.2 of the PNG Specification.
      * @param png the image requesting the chunk
      * @param type the chunk type
+     * @see ExtendedPngConfig
      */
     public PngChunk getChunk(PngImage png, int type)
     {
@@ -265,6 +263,9 @@ public class PngConfig
         case PngChunk.sRGB: return sRGB;
         case PngChunk.tIME: return tIME;
         case PngChunk.tRNS: return tRNS;
+        case PngChunk.hIST: return hIST;
+        case PngChunk.iCCP: return iCCP;
+        case PngChunk.sPLT: return sPLT;
         case PngChunk.iTXt:
         case PngChunk.tEXt:
         case PngChunk.zTXt:
