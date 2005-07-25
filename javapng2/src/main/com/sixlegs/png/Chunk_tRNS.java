@@ -36,22 +36,24 @@ extends PngChunk
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_GRAY:
             checkLength(length, 2);
-            props.put(PngConstants.TRANSPARENCY_GRAY, Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_GRAY, new int[]{ in.readUnsignedShort() });
             break;
 
         case PngConstants.COLOR_TYPE_RGB:
             checkLength(length, 6);
-            props.put(PngConstants.TRANSPARENCY_RED,   Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngConstants.TRANSPARENCY_GREEN, Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngConstants.TRANSPARENCY_BLUE,  Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.TRANSPARENCY_RGB, new int[]{
+                in.readUnsignedShort(),
+                in.readUnsignedShort(),
+                in.readUnsignedShort(),
+            });
             break;
 
         case PngConstants.COLOR_TYPE_PALETTE:
-            byte[] r = (byte[])png.getProperty(PngConstants.PALETTE_RED);
-            if (length > r.length)
-                throw new PngError("Too many transparency palette entries (" + length + " > " + r.length + ")");
+            int paletteSize = ((byte[])png.getProperty(PngConstants.PALETTE)).length / 3;
+            if (length > paletteSize)
+                throw new PngError("Too many transparency palette entries (" + length + " > " + paletteSize + ")");
 
-            byte[] alpha = new byte[r.length];
+            byte[] alpha = new byte[paletteSize];
             Arrays.fill(alpha, (byte)0xFF);
             for (int i = 0; i < length; i++)
                 alpha[i] = in.readByte();

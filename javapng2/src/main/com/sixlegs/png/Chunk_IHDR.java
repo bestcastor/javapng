@@ -96,16 +96,5 @@ extends PngChunk
         props.put(PngConstants.FILTER, Integers.valueOf(filter));
         props.put(PngConstants.COLOR_TYPE, Integers.valueOf(colorType));
         props.put(PngConstants.SIGNIFICANT_BITS, sbits);
-
-        if (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16) {
-            int size = 1 << bitDepth;
-            byte[] palette = new byte[size];
-            for (int i = 0; i < size; i++) {
-                palette[i] = (byte)(i * 255 / (size - 1));
-            }
-            props.put(PngConstants.PALETTE_RED, palette);
-            props.put(PngConstants.PALETTE_GREEN, palette);
-            props.put(PngConstants.PALETTE_BLUE, palette);
-        }
     }
 }

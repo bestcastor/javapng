@@ -47,9 +47,11 @@ extends PngChunk
         default:
             // truecolor
             checkLength(length, 6);
-            props.put(PngConstants.BACKGROUND_RED,   Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngConstants.BACKGROUND_GREEN, Integers.valueOf(in.readUnsignedShort()));
-            props.put(PngConstants.BACKGROUND_BLUE,  Integers.valueOf(in.readUnsignedShort()));
+            props.put(PngConstants.BACKGROUND_RGB, new int[]{
+                in.readUnsignedShort(),
+                in.readUnsignedShort(),
+                in.readUnsignedShort(),
+            });
         }
     }
 }

@@ -20,6 +20,7 @@ Boston, MA  02111-1307, USA.
 
 package com.sixlegs.png;
 
+// TODO: get rid of interface, make BasicPngConfig base class?
 /**
  * An interface which defines all of the customizable parameters
  * used by {@link PngImage} when decoding an image.
