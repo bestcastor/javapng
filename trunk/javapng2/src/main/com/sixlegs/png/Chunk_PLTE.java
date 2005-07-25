@@ -21,7 +21,6 @@ Boston, MA  02111-1307, USA.
 package com.sixlegs.png;
 
 import java.io.*;
-import java.util.Map;
 
 class Chunk_PLTE
 extends PngChunk
