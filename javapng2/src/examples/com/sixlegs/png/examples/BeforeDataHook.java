@@ -4,7 +4,7 @@ import com.sixlegs.png.*;
 import java.io.IOException;
 
 abstract public class BeforeDataHook
-extends BasicPngConfig
+extends PngConfig
 {
     abstract public void process(PngImage png);
     

@@ -1,6 +1,6 @@
 package com.sixlegs.png.viewer;
 
-import com.sixlegs.png.BasicPngConfig;
+import com.sixlegs.png.PngConfig;
 import com.sixlegs.png.PngImage;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -12,7 +12,7 @@ import javax.swing.*;
 
 public class Viewer
 {
-    private BasicPngConfig config = new BasicPngConfig();
+    private PngConfig config = new PngConfig();
     private int progressiveDelay = 0; // TODO
     private ImagePanel imagePanel;
     private Paint checker;
@@ -43,7 +43,7 @@ public class Viewer
         File file = (args.length > 0) ? new File(args[0]) : null;
         if (file != null) {
             try {
-                PngImage png = readMetadata(file);        
+                PngImage png = readHeader(file);        
                 size.setSize(png.getWidth(), png.getHeight());
             } catch (IOException e) {
                 // ignore here, open will re-throw
@@ -79,11 +79,11 @@ public class Viewer
         }, file)).start();
     }
 
-    private static PngImage readMetadata(File file)
+    private static PngImage readHeader(File file)
     throws IOException
     {
-        BasicPngConfig config = new BasicPngConfig();
-        config.setMetadataOnly(true);
+        PngConfig config = new PngConfig();
+        config.setReadLimit(PngConfig.READ_HEADER);
         PngImage png = new PngImage(config);
         png.read(file);
         return png;

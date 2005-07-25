@@ -11,12 +11,12 @@ public class PngCheck
     throws IOException
     {
         final List errors = new ArrayList();
-        BasicPngConfig config = new BasicPngConfig(){
+        PngConfig config = new PngConfig(){
             public void handleWarning(PngWarning e) {
                 System.out.println("Warning: " + e.getMessage());
             }
         };
-        config.setMetadataOnly(true);
+        config.setReadLimit(PngConfig.READ_UNTIL_DATA);
         new PngImage(config).read(new File(args[0]));
     }
 }

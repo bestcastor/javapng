@@ -50,7 +50,7 @@ extends PngTestCase
     }
 
     private static class MyPngConfig
-    extends BasicPngConfig
+    extends PngConfig
     {
         private static final String ORIGINAL_GIF = "original_gif";
         private static final int msOG = PngChunk.getType("msOG");
@@ -107,7 +107,7 @@ extends PngTestCase
     private PngImage readResource(String path)
     throws IOException
     {
-        return readResource(path, new BasicPngConfig());
+        return readResource(path, new PngConfig());
     }
 
     private PngImage readResource(String path, PngConfig config)

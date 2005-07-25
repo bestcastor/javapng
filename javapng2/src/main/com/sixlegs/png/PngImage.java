@@ -37,11 +37,11 @@ public class PngImage
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
     /**
-     * Constructor which uses a new instance of {@link BasicPngConfig}.
+     * Constructor which uses a new instance of {@link PngConfig}.
      */
     public PngImage()
     {
-        this(new BasicPngConfig());
+        this(new PngConfig());
     }
 
     /**
@@ -91,14 +91,16 @@ public class PngImage
             while (machine.getState() != StateMachine.STATE_END) {
                 int type = pin.startChunk(pin.readInt());
                 machine.nextState(type);
-                PngChunk chunk = config.getChunk(this, type);
-                if (chunk == null && type == PngChunk.IDAT) {
-                    if (config.getMetadataOnly())
+                if (type == PngChunk.IDAT) {
+                    if (config.getReadLimit() == PngConfig.READ_UNTIL_DATA)
                         return null;
-                    image = createImage(new ImageDataInputStream(pin, machine));
+                    ImageDataInputStream data = new ImageDataInputStream(pin, machine);
+                    image = createImage(data);
+                    if (data.read() != -1)
+                        pin.skipBytes(pin.getRemaining());
                     type = machine.getType();
-                    chunk = config.getChunk(this, type);
                 }
+                PngChunk chunk = config.getChunk(this, type);
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
                         throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
@@ -117,6 +119,8 @@ public class PngImage
                             }
                         }
                         chunk.read(type, pin, this);
+                        if (type == PngChunk.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
+                            return null;
                     } catch (PngWarning warning) {
                         pin.skipBytes(pin.getRemaining());
                         config.handleWarning(warning);
@@ -139,6 +143,8 @@ public class PngImage
     protected BufferedImage createImage(InputStream in)
     throws IOException
     {
+        if (config.getReadLimit() == PngConfig.READ_EXCEPT_DATA)
+            return null;
         return ImageFactory.createImage(this, in);
     }
 

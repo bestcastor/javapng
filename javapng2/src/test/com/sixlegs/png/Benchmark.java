@@ -34,7 +34,7 @@ public class Benchmark
     }
 
     private static PngReader SIXLEGS2 = new PngReader(){
-        private PngConfig config = new BasicPngConfig();
+        private PngConfig config = new PngConfig();
         public void read(File file) throws IOException {
             new PngImage(config).read(file);
         }
