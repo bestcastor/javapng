@@ -198,8 +198,10 @@ public class PngImage
         return getInt(PngConstants.COLOR_TYPE);
     }
 
-    // package-protected
-    int getSamples()
+    /**
+     * TODO
+     */
+    public int getSamples()
     {
         switch (getColorType()) {
         case PngConstants.COLOR_TYPE_GRAY_ALPHA: return 2;
@@ -249,9 +251,11 @@ public class PngImage
             if (!props.containsKey(PngConstants.BACKGROUND_INDEX))
                 return null;
             int index = getInt(PngConstants.BACKGROUND_INDEX);
-            return new Color(0xFF & ((byte[])props.get(PngConstants.PALETTE_RED))[index],
-                             0xFF & ((byte[])props.get(PngConstants.PALETTE_GREEN))[index],
-                             0xFF & ((byte[])props.get(PngConstants.PALETTE_BLUE))[index]);
+            byte[] palette = (byte[])props.get(PngConstants.PALETTE);
+            return new Color(0xFF & palette[index * 3 + 0], 
+                             0xFF & palette[index * 3 + 1], 
+                             0xFF & palette[index * 3 + 2]);
+
         case PngConstants.COLOR_TYPE_GRAY:
         case PngConstants.COLOR_TYPE_GRAY_ALPHA:
             if (!props.containsKey(PngConstants.BACKGROUND_GRAY))
@@ -260,15 +264,13 @@ public class PngImage
             return new Color(gray, gray, gray);
             
         default:
-            if (!props.containsKey(PngConstants.BACKGROUND_RED))
+            if (!props.containsKey(PngConstants.BACKGROUND_RGB))
                 return null;
-            int r = getInt(PngConstants.BACKGROUND_RED);
-            int g = getInt(PngConstants.BACKGROUND_GREEN);
-            int b = getInt(PngConstants.BACKGROUND_BLUE);
+            int[] rgb = (int[])props.get(PngConstants.BACKGROUND_RGB);
             if (getBitDepth() == 16) {
-                return new Color(r >> 8, g >> 8, b >> 8);
+                return new Color(rgb[0] >> 8, rgb[1] >> 8, rgb[2] >> 8);
             } else {
-                return new Color(r, g, b);
+                return new Color(rgb[0], rgb[1], rgb[2]);
             }
         }
     }
