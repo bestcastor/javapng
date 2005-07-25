@@ -55,10 +55,8 @@ public class SuiteViewer
         BufferedImage test = null;
         Graphics2D g = null;
         if (createImage) {
-            test = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            test = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             g = test.createGraphics();
-            g.setPaint(Color.gray);
-            g.fillRect(0, 0, w, h);
         }
         int i = 0, ix = 0, iy = 0;
         while (i < IMAGES.length) {
@@ -69,15 +67,9 @@ public class SuiteViewer
             }
             int x = (32 + PADDING) * ix + PADDING / 2;
             int y = (32 + PADDING) * iy + PADDING / 2;
-            // System.err.println("reading " + IMAGES[i]);
             String resource = "/images/suite/" + IMAGES[i] + ".png";
             PngImage png = new PngImage();
             BufferedImage img = png.read(SuiteViewer.class.getResourceAsStream(resource), true);
-//             try {
-//                 img = ImageIO.read(SuiteViewer.class.getResource(resource));
-//             } catch (Exception e) {
-//                 System.err.println("ImageIO could not load " + resource);
-//             }
             if (createImage) {
                 Color bg = png.getBackground();
                 if (bg != null) {

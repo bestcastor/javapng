@@ -24,11 +24,11 @@ package com.sixlegs.png;
  * TODO
  */
 public class CompletePngConfig
-extends BasicPngConfig
+extends PngConfig
 {
-    private static final PngChunk hIST = new Chunk_hIST();
-    private static final PngChunk iCCP = new Chunk_iCCP();
-    private static final PngChunk sPLT = new Chunk_sPLT();
+    private static final PngChunk hIST = loadChunk(PngChunk.hIST);
+    private static final PngChunk iCCP = loadChunk(PngChunk.iCCP);
+    private static final PngChunk sPLT = loadChunk(PngChunk.sPLT);
 
     public PngChunk getChunk(PngImage png, int type)
     {
