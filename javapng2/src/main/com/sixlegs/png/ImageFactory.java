@@ -70,9 +70,9 @@ class ImageFactory
         }
 
         if (pp == null)
-            pp = new BasicPixelProcessor(raster);            
+            pp = new TransferPixelProcessor(raster);            
         if (config.getProgressive() && interlaced)
-            pp = new ProgressivePixelProcessor((BasePixelProcessor)pp, width, height);
+            pp = new ProgressivePixelProcessor(pp, width, height);
 
         InflaterInputStream inflate = new InflaterInputStream(in, new Inflater(), 0x1000);
         Defilterer d = new Defilterer(inflate, raster, bitDepth, samples, pp);

@@ -23,7 +23,7 @@ package com.sixlegs.png;
 import java.awt.image.*;
 
 final class TransGammaPixelProcessor
-extends BasePixelProcessor
+extends PixelProcessor
 {
     final private short[] gammaTable;
     final private int[] trans;
