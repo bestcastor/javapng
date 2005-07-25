@@ -33,6 +33,18 @@ class PngUtils
     {
     }
 
+    public static void readFully(InputStream in, byte[] b, int off, int len)
+    throws IOException
+    {
+        int total = 0;
+        while (total < len) {
+            int result = in.read(b, off + total, len - total);
+            if (result == -1)
+                throw new EOFException();
+            total += result;
+        }
+    }
+
     public static byte[] readCompressed(PngInputStream in, int length)
     throws IOException
     {
