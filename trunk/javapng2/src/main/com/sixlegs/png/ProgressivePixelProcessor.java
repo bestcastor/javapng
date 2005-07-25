@@ -28,16 +28,13 @@ extends PixelProcessor
     final private PixelProcessor pp;
     final private int imgWidth;
     final private int imgHeight;
-    final private WritableRaster dst;
-    final private int[] row;
     
-    public ProgressivePixelProcessor(BasePixelProcessor pp, int imgWidth, int imgHeight)
+    public ProgressivePixelProcessor(PixelProcessor pp, int imgWidth, int imgHeight)
     {
+        super(pp.dst, pp.row);
         this.pp = pp;
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
-        this.dst = pp.dst;
-        this.row = pp.row;
     }
     
     public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)

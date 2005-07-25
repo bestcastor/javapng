@@ -22,10 +22,10 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-final class BasicPixelProcessor
-extends BasePixelProcessor
+final class TransferPixelProcessor
+extends PixelProcessor
 {
-    public BasicPixelProcessor(WritableRaster dst)
+    public TransferPixelProcessor(WritableRaster dst)
     {
         super(dst);
     }
