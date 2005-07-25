@@ -157,6 +157,7 @@ public class PngImage
 
     /** 
      * Returns the image width in pixels.
+     * @throws IllegalStateException if an image has not been read
      */
     public int getWidth()
     {
@@ -165,6 +166,7 @@ public class PngImage
 
     /** 
      * Returns the image height in pixels.
+     * @throws IllegalStateException if an image has not been read
      */
     public int getHeight()
     {
@@ -174,6 +176,7 @@ public class PngImage
     /** 
      * Returns the image bit depth.
      * @return 1, 2, 4, 8, or 16.
+     * @throws IllegalStateException if an image has not been read
      */
     public int getBitDepth()
     {
@@ -184,6 +187,7 @@ public class PngImage
      * Returns the image interlace type.
      * @return {@link PngConstants#INTERLACE_NONE INTERLACE_NONE}
      *    or {@link PngConstants#INTERLACE_ADAM7 INTERLACE_ADAM7}
+     * @throws IllegalStateException if an image has not been read
      */
     public int getInterlace()
     {
@@ -198,6 +202,7 @@ public class PngImage
      *    {@link PngConstants#COLOR_TYPE_PALETTE COLOR_TYPE_PALETTE},<br>
      *    {@link PngConstants#COLOR_TYPE_RGB COLOR_TYPE_RGB},<br>
      *    or {@link PngConstants#COLOR_TYPE_RGB_ALPHA COLOR_TYPE_RGB_ALPHA}
+     * @throws IllegalStateException if an image has not been read
      */
     public int getColorType()
     {
@@ -206,6 +211,7 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public int getSamples()
     {
@@ -219,6 +225,7 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public float getGamma()
     {
@@ -230,6 +237,7 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public short[] getGammaTable()
     {
@@ -248,6 +256,7 @@ public class PngImage
     // TODO: gamma-correct background?
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public Color getBackground()
     {
@@ -283,6 +292,7 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public Object getProperty(String name)
     {
@@ -292,6 +302,7 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public Map getProperties()
     {
@@ -301,9 +312,11 @@ public class PngImage
 
     /**
      * TODO
+     * @throws IllegalStateException if an image has not been read
      */
     public TextChunk getTextChunk(String key)
     {
+        assertRead();
         List list = (List)getProperty(PngConstants.TEXT_CHUNKS);
         if (key != null && list != null) {
             for (Iterator it = list.iterator(); it.hasNext();) {
