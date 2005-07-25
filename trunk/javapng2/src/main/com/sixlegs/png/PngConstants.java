@@ -29,16 +29,12 @@ package com.sixlegs.png;
  */
 public interface PngConstants
 {
-    /** {@link PngChunk#bKGD bKGD}: Background blue sample */
-    static final String BACKGROUND_BLUE = "background_blue";
+    /** {@link PngChunk#bKGD bKGD}: Background RGB sample */
+    static final String BACKGROUND_RGB = "background_rgb";
     /** {@link PngChunk#bKGD bKGD}: Background gray sample */
     static final String BACKGROUND_GRAY = "background_gray";
-    /** {@link PngChunk#bKGD bKGD}: Background green sample */
-    static final String BACKGROUND_GREEN = "background_green";
     /** {@link PngChunk#bKGD bKGD}: Background palette index */
     static final String BACKGROUND_INDEX = "background_index";
-    /** {@link PngChunk#bKGD bKGD}: Background red sample */
-    static final String BACKGROUND_RED = "background_red";
     /** {@link PngChunk#IHDR IHDR}: Bit depth */
     static final String BIT_DEPTH = "bit_depth";
     /** {@link PngChunk#IHDR IHDR}: Color type */
@@ -53,14 +49,10 @@ public interface PngConstants
     static final String HEIGHT = "height";
     /** {@link PngChunk#IHDR IHDR}: Interlace method */
     static final String INTERLACE = "interlace";
-    /** {@link PngChunk#PLTE PLTE}: Palette alpha samples */
+    /** {@link PngChunk#PLTE PLTE}: Palette alpha components */
     static final String PALETTE_ALPHA = "palette_alpha";
-    /** {@link PngChunk#PLTE PLTE}: Palette blue samples */
-    static final String PALETTE_BLUE = "palette_blue";
-    /** {@link PngChunk#PLTE PLTE}: Palette green samples */
-    static final String PALETTE_GREEN = "palette_green";
-    /** {@link PngChunk#PLTE PLTE}: Palette red samples */
-    static final String PALETTE_RED = "palette_red";
+    /** {@link PngChunk#PLTE PLTE}: Palette entries */
+    static final String PALETTE = "palette";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, X axis */
     static final String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, Y axis */
@@ -73,14 +65,10 @@ public interface PngConstants
     static final String TEXT_CHUNKS = "text_chunks";
     /** {@link PngChunk#tIME tIME}: Image last-modification time */
     static final String TIME = "time";
-    /** {@link PngChunk#tRNS tRNS}: Transparency blue sample */
-    static final String TRANSPARENCY_BLUE = "transparency_blue";
+    /** {@link PngChunk#tRNS tRNS}: Transparency RGB sample */
+    static final String TRANSPARENCY_RGB = "transparency_rgb";
     /** {@link PngChunk#tRNS tRNS}: Transparency gray sample */
     static final String TRANSPARENCY_GRAY = "transparency_gray";
-    /** {@link PngChunk#tRNS tRNS}: Transparency green sample */
-    static final String TRANSPARENCY_GREEN = "transparency_green";
-    /** {@link PngChunk#tRNS tRNS}: Transparency red sample */
-    static final String TRANSPARENCY_RED = "transparency_red";
     /** {@link PngChunk#pHYs pHYs}: Unit specifier */
     static final String UNIT = "unit";
     /** {@link PngChunk#IHDR IHDR}: Width */

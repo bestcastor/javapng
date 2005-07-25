@@ -19,9 +19,10 @@ extends PngTestCase
                     Map props = png.getProperties();
                     props.put(PngConstants.COLOR_TYPE,
                               new Integer(PngConstants.COLOR_TYPE_PALETTE));
-                    props.put(PngConstants.PALETTE_RED, new byte[]{ (byte)255, (byte)255 });
-                    props.put(PngConstants.PALETTE_GREEN, new byte[]{ 0, (byte)255 });
-                    props.put(PngConstants.PALETTE_BLUE, new byte[]{ 0, 0 });
+                    props.put(PngConstants.PALETTE, new byte[]{
+                        (byte)255, 0, 0,
+                        (byte)255, (byte)255, 0
+                    });
                 }
             }
         });

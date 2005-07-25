@@ -52,16 +52,10 @@ class ImageFactory
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
             int[] trans = null;
-            if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
-                trans = new int[]{
-                    png.getInt(PngConstants.TRANSPARENCY_GRAY),
-                };
-            } else if (props.containsKey(PngConstants.TRANSPARENCY_RED)) {
-                trans = new int[]{
-                    png.getInt(PngConstants.TRANSPARENCY_RED),
-                    png.getInt(PngConstants.TRANSPARENCY_GREEN),
-                    png.getInt(PngConstants.TRANSPARENCY_BLUE),
-                };
+            if (props.containsKey(PngConstants.TRANSPARENCY_RGB)) {
+                trans = (int[])props.get(PngConstants.TRANSPARENCY_RGB);
+            } else if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
+                trans = (int[])props.get(PngConstants.TRANSPARENCY_GRAY);
             }
             int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
             if (shift != 0 || trans != null || gammaTable != null) {
@@ -113,19 +107,39 @@ class ImageFactory
         int bitDepth = png.getBitDepth();
         int outputDepth = (bitDepth == 16 && png.getConfig().getReduce16()) ? 8 : bitDepth;
 
-        if (colorType == PngConstants.COLOR_TYPE_PALETTE ||
-            (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
-
-            byte[] r = applyGamma((byte[])props.get(PngConstants.PALETTE_RED), gammaTable);
-            byte[] g = applyGamma((byte[])props.get(PngConstants.PALETTE_GREEN), gammaTable);
-            byte[] b = applyGamma((byte[])props.get(PngConstants.PALETTE_BLUE), gammaTable);
+        boolean isPalette = colorType == PngConstants.COLOR_TYPE_PALETTE;
+        if (isPalette || (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
+            byte[] r, g, b;
+            if (isPalette) {
+                byte[] palette = (byte[])props.get(PngConstants.PALETTE);
+                int paletteSize = palette.length / 3;
+                r = new byte[paletteSize];
+                g = new byte[paletteSize];
+                b = new byte[paletteSize];
+                for (int i = 0, p = 0; i < paletteSize; i++) {
+                    r[i] = palette[p++];
+                    g[i] = palette[p++];
+                    b[i] = palette[p++];
+                }
+                applyGamma(r, gammaTable);
+                applyGamma(g, gammaTable);
+                applyGamma(b, gammaTable);
+            } else {
+                int paletteSize = 1 << bitDepth;
+                r = g = b = new byte[paletteSize];
+                for (int i = 0; i < paletteSize; i++) {
+                    r[i] = (byte)(i * 255 / (paletteSize - 1));
+                }
+                applyGamma(r, gammaTable);
+            }
+            
             byte[] a = (byte[])props.get(PngConstants.PALETTE_ALPHA);
             if (a != null) {
                 return new IndexColorModel(outputDepth, r.length, r, g, b, a);
             } else {
                 int trans = -1;
                 if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
-                    trans = png.getInt(PngConstants.TRANSPARENCY_GRAY);
+                    trans = ((int[])props.get(PngConstants.TRANSPARENCY_GRAY))[0];
                     trans = trans * 255 / ((1 << bitDepth) - 1);
                 }
                 return new IndexColorModel(outputDepth, r.length, r, g, b, trans);
@@ -142,7 +156,7 @@ class ImageFactory
                 colorType == PngConstants.COLOR_TYPE_RGB_ALPHA ||
                 colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA ||
                 props.containsKey(PngConstants.TRANSPARENCY_GRAY) ||
-                props.containsKey(PngConstants.TRANSPARENCY_RED);
+                props.containsKey(PngConstants.TRANSPARENCY_RGB);
             // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            null,
@@ -152,21 +166,15 @@ class ImageFactory
                                            dataType);
         }
     }
+
+     private static void applyGamma(byte[] palette, short[] gammaTable)
+     {
+         if (gammaTable != null) {
+             for (int i = 0; i < palette.length; i++)
+                 palette[i] = (byte)gammaTable[0xFF & palette[i]];
+         }
+     }
     
-    private static byte[] applyGamma(byte[] palette, short[] gammaTable)
-    {
-        if (palette == null)
-            return null;
-        if (gammaTable == null)
-            return palette;
-
-        int size = palette.length;
-        byte[] copy = new byte[size];
-        for (int i = 0; i < size; i++)
-            copy[i] = (byte)gammaTable[0xFF & palette[i]];
-        return copy;
-    }
-
     private static short[] getIdentityTable(int bitDepth)
     {
         // TODO: cache identity tables?
