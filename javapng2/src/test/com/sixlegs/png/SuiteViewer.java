@@ -57,6 +57,8 @@ public class SuiteViewer
         if (createImage) {
             test = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             g = test.createGraphics();
+            g.setPaint(Color.gray);
+            g.fillRect(0, 0, w, h);
         }
         int i = 0, ix = 0, iy = 0;
         while (i < IMAGES.length) {
