@@ -29,12 +29,8 @@ package com.sixlegs.png;
  */
 public interface PngConstants
 {
-    /** {@link PngChunk#bKGD bKGD}: Background RGB sample */
-    static final String BACKGROUND_RGB = "background_rgb";
-    /** {@link PngChunk#bKGD bKGD}: Background gray sample */
-    static final String BACKGROUND_GRAY = "background_gray";
-    /** {@link PngChunk#bKGD bKGD}: Background palette index */
-    static final String BACKGROUND_INDEX = "background_index";
+    /** {@link PngChunk#bKGD bKGD}: Background samples */
+    static final String BACKGROUND = "background_rgb";
     /** {@link PngChunk#IHDR IHDR}: Bit depth */
     static final String BIT_DEPTH = "bit_depth";
     /** {@link PngChunk#IHDR IHDR}: Color type */
@@ -49,10 +45,10 @@ public interface PngConstants
     static final String HEIGHT = "height";
     /** {@link PngChunk#IHDR IHDR}: Interlace method */
     static final String INTERLACE = "interlace";
-    /** {@link PngChunk#PLTE PLTE}: Palette alpha components */
-    static final String PALETTE_ALPHA = "palette_alpha";
     /** {@link PngChunk#PLTE PLTE}: Palette entries */
     static final String PALETTE = "palette";
+    /** {@link PngChunk#PLTE PLTE}: Palette alpha */
+    static final String PALETTE_ALPHA = "palette_alpha";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, X axis */
     static final String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, Y axis */
@@ -65,10 +61,8 @@ public interface PngConstants
     static final String TEXT_CHUNKS = "text_chunks";
     /** {@link PngChunk#tIME tIME}: Image last-modification time */
     static final String TIME = "time";
-    /** {@link PngChunk#tRNS tRNS}: Transparency RGB sample */
-    static final String TRANSPARENCY_RGB = "transparency_rgb";
-    /** {@link PngChunk#tRNS tRNS}: Transparency gray sample */
-    static final String TRANSPARENCY_GRAY = "transparency_gray";
+    /** {@link PngChunk#tRNS tRNS}: Transparency samples */
+    static final String TRANSPARENCY = "transparency";
     /** {@link PngChunk#pHYs pHYs}: Unit specifier */
     static final String UNIT = "unit";
     /** {@link PngChunk#IHDR IHDR}: Width */

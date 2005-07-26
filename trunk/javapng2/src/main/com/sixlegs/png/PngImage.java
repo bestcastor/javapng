@@ -261,31 +261,25 @@ public class PngImage
     public Color getBackground()
     {
         assertRead();
+        int[] background = (int[])props.get(PngConstants.BACKGROUND);
+        if (background == null)
+            return null;
         switch (getColorType()) {
         case PngConstants.COLOR_TYPE_PALETTE:
-            if (!props.containsKey(PngConstants.BACKGROUND_INDEX))
-                return null;
-            int index = getInt(PngConstants.BACKGROUND_INDEX);
             byte[] palette = (byte[])props.get(PngConstants.PALETTE);
-            return new Color(0xFF & palette[index * 3 + 0], 
-                             0xFF & palette[index * 3 + 1], 
-                             0xFF & palette[index * 3 + 2]);
-
+            int index = background[0] * 3;
+            return new Color(0xFF & palette[index + 0], 
+                             0xFF & palette[index + 1], 
+                             0xFF & palette[index + 2]);
         case PngConstants.COLOR_TYPE_GRAY:
         case PngConstants.COLOR_TYPE_GRAY_ALPHA:
-            if (!props.containsKey(PngConstants.BACKGROUND_GRAY))
-                return null;
-            int gray = getInt(PngConstants.BACKGROUND_GRAY) * 255 / ((1 << getBitDepth()) - 1);
+            int gray = background[0] * 255 / ((1 << getBitDepth()) - 1);
             return new Color(gray, gray, gray);
-            
         default:
-            if (!props.containsKey(PngConstants.BACKGROUND_RGB))
-                return null;
-            int[] rgb = (int[])props.get(PngConstants.BACKGROUND_RGB);
             if (getBitDepth() == 16) {
-                return new Color(rgb[0] >> 8, rgb[1] >> 8, rgb[2] >> 8);
+                return new Color(background[0] >> 8, background[1] >> 8, background[2] >> 8);
             } else {
-                return new Color(rgb[0], rgb[1], rgb[2]);
+                return new Color(background[0], background[1], background[2]);
             }
         }
     }
