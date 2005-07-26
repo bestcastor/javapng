@@ -30,37 +30,29 @@ extends PngChunk
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
     {
-        int length = in.getRemaining();
         Map props = png.getProperties();
-
+        int length = in.getRemaining();
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_GRAY:
             checkLength(length, 2);
-            props.put(PngConstants.TRANSPARENCY_GRAY, new int[]{ in.readUnsignedShort() });
+            props.put(PngConstants.TRANSPARENCY, new int[]{ in.readUnsignedShort() });
             break;
-
         case PngConstants.COLOR_TYPE_RGB:
             checkLength(length, 6);
-            props.put(PngConstants.TRANSPARENCY_RGB, new int[]{
+            props.put(PngConstants.TRANSPARENCY, new int[]{
                 in.readUnsignedShort(),
                 in.readUnsignedShort(),
                 in.readUnsignedShort(),
             });
             break;
-
         case PngConstants.COLOR_TYPE_PALETTE:
             int paletteSize = ((byte[])png.getProperty(PngConstants.PALETTE)).length / 3;
             if (length > paletteSize)
                 throw new PngError("Too many transparency palette entries (" + length + " > " + paletteSize + ")");
-
-            byte[] alpha = new byte[paletteSize];
-            Arrays.fill(alpha, (byte)0xFF);
-            for (int i = 0; i < length; i++)
-                alpha[i] = in.readByte();
-
-            props.put(PngConstants.PALETTE_ALPHA, alpha);
+            byte[] trans = new byte[length];
+            in.readFully(trans);
+            props.put(PngConstants.PALETTE_ALPHA, trans);
             break;
-
         default:
             throw new PngError("tRNS prohibited for color type " + png.getColorType());
         }

@@ -30,28 +30,26 @@ extends PngChunk
     throws IOException
     {
         int length = in.getRemaining();
-        Map props = png.getProperties();
-        
+        int[] background;
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_PALETTE:
             checkLength(length, 1);
-            props.put(PngConstants.BACKGROUND_INDEX, Integers.valueOf(in.readUnsignedByte()));
+            background = new int[]{ in.readUnsignedByte() };
             break;
-            
         case PngConstants.COLOR_TYPE_GRAY:
         case PngConstants.COLOR_TYPE_GRAY_ALPHA:
             checkLength(length, 2);
-            props.put(PngConstants.BACKGROUND_GRAY, Integers.valueOf(in.readUnsignedShort()));
+            background = new int[]{ in.readUnsignedShort() };
             break;
-            
         default:
             // truecolor
             checkLength(length, 6);
-            props.put(PngConstants.BACKGROUND_RGB, new int[]{
+            background = new int[]{
                 in.readUnsignedShort(),
                 in.readUnsignedShort(),
                 in.readUnsignedShort(),
-            });
+            };
         }
+        png.getProperties().put(PngConstants.BACKGROUND, background);
     }
 }

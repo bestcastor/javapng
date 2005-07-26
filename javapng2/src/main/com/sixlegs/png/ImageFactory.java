@@ -51,12 +51,7 @@ class ImageFactory
 
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
-            int[] trans = null;
-            if (props.containsKey(PngConstants.TRANSPARENCY_RGB)) {
-                trans = (int[])props.get(PngConstants.TRANSPARENCY_RGB);
-            } else if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
-                trans = (int[])props.get(PngConstants.TRANSPARENCY_GRAY);
-            }
+            int[] trans = (int[])props.get(PngConstants.TRANSPARENCY);
             int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
             if (shift != 0 || trans != null || gammaTable != null) {
                 if (gammaTable == null)
@@ -132,14 +127,16 @@ class ImageFactory
                 }
                 applyGamma(r, gammaTable);
             }
-            
-            byte[] a = (byte[])props.get(PngConstants.PALETTE_ALPHA);
-            if (a != null) {
+            if (props.containsKey(PngConstants.PALETTE_ALPHA)) {
+                byte[] trans = (byte[])props.get(PngConstants.PALETTE_ALPHA);
+                byte[] a = new byte[r.length];
+                Arrays.fill(a, trans.length, r.length, (byte)0xFF);
+                System.arraycopy(trans, 0, a, 0, trans.length);
                 return new IndexColorModel(outputDepth, r.length, r, g, b, a);
             } else {
                 int trans = -1;
-                if (props.containsKey(PngConstants.TRANSPARENCY_GRAY)) {
-                    trans = ((int[])props.get(PngConstants.TRANSPARENCY_GRAY))[0];
+                if (props.containsKey(PngConstants.TRANSPARENCY)) {
+                    trans = ((int[])props.get(PngConstants.TRANSPARENCY))[0];
                     trans = trans * 255 / ((1 << bitDepth) - 1);
                 }
                 return new IndexColorModel(outputDepth, r.length, r, g, b, trans);
@@ -155,8 +152,7 @@ class ImageFactory
             boolean hasAlpha =
                 colorType == PngConstants.COLOR_TYPE_RGB_ALPHA ||
                 colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA ||
-                props.containsKey(PngConstants.TRANSPARENCY_GRAY) ||
-                props.containsKey(PngConstants.TRANSPARENCY_RGB);
+                props.containsKey(PngConstants.TRANSPARENCY);
             // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            null,
