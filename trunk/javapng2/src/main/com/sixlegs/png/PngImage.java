@@ -1,21 +1,21 @@
 /*
-com.sixlegs.image.png - Java package to read and display PNG images
-Copyright (C) 1998-2005 Chris Nokleberg
+  com.sixlegs.image.png - Java package to read and display PNG images
+  Copyright (C) 1998-2005 Chris Nokleberg
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Library General Public
-License as published by the Free Software Foundation; either
-version 2 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Library General Public
+  License as published by the Free Software Foundation; either
+  version 2 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Library General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Library General Public License for more details.
 
-You should have received a copy of the GNU Library General Public
-License along with this library; if not, write to the
-Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
+  You should have received a copy of the GNU Library General Public
+  License along with this library; if not, write to the
+  Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+  Boston, MA  02111-1307, USA.
 */
 
 package com.sixlegs.png;
@@ -26,7 +26,17 @@ import java.io.*;
 import java.util.*;
 
 /**
- * TODO
+ * A class to decode PNG images.
+ * The simplest use is if only a decoded {@link BufferedImage} is required:
+ * <pre>BufferedImage image = new PngImage().read(new java.io.File("test.png"));</pre>
+ * The {@code PngImage} instance used to read the image also stores all of the
+ * image metadata. For customized PNG decoding, a {@link PngConfig} object
+ * may be passed to the {@linkplain #PngImage(PngConfig) constructor}.
+ * <p>
+ * For more information visit <a href="http://www.sixlegs.com/">http://www.sixlegs.com/</a>
+ * @version 2.0-rc1 August 5, 2005
+ * @author Chris Nokleberg <a href="mailto:chris@sixlegs.com">&lt;chris@sixlegs.com&gt;</a>
+ * @see PngConfig
  */
 public class PngImage
 {
@@ -53,7 +63,8 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns the configuration used by this object.
+     * @return the {@code PngConfig} instance used by this object
      */
     public PngConfig getConfig()
     {
@@ -61,7 +72,24 @@ public class PngImage
     }
     
     /**
-     * TODO
+     * Reads a PNG image from the specified file. Image metadata will
+     * be stored in the property map of this {@code PngImage} instance,
+     * for retrieval via the various helper methods ({@link #getWidth}, {@link #getHeight}, etc.)
+     * and {@link #getProperty}. The decoded image itself is returned by this
+     * method but not cached.
+     * <p>
+     * If {@link PngConfig#getReadLimit} is anything but {@link PngConfig#READ_ALL},
+     * then this method will return null instead of the decoded image.
+     * <p>
+     * Multiple images can be read using the same {@code PngImage} instance.
+     * The property map is cleared each time this method is called.
+     * This method is not thread-safe.
+     * @param file the file to read
+     * @return the decoded image, or null if no image was decoded
+     * @throws IOException if any error occurred while reading the image
+     * @see #read(java.io.InputStream, boolean)
+     * @see #createImage
+     * @see #handleFrame
      */
     public BufferedImage read(File file)
     throws IOException
@@ -70,7 +98,25 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Reads a PNG image from the specified input stream. Image metadata will
+     * be stored in the property map of this {@code PngImage} instance,
+     * for retrieval via the various helper methods ({@link #getWidth}, {@link #getHeight}, etc.)
+     * and {@link #getProperty}. The decoded image itself is returned by this
+     * method but not cached.
+     * <p>
+     * If {@link PngConfig#getReadLimit} is anything but {@link PngConfig#READ_ALL},
+     * then this method will return null instead of the decoded image.
+     * <p>
+     * Multiple images can be read using the same {@code PngImage} instance.
+     * The property map is cleared each time this method is called.
+     * This method is not thread-safe.
+     * @param in the input stream to read
+     * @param close whether to close the input stream after reading
+     * @return the decoded image, or null if no image was decoded
+     * @throws IOException if any error occurred while reading the image
+     * @see #read(java.io.File)
+     * @see #createImage
+     * @see #handleFrame
      */
     public BufferedImage read(InputStream in, boolean close)
     throws IOException
@@ -138,7 +184,21 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * A hook by which subclasses can access or manipulate the raw image data.
+     * All of the raw, compressed image data contained in the {@code IDAT} chunks
+     * of the PNG image being read is concatenated and passed to this method
+     * as a single input stream. The returned image will become the return value
+     * of the calling {@link #read(java.io.File)} or {@link #read(java.io.InputStream, boolean)}
+     * method.
+     * <p>
+     * The default implementation is to decode the image into a {@link java.awt.image.BufferedImage}
+     * as long as {@link PngConfig#getReadLimit} does not equal {@link PngConfig#READ_EXCEPT_DATA}.
+     * <p>
+     * Unlike {@link PngChunk} implementations, subclasses do not have to read exactly
+     * the correct amount from this stream.
+     * @param in the input stream of raw, compressed image data
+     * @return the decoded image, or null
+     * @throws IOException if any error occurred while processing the image data
      */
     protected BufferedImage createImage(InputStream in)
     throws IOException
@@ -149,7 +209,17 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * A no-op method which subclasses may override to take some action
+     * after each "frame" has been decoded. An interlaced image has seven
+     * frames, and non-interlaced image only one. The {@code framesLeft}
+     * arguments indicates how many additional times the {@code handleFrame}
+     * method will be called. When it reaches zero, the image processing
+     * is complete.
+     * <p>
+     * For interlaced images, the state of the image data before the last
+     * frame is affected by the value of {@link PngConfig#getProgressive}.
+     * @param image the partially or fully decoded image
+     * @param framesLeft how many additional frames remain
      */
     protected void handleFrame(BufferedImage image, int framesLeft)
     {
@@ -175,7 +245,7 @@ public class PngImage
 
     /** 
      * Returns the image bit depth.
-     * @return 1, 2, 4, 8, or 16.
+     * @return 1, 2, 4, 8, or 16
      * @throws IllegalStateException if an image has not been read
      */
     public int getBitDepth()
@@ -210,7 +280,10 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns the number of samples per pixel. Gray and paletted
+     * images use one sample, gray+alpha uses two, RGB uses three,
+     * and RGB+alpha uses four.
+     * @return 1, 2, 3 or 4
      * @throws IllegalStateException if an image has not been read
      */
     public int getSamples()
@@ -224,7 +297,9 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns the gamma exponent that was explicitly encoded in the image,
+     * if there was one, or the value of {@link PngConfig#getDefaultGamma} otherwise.
+     * @return the gamma exponent
      * @throws IllegalStateException if an image has not been read
      */
     public float getGamma()
@@ -236,7 +311,14 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns a gamma table which can be used for custom gamma correction.
+     * The size of the table is 2 to the power of {@link #getBitDepth}, unless
+     * the bit depth is 16 and {@link PngConfig#getReduce16} is true, in which
+     * case the table is 256 entries.
+     * <p>
+     * The values in the table take into account {@link #getGamma},
+     * {@link PngConfig#getDisplayExponent}, and {@link PngConfig#getUserExponent}.
+     * @return a table of component values to be used in gamma correction
      * @throws IllegalStateException if an image has not been read
      */
     public short[] getGammaTable()
@@ -255,7 +337,9 @@ public class PngImage
 
     // TODO: gamma-correct background?
     /**
-     * TODO
+     * Returns the background color explicitly encoded in the image.
+     * For 16-bit images the components are reduced to 8-bit by shifting.
+     * @return the background color, or null
      * @throws IllegalStateException if an image has not been read
      */
     public Color getBackground()
@@ -285,7 +369,89 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns a per-image property by name. All common property names are defined in
+     * {@link PngConstants}; their types are listed in the following table.
+     * The use of the various helper methods defined in this class, such as {@link #getBackground},
+     * is normally preferrable to working with the raw property values.
+     * <p>
+     * <center><table border=1 cellspacing=0 cellpadding=4 width="80%">
+     * <tr bgcolor="#E0E0E0"><td nowrap><b>Property</b></td><td nowrap><b>Type</b></td>
+     * <td><b>Description</b></td></tr>
+     * <tr><td>{@link PngConstants#BIT_DEPTH BIT_DEPTH}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Bit depth</td></tr>
+     * <tr><td>{@link PngConstants#COLOR_TYPE COLOR_TYPE}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Color type</td></tr>
+     * <tr><td>{@link PngConstants#COMPRESSION COMPRESSION}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Compression method</td></tr>
+     * <tr><td>{@link PngConstants#FILTER FILTER}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Filter method</td></tr>
+     * <tr><td>{@link PngConstants#GAMMA GAMMA}</td>
+     * <td>{@link Float Float}</td>
+     * <td>Gamma</td></tr>
+     * <tr><td>{@link PngConstants#WIDTH WIDTH}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Width</td></tr>
+     * <tr><td>{@link PngConstants#HEIGHT HEIGHT}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Height</td></tr>
+     * <tr><td>{@link PngConstants#INTERLACE INTERLACE}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Interlace method</td></tr>
+     * <tr><td>{@link PngConstants#PALETTE PALETTE}</td>
+     * <td>{@code byte[]}</td>
+     * <td>Palette entries</td></tr>
+     * <tr><td>{@link PngConstants#PALETTE_ALPHA PALETTE_ALPHA}</td>
+     * <td>{@code byte[]}</td>
+     * <td>Palette alpha</td></tr>
+     * <tr><td>{@link PngConstants#TRANSPARENCY TRANSPARENCY}</td>
+     * <td>{@code byte[]}</td>
+     * <td>Transparency samples</td></tr>
+     * <tr><td>{@link PngConstants#BACKGROUND BACKGROUND}</td>
+     * <td>{@code int[]}</td>
+     * <td>Background samples</td></tr>
+     * <tr><td>{@link PngConstants#PIXELS_PER_UNIT_X PIXELS_PER_UNIT_X}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Pixels per unit, X axis</td></tr>
+     * <tr><td>{@link PngConstants#PIXELS_PER_UNIT_Y PIXELS_PER_UNIT_Y}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Pixels per unit, Y axis</td></tr>
+     * <tr><td>{@link PngConstants#UNIT UNIT}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Unit specifier</td></tr>
+     * <tr><td>{@link PngConstants#RENDERING_INTENT RENDERING_INTENT}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Rendering intent</td></tr>
+     * <tr><td>{@link PngConstants#SIGNIFICANT_BITS SIGNIFICANT_BITS}</td>
+     * <td>{@code byte[]}</td>
+     * <td>Significant bits</td></tr>
+     * <tr><td>{@link PngConstants#TEXT_CHUNKS TEXT_CHUNKS}</td>
+     * <td>{@link java.util.List List}</td>
+     * <td>List of {@linkplain TextChunk text chunks}</td></tr>
+     * <tr><td>{@link PngConstants#TIME TIME}</td>
+     * <td>{@link java.util.Date Date}</td>
+     * <td>Image last-modification time</td></tr>
+     * <tr><td>{@link PngConstants#CHROMATICITY CHROMATICITY}</td>
+     * <td>{@code float[]}</td>
+     * <td>Chromaticity</td></tr>
+     * <tr><td>{@link PngConstants#ICC_PROFILE ICC_PROFILE}</td>
+     * <td>{@code byte[]}</td>
+     * <td>ICC profile</td></tr>
+     * <tr><td>{@link PngConstants#ICC_PROFILE_NAME ICC_PROFILE_NAME}</td>
+     * <td>{@link String String}</td>
+     * <td>ICC profile name</td></tr>
+     * <tr><td>{@link PngConstants#HISTOGRAM HISTOGRAM}</td>
+     * <td>{@code int[]}</td>
+     * <td>Palette histogram</td></tr>
+     * <tr><td>{@link PngConstants#SUGGESTED_PALETTES SUGGESTED_PALETTES}</td>
+     * <td>{@link java.util.List List}</td>
+     * <td>List of {@linkplain SuggestedPalette suggested palettes}</td></tr>
+     * </table></center>
+     * @param name a property name
+     * @return the property value, or null if no such property exists
      * @throws IllegalStateException if an image has not been read
      */
     public Object getProperty(String name)
@@ -295,7 +461,12 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns the map which stores all of this image's property values.
+     * The map is mutable, and storing a value with the wrong type may
+     * result in other methods in this class throwing a {@code ClassCastException}.
+     * This method is primarily meant for {@link PngChunk} implementations
+     * to store the properties they are responsible for reading.
+     * @return the mutable map of image properties
      * @throws IllegalStateException if an image has not been read
      */
     public Map getProperties()
@@ -305,7 +476,13 @@ public class PngImage
     }
 
     /**
-     * TODO
+     * Returns a text chunk that uses the given keyword, if one exists.
+     * If multiple text chunks share the same keyword, this method
+     * will return the first one that was read. The full list of text
+     * chunks may be accessed by calling
+     * <pre>{@linkplain #getProperty getProperty}({@linkplain PngConstants#TEXT_CHUNKS})</pre>
+     * @param key the text chunk keyword
+     * @return a {@link TextChunk} implementation, or null
      * @throws IllegalStateException if an image has not been read
      */
     public TextChunk getTextChunk(String key)

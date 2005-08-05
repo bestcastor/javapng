@@ -29,8 +29,6 @@ package com.sixlegs.png;
  */
 public interface PngConstants
 {
-    /** {@link PngChunk#bKGD bKGD}: Background samples */
-    static final String BACKGROUND = "background_rgb";
     /** {@link PngChunk#IHDR IHDR}: Bit depth */
     static final String BIT_DEPTH = "bit_depth";
     /** {@link PngChunk#IHDR IHDR}: Color type */
@@ -41,6 +39,8 @@ public interface PngConstants
     static final String FILTER = "filter";
     /** {@link PngChunk#gAMA gAMA}: Gamma */
     static final String GAMMA = "gamma";
+    /** {@link PngChunk#IHDR IHDR}: Width */
+    static final String WIDTH = "width";
     /** {@link PngChunk#IHDR IHDR}: Height */
     static final String HEIGHT = "height";
     /** {@link PngChunk#IHDR IHDR}: Interlace method */
@@ -49,6 +49,10 @@ public interface PngConstants
     static final String PALETTE = "palette";
     /** {@link PngChunk#PLTE PLTE}: Palette alpha */
     static final String PALETTE_ALPHA = "palette_alpha";
+    /** {@link PngChunk#tRNS tRNS}: Transparency samples */
+    static final String TRANSPARENCY = "transparency";
+    /** {@link PngChunk#bKGD bKGD}: Background samples */
+    static final String BACKGROUND = "background_rgb";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, X axis */
     static final String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, Y axis */
@@ -61,28 +65,10 @@ public interface PngConstants
     static final String TEXT_CHUNKS = "text_chunks";
     /** {@link PngChunk#tIME tIME}: Image last-modification time */
     static final String TIME = "time";
-    /** {@link PngChunk#tRNS tRNS}: Transparency samples */
-    static final String TRANSPARENCY = "transparency";
     /** {@link PngChunk#pHYs pHYs}: Unit specifier */
     static final String UNIT = "unit";
-    /** {@link PngChunk#IHDR IHDR}: Width */
-    static final String WIDTH = "width";
-    /** {@link PngChunk#cHRM cHRM}: White Point x */
-    static final String WHITE_POINT_X = "white_point_x";
-    /** {@link PngChunk#cHRM cHRM}: White Point y */
-    static final String WHITE_POINT_Y = "white_point_y";
-    /** {@link PngChunk#cHRM cHRM}: Red x */
-    static final String RED_X = "red_x";
-    /** {@link PngChunk#cHRM cHRM}: Red y */
-    static final String RED_Y = "red_y";
-    /** {@link PngChunk#cHRM cHRM}: Blue x */
-    static final String BLUE_X = "blue_x";
-    /** {@link PngChunk#cHRM cHRM}: Blue y */
-    static final String BLUE_Y = "blue_y";
-    /** {@link PngChunk#cHRM cHRM}: Green x */
-    static final String GREEN_X = "green_x";
-    /** {@link PngChunk#cHRM cHRM}: Green y */
-    static final String GREEN_Y = "green_y";
+    /** {@link PngChunk#cHRM cHRM}: Chromaticity */
+    static final String CHROMATICITY = "chromaticity";
     /** {@link PngChunk#iCCP iCCP}: ICC profile */
     static final String ICC_PROFILE = "icc_profile";
     /** {@link PngChunk#iCCP iCCP}: ICC profile name */

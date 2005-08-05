@@ -23,7 +23,12 @@ package com.sixlegs.png;
 import java.io.*;
 
 /**
- * TODO
+ * Individual chunks in a PNG image are read by implementations of this
+ * class. The {@code PngChunk} instance used to read a particular chunk
+ * is returned by {@link PngConfig#getChunk}. In addition, the type of
+ * chunk being read is passed to the {@link #read} method, to make it
+ * possible for a single {@code PngChunk} implementation to handle
+ * reading multiple chunk types.
  */
 abstract public class PngChunk
 {
@@ -77,12 +82,23 @@ abstract public class PngChunk
     public static final int gIFx = 0x67494678;
 
     /**
-     * TODO
+     * Read the chunk data from the image input stream, storing properties
+     * into the {@code PngImage} instance.
+     * Subclasses are required to read or skip the exact length of the chunk
+     * data. {@link PngInputStream#getRemaining} will return how much chunk data
+     * remains to be read.
+     * @param type the chunk type
+     * @param in the input stream to read the chunk data from
+     * @param png the image into which to store chunk-specific properties
      */
     abstract public void read(int type, PngInputStream in, PngImage png) throws IOException;
 
     /**
-     * TODO
+     * Returns {@code true} if the given chunk type is
+     * allowed to occur multiple times within a single image. The default
+     * implementation always returns {@code false}.
+     * @param type the chunk type
+     * @return whether multiple instances of the chunk type are allowed
      */
     public boolean isMultipleOK(int type)
     {
@@ -90,11 +106,12 @@ abstract public class PngChunk
     }
 
     /**
-     * Returns <code>true</code> if the given type has the ancillary bit set
+     * Returns {@code true} if the given chunk type has the ancillary bit set
      * (the first letter is lowercase).
      * An ancillary chunk is once which is not strictly necessary
      * in order to meaningfully display the contents of the file.
      * @param type the chunk type
+     * @return whether the chunk type ancillary bit is set
      */
     public static boolean isAncillary(int type)
     {
@@ -102,10 +119,11 @@ abstract public class PngChunk
     }
 
     /**
-     * Returns <code>true</code> if the given type has the private bit set
+     * Returns {@code true} if the given chunk type has the private bit set
      * (the second letter is lowercase).
      * All unregistered chunk types should have this bit set.
      * @param type the chunk type
+     * @return whether the chunk type private bit is set
      */
     public static boolean isPrivate(int type)
     {
@@ -113,12 +131,13 @@ abstract public class PngChunk
     }
 
     /**
-     * Returns <code>true</code> if the given type has the reserved bit set
+     * Returns {@code true} if the given chunk type has the reserved bit set
      * (the third letter is lowercase).
      * The meaning of this bit is currently undefined, but reserved for future use.
      * Images conforming to the current version of the PNG specification must
      * not have this bit set.
      * @param type the chunk type
+     * @return whether the chunk type reserved bit is set
      */
     public static boolean isReserved(int type)
     {
@@ -126,11 +145,12 @@ abstract public class PngChunk
     }
 
     /**
-     * Returns <code>true</code> if the given type has the safe-to-copy bit set
+     * Returns {@code true} if the given chunk type has the safe-to-copy bit set
      * (the fourth letter is lowercase).
      * Chunks marked as safe-to-copy may be copied to a modified PNG file
      * whether or not the software recognizes the chunk type.
      * @param type the chunk type
+     * @return whether the chunk safe-to-copy bit is set
      */
     public static boolean isSafeToCopy(int type)
     {
@@ -138,7 +158,11 @@ abstract public class PngChunk
     }
 
     /**
-     * TODO
+     * Returns the four-character ASCII name corresponding to the given
+     * chunk type. For example, {@code PngChunk.getName(PngChunk.IHDR)} will
+     * return {@code "IHDR"}.
+     * @param type the chunk type
+     * @return the four-character ASCII chunk name
      */
     public static String getName(int type)
     {
@@ -150,7 +174,12 @@ abstract public class PngChunk
     }
 
     /**
-     * TODO
+     * Returns the chunk type corresponding to the given four-character
+     * ASCII chunk name.
+     * @param name the four-character ASCII chunk name
+     * @return the chunk type
+     * @throws NullPointerException if {@code name} is null
+     * @throws IndexOutOfBoundsException if {@code name} has less than four characters
      */
     public static int getType(String name)
     {

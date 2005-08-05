@@ -54,8 +54,8 @@ public interface SuggestedPalette
      * specified by {@link #getSampleDepth getSampleDepth}. The color samples are not
      * premultiplied by alpha. An alpha value of 0 means fully transparent.
      * @throws IndexOutOfBoundsException if index < 0, index >= {@link #getSampleCount getSampleCount}, or
-     * <code>pixel.length</code> is less than 4
-     * @throws NullPointerException if <code>pixel</code> is null
+     * {@code pixel.length} is less than 4
+     * @throws NullPointerException if {@code pixel} is null
      * @param index the sample index
      * @param pixel the array in which to store the sample components
      */

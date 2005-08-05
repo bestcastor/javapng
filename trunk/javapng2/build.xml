@@ -200,10 +200,11 @@
         </pmd>
     </target>
 
+    <!-- TODO: stylesheetfile -->
     <target name="javadoc" depends="compile" description="Generate the javadoc">
         <mkdir dir="dist/api"/>
         <javadoc 
-          sourcepath="src/main:src/ext"
+          sourcepath="src/main"
           destdir="dist/api"
           access="${javadoc.access}"
           failonerror="true"
@@ -212,7 +213,9 @@
           Author="true"
           Version="true"
           Use="true"
-        />
+        >
+            <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
+        </javadoc>
     </target>
 
 <!--
