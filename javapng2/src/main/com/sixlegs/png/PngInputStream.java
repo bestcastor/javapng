@@ -24,7 +24,9 @@ import java.io.*;
 import java.util.zip.*;
 
 /**
- * TODO
+ * An input stream used to read PNG chunk data.
+ * @see PngChunk#read
+ * @see #getRemaining
  */
 public class PngInputStream
 extends InputStream
@@ -209,7 +211,13 @@ implements DataInput
     }
 
     ////////// PNG-specific methods //////////
-    
+
+    /**
+     * Returns the number of bytes of chunk data that the
+     * {@link PngChunk#read} method implementation is required to read.
+     * Use {@link #skipBytes} to skip the data.
+     * @return the number of bytes in the chunk remaining to be read
+     */
     public int getRemaining()
     {
         return (int)(length - count);
