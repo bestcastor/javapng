@@ -2,6 +2,7 @@ package com.sixlegs.png;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.AlphaComposite;
 import java.awt.image.*;
 import java.io.*;
 import java.security.MessageDigest;
@@ -38,6 +39,7 @@ extends PngTestCase
                 BufferedImage image = new PngImage(config).read(in, true);
                 Graphics2D g = argb.createGraphics();
                 g.setPaint(new Color(255, 255, 255, 0));
+                g.setComposite(AlphaComposite.Src);
                 g.fillRect(0, 0, argb.getWidth(), argb.getHeight());
                 g.drawImage(image, null, 0, 0);
                 raster.getDataElements(0, 0, image.getWidth(), image.getHeight(), data);

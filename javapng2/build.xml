@@ -14,7 +14,9 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
+    <property name="product" value="javapng"/>
     <property name="version" value="2.0-rc1"/>
+    <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
     <property name="benchmark.file" value="benchmark.txt"/>
@@ -219,24 +221,16 @@
         </javadoc>
     </target>
 
-<!--
-    <target name="dist" depends="clean,test,javadoc,jar" description="Create distribution">
-        <copy todir="dist/src">
-            <fileset dir="src" excludes="test/**,**/*.java~"/>
-        </copy>
-        <copy todir="dist">
-            <fileset dir="." includes="*.txt"/>
-        </copy>
-
-        <fixcrlf srcDir="dist" includes="**/*.txt,**/*.java,**/*.html" eol="unix"/>
-        <tar destfile="dist/png-sixlegs-${version}.tar.gz" compression="gzip">
-            <tarfileset prefix="png-sixlegs-${version}" dir="dist" excludes="*.zip,*.gz"/>
-        </tar>
-
-        <fixcrlf srcDir="dist" includes="**/*.txt,**/*.java,**/*.html" eol="dos"/>
-        <zip destfile="dist/png-sixlegs-${version}.zip">
-            <zipfileset prefix="png-sixlegs-${version}" dir="dist" excludes="*.zip,*.gz"/>
-        </zip>
+    <target name="dist-src" depends="test" description="Create source distribution">
+        <mkdir dir="dist"/>
+        <jar jarfile="dist/${product}-src-${version}.jar" filesonly="true">
+            <zipfileset dir="src" prefix="${prefix}/src">
+                <exclude name="**/*.java~"/>
+                <exclude name="**/*.save"/>
+                <exclude name="test/images/nodist/*.png"/>
+            </zipfileset>
+            <zipfileset dir="lib" prefix="${prefix}/lib"/>
+            <zipfileset dir="." includes="build.xml,COPYING,LICENSE" prefix="${prefix}"/>
+        </jar>
     </target>
--->
 </project>
