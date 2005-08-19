@@ -109,7 +109,7 @@ implements DataInput
     public long skip(long n)
     throws IOException
     {
-        int result = read(tmp, 0, (int)Math.min(Integer.MAX_VALUE, n));
+        int result = read(tmp, 0, (int)Math.min(tmp.length, n));
         return (result < 0) ? 0 : result;
     }
 
