@@ -184,7 +184,7 @@
 
     <target name="jar" depends="compile" description="Create Jar">
         <mkdir dir="dist"/>
-	<jar jarfile="dist/png-${version}.jar">
+	<jar jarfile="dist/${product}-${version}.jar">
 	    <fileset dir="build/main"/>
 	</jar>
 	<jar jarfile="dist/pngext-${version}.jar">
