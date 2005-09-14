@@ -165,16 +165,13 @@ class ImageFactory
                  colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA) ?
                 ColorSpace.CS_GRAY :
                 ColorSpace.CS_sRGB;
-            boolean hasAlpha =
-                colorType == PngConstants.COLOR_TYPE_RGB_ALPHA ||
-                colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA ||
-                props.containsKey(PngConstants.TRANSPARENCY);
+            int transparency = png.getTransparency();
             // TODO: cache/enumerate color models?
             return new ComponentColorModel(ColorSpace.getInstance(colorSpace),
                                            null,
-                                           hasAlpha,
+                                           transparency != Transparency.OPAQUE,
                                            false,
-                                           hasAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE,
+                                           transparency,
                                            dataType);
         }
     }
