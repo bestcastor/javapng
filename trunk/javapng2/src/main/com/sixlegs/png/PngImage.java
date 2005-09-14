@@ -51,7 +51,6 @@ import java.util.*;
  * may be passed to the {@linkplain #PngImage(PngConfig) constructor}.
  * <p>
  * For more information visit <a href="http://www.sixlegs.com/">http://www.sixlegs.com/</a>
- * @version 2.0rc2 September 14, 2005
  * @author Chris Nokleberg <a href="mailto:chris@sixlegs.com">&lt;chris@sixlegs.com&gt;</a>
  * @see PngConfig
  */
