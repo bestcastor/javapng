@@ -37,6 +37,7 @@ exception statement from your version.
 package com.sixlegs.png;
 
 import java.awt.Color;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -55,6 +56,7 @@ import java.util.*;
  * @see PngConfig
  */
 public class PngImage
+implements Transparency
 {
     private PngConfig config;
     private Map props = new HashMap();
@@ -293,6 +295,21 @@ public class PngImage
     public int getColorType()
     {
         return getInt(PngConstants.COLOR_TYPE);
+    }
+
+    /**
+     * Returns the type of this Transparency.
+     * @return the field type of this Transparency, which is either OPAQUE, BITMASK or TRANSLUCENT.
+     * @throws IllegalStateException if an image has not been read
+     */
+    public int getTransparency()
+    {
+        int colorType = getColorType();
+        return (colorType == PngConstants.COLOR_TYPE_RGB_ALPHA ||
+                colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA ||
+                props.containsKey(PngConstants.TRANSPARENCY) ||
+                props.containsKey(PngConstants.PALETTE_ALPHA)) ?
+            TRANSLUCENT : OPAQUE;
     }
 
     /**
