@@ -15,7 +15,7 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="product" value="javapng"/>
-    <property name="version" value="2.0rc2"/>
+    <property name="version" value="2.0-rc2"/>
     <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
@@ -186,9 +186,15 @@
         <mkdir dir="dist"/>
 	<jar jarfile="dist/${prefix}.jar">
 	    <fileset dir="build/main"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
 	</jar>
 	<jar jarfile="dist/pngext-${version}.jar">
 	    <fileset dir="build/ext"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
 	</jar>
     </target>
 
@@ -221,7 +227,7 @@
         </javadoc>
     </target>
 
-    <target name="dist" depends="test,jar,javadoc" description="Create source distribution">
+    <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
         <mkdir dir="dist"/>
         <jar jarfile="dist/${prefix}-dist.jar" filesonly="true">
             <zipfileset dir="src" prefix="${prefix}/src">
@@ -230,7 +236,7 @@
                 <exclude name="test/images/nodist/*.png"/>
             </zipfileset>
             <zipfileset dir="lib" prefix="${prefix}/lib"/>
-            <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,benchmark.txt"/>
+            <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,README,benchmark.txt"/>
             <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,api/**"/>
         </jar>
     </target>
