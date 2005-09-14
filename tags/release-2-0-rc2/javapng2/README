@@ -1,0 +1,55 @@
+Copyright (C) 1998-2005 Chris Nokleberg
+All rights reserved.
+
+README - Sixlegs PNG v2.0-rc2
+
+Features
+
+  Supports all valid bit depths (grayscale/color), interlacing, paletted
+  images, alpha channel/transparency, gamma correction, access to all
+  standard chunks, private chunk handling, and progressive display.
+
+Getting Started
+
+  After including the javapng jar file in your classpath, typical usage
+  is as follows:
+
+  // create a new instance of PngImage
+  com.sixlegs.png.PngImage png = new com.sixlegs.png.PngImage();
+
+  // decode a PNG file into a BufferedImage using the read method
+  java.awt.image.BufferedImage image =
+    png.read(new java.io.File("test.png"));
+
+  // the PngImage object will now provide access to the metadata
+  int colorType = png.getColorType();
+
+Revision History
+
+  Changes from v2.0-rc1 -> v2.0-rc2 (2005-9-14):
+
+    * Fixed a buffering bug in PngInputStream
+    * Made PngImage implement java.awt.Transparency
+
+  Changes from v1.3.0 -> v2.0-rc1 (2005-8-5):
+
+    * Complete rewrite, now requires Java 1.2 or higher
+    * Uses the modern BufferedImage-based Java APIs
+    * Decoded images use less memory
+    * Smaller jar file (under 35K)
+    * Access to raw image data
+    * 16-bit images do not have to be reduced to 8-bit
+    * Faster decoding 
+    * License changed from LGPL to GPL-with-library-exception 
+      (the same as the GNU Classpath project)
+
+Contact Information
+
+  The latest version of this package is available from:
+  http://www.sixlegs.com/
+
+  Please let me know about any problems you encounter, or features
+  that you would find valuable. 
+
+  Chris Nokleberg <chris@sixlegs.com>
+

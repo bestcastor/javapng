@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project name="Sixlegs PNG" default="jar">
+    <property file="${user.home}/build.properties" />
+    <property file="build.properties" />
+
+    <property name="javadoc.access" value="protected"/>
+
+    <property name="compile.source" value="1.2"/>
+    <property name="compile.target" value="1.2"/>
+    <property name="compile.bootclasspath" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.extdirs" value=""/>
+
+    <property name="compile.debug" value="true"/>
+    <property name="compile.deprecation" value="false"/>
+    <property name="compile.optimize" value="false"/>
+
+    <property name="product" value="javapng"/>
+    <property name="version" value="2.0-rc2"/>
+    <property name="prefix" value="${product}-${version}"/>
+    <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
+    <property name="suite.file" value="suite.png"/>
+    <property name="benchmark.file" value="benchmark.txt"/>
+    <property name="benchmark.loop" value="1"/>
+
+    <property name="testmethods" value=""/>
+
+    <target name="init" unless="path.lib">
+        <tstamp/>
+        <path id="path.lib">
+            <fileset dir="lib" includes="**/*.jar"/>
+        </path>
+        <path id="path.main">
+            <path refid="path.lib"/>
+            <pathelement path="build/main"/>
+        </path>
+        <path id="path.ext">
+            <path refid="path.main"/>
+            <pathelement path="build/ext"/>
+        </path>
+        <path id="path.examples">
+            <path refid="path.ext"/>
+            <pathelement path="build/examples"/>
+        </path>
+        <path id="path.viewer">
+            <path refid="path.ext"/>
+            <pathelement path="build/viewer"/>
+        </path>
+        <path id="path.test">
+            <path refid="path.examples"/>
+            <pathelement path="build/test"/>
+        </path>
+        <path id="path.libdev">
+            <path refid="path.lib"/>
+            <fileset dir="libdev" includes="**/*.jar"/>
+        </path>
+        <path id="path.test.emma">
+            <path refid="path.libdev"/>
+            <pathelement path="build/test"/>
+            <pathelement path="build/emma"/>
+        </path>
+    </target>
+
+    <target name="compile" depends="init" description="Compile">
+        <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath}"/>
+        <compile module="ext" refid="path.main" bootclasspath="${compile.bootclasspath}"/>
+    </target>
+
+    <target name="compile-examples" depends="compile" description="Compile examples">
+        <compile module="examples" refid="path.ext"/>
+    </target>
+
+    <target name="compile-viewer" depends="compile" description="Compile viewer">
+        <compile module="viewer" refid="path.ext"/>
+    </target>
+
+    <target name="compile-test" depends="compile-examples" description="Compile tests">
+        <compile module="test" refid="path.examples"/>
+    </target>
+
+    <target name="compile-all" depends="compile-test,compile-viewer" description="Compile all classes"/>
+
+    <macrodef name="compile">
+        <attribute name="module"/>
+        <attribute name="refid"/>
+        <attribute name="bootclasspath" default=""/>
+        <sequential>
+            <mkdir dir="build/@{module}"/>
+            <copy todir="build/@{module}">
+                <fileset dir="src/@{module}" excludes="**/*.java"/>
+            </copy>
+            <javac srcdir="src/@{module}" destdir="build/@{module}"
+              source="${compile.source}"
+              target="${compile.target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
+              debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
+                 <classpath refid="@{refid}"/>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="mytest">
+        <attribute name="includes" default="**/*Test.java"/>
+        <attribute name="refid"/>
+        <attribute name="fork" default="false"/>
+        <sequential>
+            <junit fork="@{fork}">
+                <sysproperty key="testmethods" value="${testmethods}"/>
+                <formatter type="brief" usefile="false"/>
+                <classpath refid="@{refid}"/>
+                <test name="${testcase}" if="testcase"/>
+                <batchtest unless="testcase">
+                    <fileset dir="src/test" includes="@{includes}"/>
+                </batchtest>
+            </junit>
+        </sequential>
+    </macrodef>
+
+    <target name="test" depends="compile-test" description="Run JUnit tests">
+        <mytest refid="path.test"/>
+    </target>
+
+    <target name="todo" depends="compile-test" description="Known JUnit failures">
+        <mytest refid="path.test" includes="**/*Todo.java"/>
+    </target>
+
+    <target name="emma" depends="compile-test" description="Generate code coverage report using Emma">
+        <taskdef resource="emma_ant.properties" classpathref="path.libdev"/>
+        <mkdir dir="build/emma"/>
+        <copy todir="build/emma">
+            <fileset dir="build/main"/>
+            <fileset dir="build/ext"/>
+            <fileset dir="build/examples"/>
+        </copy>
+        <emma enabled="true">
+            <instr
+              instrpath="build/emma"
+              mode="overwrite"
+            />
+        </emma>
+        <mytest refid="path.test.emma" fork="true"/>
+        <mkdir dir="reports"/>
+        <emma enabled="true">
+            <report sourcepath="src/main,src/ext">
+                <infileset dir="${user.dir}" includes="*.em, *.ec"/>
+                <txt outfile="reports/coverage.txt"/>
+                <html outfile="reports/coverage.html"/>
+            </report>
+        </emma>
+    </target>
+
+    <macrodef name="viewerImpl">
+        <attribute name="file"/>
+        <sequential>
+            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.viewer" fork="yes">
+                <arg value="@{file}"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="viewer" depends="compile-viewer" description="Run PNG Viewer application">
+        <viewerImpl file="${viewer.file}"/>
+    </target>
+
+    <target name="suite" depends="compile-test,compile-viewer" description="Decode and display PngSuite">
+        <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
+            <arg value="${suite.file}"/>
+        </java>
+        <viewerImpl file="${suite.file}"/>
+    </target>
+
+    <target name="benchmark" depends="compile-test" description="Run simple benchmark">
+        <java classname="com.sixlegs.png.Benchmark" classpathref="path.test" input="${benchmark.file}">
+            <arg value="${benchmark.loop}"/>
+        </java>
+    </target>
+
+    <target name="clean" description="Clean">
+        <delete dir="build"/>
+        <delete dir="dist"/>
+        <delete dir="reports"/>
+        <delete file="${user.dir}/coverage.em"/>
+        <delete file="${user.dir}/coverage.ec"/>
+        <delete file="${suite.file}"/>
+    </target>
+
+    <target name="jar" depends="compile" description="Create Jar">
+        <mkdir dir="dist"/>
+	<jar jarfile="dist/${prefix}.jar">
+	    <fileset dir="build/main"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+	</jar>
+	<jar jarfile="dist/pngext-${version}.jar">
+	    <fileset dir="build/ext"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+	</jar>
+    </target>
+
+    <target name="pmd" depends="init" description="Find bugs using PMD">
+        <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="path.libdev"/>
+        <mkdir dir="reports"/>
+        <pmd rulesetfiles="rulesets/basic.xml,rulesets/coupling.xml,rulesets/imports.xml,rulesets/unusedcode.xml">
+            <formatter type="html" toFile="reports/pmd_report.html"/>
+            <fileset dir="src/main">
+                <include name="**/*.java"/>
+            </fileset>
+        </pmd>
+    </target>
+
+    <!-- TODO: stylesheetfile -->
+    <target name="javadoc" depends="compile" description="Generate the javadoc">
+        <mkdir dir="dist/api"/>
+        <javadoc 
+          sourcepath="src/main"
+          destdir="dist/api"
+          access="${javadoc.access}"
+          failonerror="true"
+          packagenames="com.sixlegs.png.*"
+          classpathref="path.ext"
+          Author="true"
+          Version="true"
+          Use="true"
+        >
+            <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
+        </javadoc>
+    </target>
+
+    <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
+        <mkdir dir="dist"/>
+        <jar jarfile="dist/${prefix}-dist.jar" filesonly="true">
+            <zipfileset dir="src" prefix="${prefix}/src">
+                <exclude name="**/*.java~"/>
+                <exclude name="**/*.save"/>
+                <exclude name="test/images/nodist/*.png"/>
+            </zipfileset>
+            <zipfileset dir="lib" prefix="${prefix}/lib"/>
+            <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,README,benchmark.txt"/>
+            <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,api/**"/>
+        </jar>
+    </target>
+</project>
