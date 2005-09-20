@@ -160,7 +160,7 @@ implements Transparency
                     ImageDataInputStream data = new ImageDataInputStream(pin, machine);
                     image = createImage(data);
                     if (data.read() != -1)
-                        pin.skipBytes(pin.getRemaining());
+                        new DataInputStream(data).skipBytes(pin.getRemaining());
                     type = machine.getType();
                 }
                 PngChunk chunk = config.getChunk(this, type);

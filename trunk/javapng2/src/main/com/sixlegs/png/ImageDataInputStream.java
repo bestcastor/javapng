@@ -70,7 +70,7 @@ extends InputStream
                 in.readFully(b, off + total, amt);
                 total += amt;
             }
-            if (total != len) {
+            if (in.getRemaining() <= 0) {
                 in.endChunk(machine.getType());
                 machine.nextState(in.startChunk(in.readInt()));
                 done = machine.getType() != PngChunk.IDAT;

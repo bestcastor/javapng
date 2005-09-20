@@ -300,6 +300,7 @@ public class PngConfig
      * @param png the image requesting the chunk
      * @param type the chunk type
      * @return an instance of {@code PngChunk} which will read the following chunk data, or null
+     * @throws IllegalArgumentException if the type is IDAT
      */
     public PngChunk getChunk(PngImage png, int type)
     {
@@ -322,6 +323,8 @@ public class PngConfig
         case PngChunk.tEXt:
         case PngChunk.zTXt:
             return text;
+        case PngChunk.IDAT:
+            throw new IllegalArgumentException("Unexpected IDAT chunk");
         }
         return null;
     }
