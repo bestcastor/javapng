@@ -30,6 +30,8 @@ Revision History
 
     * Fix decoding when there is leftover IDAT data
     * Move some methods from PngConfig to PngImage
+    * Add handleProgress methods to PngImage
+    * Support abort from handleFrame, handleProgress
 
   Changes from v2.0-rc1 -> v2.0-rc2 (2005-9-14):
 

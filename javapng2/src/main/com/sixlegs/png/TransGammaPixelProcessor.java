@@ -59,7 +59,7 @@ extends BasicPixelProcessor
             throw new IllegalStateException("Expecting alpha channel");
     }
     
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
             src.getPixel(srcX, 0, row);
@@ -78,5 +78,6 @@ extends BasicPixelProcessor
             dst.setPixel(dstX, y, row);
             dstX += xStep;
         }
+        return true;
     }
 }

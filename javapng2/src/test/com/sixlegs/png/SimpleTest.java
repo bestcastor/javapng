@@ -107,6 +107,18 @@ extends PngTestCase
         }), progress);
     }
 
+    public void testAbort()
+    throws Exception
+    {
+        readResource("/images/suite/basi3p04.png", new PngImage(){
+            protected boolean handleFrame(BufferedImage image, int framesLeft) {
+                if (framesLeft != 6)
+                    throw new IllegalStateException("Should have aborted after first frame");
+                return false;
+            }
+        });
+    }
+
     public void testReadAncillary()
     throws Exception
     {

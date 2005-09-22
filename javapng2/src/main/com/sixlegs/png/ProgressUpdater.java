@@ -60,14 +60,16 @@ extends PixelProcessor
         step = Math.max(1, total * STEP_PERCENT / 100);
     }
 
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         pp.process(src, xOffset, xStep, yStep, y, width);
         mod += width;
         count += width;
         if (mod > step) {
             mod %= step;
-            png.handleProgress(image, 100f * count / total);
+            return png.handleProgress(image, 100f * count / total);
+        } else {
+            return true;
         }
     }
 }
