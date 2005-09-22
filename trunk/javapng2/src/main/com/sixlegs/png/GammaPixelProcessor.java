@@ -39,7 +39,7 @@ package com.sixlegs.png;
 import java.awt.image.*;
 
 final class GammaPixelProcessor
-extends PixelProcessor
+extends BasicPixelProcessor
 {
     final private short[] gammaTable;
     final private int shift;
