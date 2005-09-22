@@ -57,7 +57,7 @@ extends BasicPixelProcessor
         shiftAlpha = hasAlpha && shift > 0;
     }
     
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         src.getPixels(0, 0, width, 1, row);
         int total = samples * width;
@@ -68,5 +68,6 @@ extends BasicPixelProcessor
             for (int index = samplesNoAlpha; index < total; index += samples)
                 row[index] >>= shift;
         transfer(xOffset, xStep, y, width);
+        return true;
     }
 }

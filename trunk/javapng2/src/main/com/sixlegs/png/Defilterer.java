@@ -59,13 +59,13 @@ class Defilterer
         bpp = Math.max(1, (bitDepth * samples) >> 3);
     }
 
-    public void defilter(int xOffset, int yOffset,
-                         int xStep, int yStep,
-                         int passWidth, int passHeight)
+    public boolean defilter(int xOffset, int yOffset,
+                            int xStep, int yStep,
+                            int passWidth, int passHeight)
     throws IOException
     {
         if (passWidth == 0 || passHeight == 0)
-            return;
+            return true;
 
         boolean isShort = bitDepth == 16;
         WritableRaster passRow = createInputRaster(bitDepth, samples, raster.getWidth());
@@ -91,11 +91,13 @@ class Defilterer
             } else {
                 System.arraycopy(cur, bpp, byteData, 0, bytesPerRow);
             }
-            pp.process(passRow, xOffset, xStep, yStep, dstY, passWidth);
+            if (!pp.process(passRow, xOffset, xStep, yStep, dstY, passWidth))
+                return false;
             byte[] tmp = cur;
             cur = prev;
             prev = tmp;
         }
+        return true;
     }
 
     private static void defilter(byte[] cur, byte[] prev, int bpp, int filterType)

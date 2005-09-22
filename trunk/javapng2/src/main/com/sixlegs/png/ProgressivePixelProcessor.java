@@ -53,10 +53,11 @@ extends BasicPixelProcessor
         this.imgHeight = imgHeight;
     }
     
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         // run non-progressive processor first
-        pp.process(src, xOffset, xStep, yStep, y, width);
+        if (!pp.process(src, xOffset, xStep, yStep, y, width))
+            return false;
 
         // then replicate pixels across entire block
         int blockHeight = xStep;
@@ -74,5 +75,6 @@ extends BasicPixelProcessor
                 dstX += xStep;
             }
         }
+        return true;
     }
 }

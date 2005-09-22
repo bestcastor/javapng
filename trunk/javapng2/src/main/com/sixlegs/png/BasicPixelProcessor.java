@@ -57,10 +57,11 @@ extends PixelProcessor
         samples = dst.getNumBands();
     }
 
-    public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
         src.getPixels(0, 0, width, 1, row);
         transfer(xOffset, xStep, y, width);
+        return true;
     }
 
     protected void transfer(int xOffset, int xStep, int y, int width)
