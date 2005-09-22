@@ -1,6 +1,5 @@
 package com.sixlegs.png;
 
-import com.sixlegs.png.examples.BeforeDataHook;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Map;
@@ -12,11 +11,11 @@ extends PngTestCase
     public void testRecolorMonochrome()
     throws Exception
     {
-        PngImage png = new PngImage(new BeforeDataHook(){
-            public void process(PngImage png) {
-                if (png.getBitDepth() == 1 &&
-                    png.getColorType() == PngConstants.COLOR_TYPE_GRAY) {
-                    Map props = png.getProperties();
+        PngImage png = new PngImage(){
+            protected BufferedImage createImage(InputStream in) throws IOException {
+                if (getBitDepth() == 1 &&
+                    getColorType() == PngConstants.COLOR_TYPE_GRAY) {
+                    Map props = getProperties();
                     props.put(PngConstants.COLOR_TYPE,
                               new Integer(PngConstants.COLOR_TYPE_PALETTE));
                     props.put(PngConstants.PALETTE, new byte[]{
@@ -24,18 +23,36 @@ extends PngTestCase
                         (byte)255, (byte)255, 0
                     });
                 }
+                return super.createImage(in);
             }
-        });
+        };
         InputStream in = getClass().getResourceAsStream("/images/suite/basn0g01.png");
         BufferedImage img = png.read(in, true);
         javax.imageio.ImageIO.write(img, "PNG", File.createTempFile("recolor", ".png"));
     }
 
+
     public void testPrivateChunk()
     throws Exception
     {
-        PngImage png = readResource("/images/misc/anigif.png", new MyPngConfig());
-        byte[] bytes = (byte[])png.getProperty(MyPngConfig.ORIGINAL_GIF);
+        final String ORIGINAL_GIF = "original_gif";
+        final int msOG_type = PngChunk.getType("msOG");
+
+        PngImage png = readResource("/images/misc/anigif.png", new PngImage(){
+            protected PngChunk getChunk(int type) {
+                if (type == msOG_type) {
+                    return new PngChunk(){
+                        public void read(int type, PngInputStream in, PngImage png) throws IOException {
+                            byte[] bytes = new byte[in.getRemaining()];
+                            in.readFully(bytes);
+                            png.getProperties().put(ORIGINAL_GIF, bytes);
+                        }
+                    };
+                }
+                return super.getChunk(type);
+            }                
+        });
+        byte[] bytes = (byte[])png.getProperty(ORIGINAL_GIF);
 
         assertEquals("MSOFFICE9.0", new String(bytes, 0, 11, "US-ASCII"));
         
@@ -47,26 +64,6 @@ extends PngTestCase
         BufferedImage image = javax.imageio.ImageIO.read(file);
         assertEquals(32, image.getWidth());
         assertEquals(32, image.getHeight());        
-    }
-
-    private static class MyPngConfig
-    extends PngConfig
-    {
-        private static final String ORIGINAL_GIF = "original_gif";
-        private static final int msOG = PngChunk.getType("msOG");
-
-        private static final PngChunk CHUNK = new PngChunk(){
-            public void read(int type, PngInputStream in, PngImage png) throws IOException {
-                byte[] bytes = new byte[in.getRemaining()];
-                in.readFully(bytes);
-                png.getProperties().put(ORIGINAL_GIF, bytes);
-            }
-        };
-        
-        public PngChunk getChunk(PngImage png, int type)
-        {
-            return (type == msOG) ? CHUNK : super.getChunk(png, type);
-        }
     }
 
     public void testRead()
@@ -107,13 +104,12 @@ extends PngTestCase
     private PngImage readResource(String path)
     throws IOException
     {
-        return readResource(path, new PngConfig());
+        return readResource(path, new PngImage());
     }
 
-    private PngImage readResource(String path, PngConfig config)
+    private PngImage readResource(String path, PngImage png)
     throws IOException
     {
-        PngImage png = new PngImage(config);
         InputStream in = getClass().getResourceAsStream(path);
         png.read(in, true);
         return png;

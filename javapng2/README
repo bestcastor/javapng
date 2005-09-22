@@ -26,6 +26,11 @@ Getting Started
 
 Revision History
 
+  Changes from v2.0-rc2 -> v2.0-rc3 (2005-9-??):
+
+    * Fix decoding when there is leftover IDAT data
+    * Move some methods from PngConfig to PngImage
+
   Changes from v2.0-rc1 -> v2.0-rc2 (2005-9-14):
 
     * Fixed a buffering bug in PngInputStream

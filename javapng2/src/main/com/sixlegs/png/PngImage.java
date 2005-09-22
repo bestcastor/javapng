@@ -163,7 +163,7 @@ implements Transparency
                         new DataInputStream(data).skipBytes(pin.getRemaining());
                     type = machine.getType();
                 }
-                PngChunk chunk = config.getChunk(this, type);
+                PngChunk chunk = getChunk(type);
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
                         throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
@@ -186,7 +186,7 @@ implements Transparency
                             return null;
                     } catch (PngWarning warning) {
                         pin.skipBytes(pin.getRemaining());
-                        config.handleWarning(warning);
+                        handleWarning(warning);
                     }
                 }
                 pin.endChunk(type);
@@ -235,13 +235,54 @@ implements Transparency
      * <p>
      * For interlaced images, the state of the image data before the last
      * frame is affected by the value of {@link PngConfig#getProgressive}.
+     * <p>
+     * Image decoding can be aborted by returning false. The default
+     * implementation returns true.
      * @param image the partially or fully decoded image
      * @param framesLeft how many additional frames remain
+     * @return false to abort image decoding
      */
-    protected void handleFrame(BufferedImage image, int framesLeft)
+    protected boolean handleFrame(BufferedImage image, int framesLeft)
     {
+        return true;
     }
 
+    /**
+     * Reports the approximate degree of completion of the current read
+     * call. This method is called periodically during
+     * image decoding. The degree of completion is expressed as a percentage
+     * varying from 0.0F to 100.0F, and is calculated using the number
+     * of pixels decoded. 
+     * <p>
+     * Image decoding can be aborted by returning false. The default
+     * implementation returns true.
+     * @param image the partially or fully decoded image
+     * @param pct the approximate percentage of decoding that has been completed
+     * @return false to abort image decoding
+     */
+    protected boolean handleProgress(BufferedImage image, float pct)
+    {
+        return true;
+    }
+
+    /**
+     * Callback for customized handling of warnings. Whenever a
+     * non-fatal error is found, an instance of {@link PngWarning} is
+     * created and passed to this method. To signal that the exception
+     * should be treated as a fatal exception (and abort image
+     * processing), an implementation should re-throw the exception.
+     * <p>
+     * By default, this method will re-throw the warning if the
+     * {@link PngConfig#setWarningsFatal warningsFatal} property is true.
+     * @throws PngWarning if the warning should be treated as fatal
+     */
+    protected void handleWarning(PngWarning e)
+    throws PngWarning
+    {
+        if (config.getWarningsFatal())
+            throw e;
+    }
+    
     /** 
      * Returns the image width in pixels.
      * @throws IllegalStateException if an image has not been read
@@ -542,5 +583,96 @@ implements Transparency
     {
         if (!read)
             throw new IllegalStateException("Image has not been read");
+    }
+
+    private static final PngChunk IHDR = loadChunk(PngChunk.IHDR);
+    private static final PngChunk PLTE = loadChunk(PngChunk.PLTE);
+    private static final PngChunk IEND = loadChunk(PngChunk.IEND);
+    private static final PngChunk bKGD = loadChunk(PngChunk.bKGD);
+    private static final PngChunk cHRM = loadChunk(PngChunk.cHRM);
+    private static final PngChunk gAMA = loadChunk(PngChunk.gAMA);
+    private static final PngChunk pHYs = loadChunk(PngChunk.pHYs);
+    private static final PngChunk sBIT = loadChunk(PngChunk.sBIT);
+    private static final PngChunk sRGB = loadChunk(PngChunk.sRGB);
+    private static final PngChunk tIME = loadChunk(PngChunk.tIME);
+    private static final PngChunk tRNS = loadChunk(PngChunk.tRNS);
+    private static final PngChunk hIST = loadChunk(PngChunk.hIST);
+    private static final PngChunk iCCP = loadChunk(PngChunk.iCCP);
+    private static final PngChunk sPLT = loadChunk(PngChunk.sPLT);
+    private static final PngChunk text = loadChunk("com.sixlegs.png.TextChunkReader");
+
+    private static final PngChunk gIFg = loadChunk(PngChunk.gIFg);
+    private static final PngChunk gIFx = loadChunk(PngChunk.gIFx);
+    private static final PngChunk oFFs = loadChunk(PngChunk.oFFs);
+    private static final PngChunk pCAL = loadChunk(PngChunk.pCAL);
+    private static final PngChunk sCAL = loadChunk(PngChunk.sCAL);
+
+    private static PngChunk loadChunk(int chunk)
+    {
+        return loadChunk("com.sixlegs.png.Chunk_" + PngChunk.getName(chunk));
+    }
+
+    private static PngChunk loadChunk(String className)
+    {
+        try {
+            return (PngChunk)Class.forName(className).newInstance();
+        } catch (ClassNotFoundException e) {
+            return null;
+        } catch (IllegalAccessException e) {
+            throw new Error(e.getMessage());
+        } catch (InstantiationException e) {
+            throw new Error(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns a {@link PngChunk} implementation for the given chunk type.
+     * The returned chunk object will be responsible for reading the
+     * binary chunk data and populating the property map of this {@code PngImage}
+     * as appropriate. If {@code null} is returned, the chunk is skipped.
+     * Note that skipping certain critical chunks will guarantee an eventual
+     * exception.
+     * <p>
+     * {@code IDAT} chunks are not processed by this method. See {@link #createImage}
+     * for custom handling of the raw image data.
+     * <p>
+     * By default this method will return a {@code PngChunk} implementation
+     * for all of the chunk types defined in Version 1.2 of the PNG Specification
+     * (except {@code IDAT}).
+     * @param png the image requesting the chunk
+     * @param type the chunk type
+     * @return an instance of {@code PngChunk} which will read the following chunk data, or null
+     * @throws IllegalArgumentException if the type is IDAT
+     */
+    protected PngChunk getChunk(int type)
+    {
+        switch (type) {
+        case PngChunk.IHDR: return IHDR;
+        case PngChunk.PLTE: return PLTE;
+        case PngChunk.IEND: return IEND;
+        case PngChunk.bKGD: return bKGD;
+        case PngChunk.cHRM: return cHRM;
+        case PngChunk.gAMA: return gAMA;
+        case PngChunk.pHYs: return pHYs;
+        case PngChunk.sBIT: return sBIT;
+        case PngChunk.sRGB: return sRGB;
+        case PngChunk.tIME: return tIME;
+        case PngChunk.tRNS: return tRNS;
+        case PngChunk.hIST: return hIST;
+        case PngChunk.iCCP: return iCCP;
+        case PngChunk.sPLT: return sPLT;
+        case PngChunk.gIFg: return gIFg;
+        case PngChunk.gIFx: return gIFx;
+        case PngChunk.oFFs: return oFFs;
+        case PngChunk.pCAL: return pCAL;
+        case PngChunk.sCAL: return sCAL;
+        case PngChunk.iTXt:
+        case PngChunk.tEXt:
+        case PngChunk.zTXt:
+            return text;
+        case PngChunk.IDAT:
+            throw new IllegalArgumentException("Unexpected IDAT chunk");
+        }
+        return null;
     }
 }

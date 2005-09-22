@@ -102,7 +102,7 @@ public class Viewer
     private void open(File file)
     {
         new Thread(new ReadPngAction(new PngImage(config){
-            protected void handleFrame(final BufferedImage image, int framesLeft) {
+            protected boolean handleFrame(final BufferedImage image, int framesLeft) {
                 SwingUtilities.invokeLater(new UpdateImageAction(imagePanel, image));
                 if (progressiveDelay > 0 && framesLeft > 0) {
                     try {
@@ -111,6 +111,7 @@ public class Viewer
                         // ignore
                     }
                 }
+                return true;
             }
         }, file)).start();
     }
