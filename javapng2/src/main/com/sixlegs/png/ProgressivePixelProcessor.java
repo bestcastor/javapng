@@ -39,13 +39,13 @@ package com.sixlegs.png;
 import java.awt.image.*;
 
 final class ProgressivePixelProcessor
-extends PixelProcessor
+extends BasicPixelProcessor
 {
     final private PixelProcessor pp;
     final private int imgWidth;
     final private int imgHeight;
     
-    public ProgressivePixelProcessor(PixelProcessor pp, int imgWidth, int imgHeight)
+    public ProgressivePixelProcessor(BasicPixelProcessor pp, int imgWidth, int imgHeight)
     {
         super(pp.dst, pp.row);
         this.pp = pp;

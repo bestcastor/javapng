@@ -38,17 +38,36 @@ package com.sixlegs.png;
 
 import java.awt.image.*;
 
-final class TransferPixelProcessor
+final class ProgressUpdater
 extends PixelProcessor
 {
-    public TransferPixelProcessor(WritableRaster dst)
+    private static final int STEP_PERCENT = 5;
+    
+    final private PngImage png;
+    final private BufferedImage image;
+    final private PixelProcessor pp;
+    final private int total;
+    final private int step;
+    private int count;
+    private int mod;
+    
+    public ProgressUpdater(PngImage png, BufferedImage image, PixelProcessor pp)
     {
-        super(dst);
+        this.png = png;
+        this.image = image;
+        this.pp = pp;
+        total = png.getWidth() * png.getHeight();
+        step = Math.max(1, total * STEP_PERCENT / 100);
     }
 
     public void process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
-        src.getPixels(0, 0, width, 1, row);
-        transfer(xOffset, xStep, y, width);
+        pp.process(src, xOffset, xStep, yStep, y, width);
+        mod += width;
+        count += width;
+        if (mod > step) {
+            mod %= step;
+            png.handleProgress(image, 100f * count / total);
+        }
     }
 }
