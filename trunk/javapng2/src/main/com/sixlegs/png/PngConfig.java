@@ -186,24 +186,6 @@ public class PngConfig
     }
 
     /**
-     * Callback for customized handling of warnings. Whenever a
-     * non-fatal error is found, an instance of {@link PngWarning} is
-     * created and passed to this method. To signal that the exception
-     * should be treated as a fatal exception (and abort image
-     * processing), an implementation should re-throw the exception.
-     * <p>
-     * By default, this method will re-throw the warning if the
-     * {@link #setWarningsFatal warningsFatal} property has been enabled.
-     * @throws PngWarning if the warning should be treated as fatal
-     */
-    public void handleWarning(PngWarning e)
-    throws PngWarning
-    {
-        if (warningsFatal)
-            throw e;
-    }
-
-    /**
      * Returns the current read limit setting.
      * @see #setReadLimit
      */
@@ -238,94 +220,14 @@ public class PngConfig
 
     /**
      * Configures whether warnings should be treated as fatal errors.
-     * All {@link PngWarning} exceptions are caught and passed to the {@link #handleWarning}
+     * All {@link PngWarning} exceptions are caught and passed to the {@link PngImage#handleWarning}
      * method. If warnings are configured as fatal, that method will re-throw the
      * exception, which will abort image processing. Default is <i>false</i>.
      * @param warningsFatal true if warnings should be treated as fatal errors
-     * @see #handleWarning
+     * @see PngImage#handleWarning
      */
     public void setWarningsFatal(boolean warningsFatal)
     {
         this.warningsFatal = warningsFatal;
-    }
-
-    private static final PngChunk IHDR = loadChunk(PngChunk.IHDR);
-    private static final PngChunk PLTE = loadChunk(PngChunk.PLTE);
-    private static final PngChunk IEND = loadChunk(PngChunk.IEND);
-    private static final PngChunk bKGD = loadChunk(PngChunk.bKGD);
-    private static final PngChunk cHRM = loadChunk(PngChunk.cHRM);
-    private static final PngChunk gAMA = loadChunk(PngChunk.gAMA);
-    private static final PngChunk pHYs = loadChunk(PngChunk.pHYs);
-    private static final PngChunk sBIT = loadChunk(PngChunk.sBIT);
-    private static final PngChunk sRGB = loadChunk(PngChunk.sRGB);
-    private static final PngChunk tIME = loadChunk(PngChunk.tIME);
-    private static final PngChunk tRNS = loadChunk(PngChunk.tRNS);
-    private static final PngChunk hIST = loadChunk(PngChunk.hIST);
-    private static final PngChunk iCCP = loadChunk(PngChunk.iCCP);
-    private static final PngChunk sPLT = loadChunk(PngChunk.sPLT);
-    private static final PngChunk text = loadChunk("com.sixlegs.png.TextChunkReader");
-
-    private static PngChunk loadChunk(int chunk)
-    {
-        return loadChunk("com.sixlegs.png.Chunk_" + PngChunk.getName(chunk));
-    }
-
-    private static PngChunk loadChunk(String className)
-    {
-        try {
-            return (PngChunk)Class.forName(className).newInstance();
-        } catch (ClassNotFoundException e) {
-            return null;
-        } catch (IllegalAccessException e) {
-            throw new Error(e.getMessage());
-        } catch (InstantiationException e) {
-            throw new Error(e.getMessage());
-        }
-    }
-
-    /**
-     * Returns a {@link PngChunk} implementation for the given chunk type.
-     * The returned chunk object will be responsible for reading the
-     * binary chunk data and populating the property map of the {@link PngImage}
-     * as appropriate. If {@code null} is returned, the chunk is skipped.
-     * Note that skipping certain critical chunks will guarantee an eventual
-     * exception.
-     * <p>
-     * {@code IDAT} chunks are not processed by this method. See {@link PngImage#createImage}
-     * for custom handling of the raw image data.
-     * <p>
-     * By default this method will return a {@code PngChunk} implementation
-     * for all of the chunk types defined in Version 1.2 of the PNG Specification
-     * (except {@code IDAT}).
-     * @param png the image requesting the chunk
-     * @param type the chunk type
-     * @return an instance of {@code PngChunk} which will read the following chunk data, or null
-     * @throws IllegalArgumentException if the type is IDAT
-     */
-    public PngChunk getChunk(PngImage png, int type)
-    {
-        switch (type) {
-        case PngChunk.IHDR: return IHDR;
-        case PngChunk.PLTE: return PLTE;
-        case PngChunk.IEND: return IEND;
-        case PngChunk.bKGD: return bKGD;
-        case PngChunk.cHRM: return cHRM;
-        case PngChunk.gAMA: return gAMA;
-        case PngChunk.pHYs: return pHYs;
-        case PngChunk.sBIT: return sBIT;
-        case PngChunk.sRGB: return sRGB;
-        case PngChunk.tIME: return tIME;
-        case PngChunk.tRNS: return tRNS;
-        case PngChunk.hIST: return hIST;
-        case PngChunk.iCCP: return iCCP;
-        case PngChunk.sPLT: return sPLT;
-        case PngChunk.iTXt:
-        case PngChunk.tEXt:
-        case PngChunk.zTXt:
-            return text;
-        case PngChunk.IDAT:
-            throw new IllegalArgumentException("Unexpected IDAT chunk");
-        }
-        return null;
     }
 }

@@ -19,7 +19,7 @@ extends PngTestCase
         int[] data = new int[800 * 600];
         byte[] pixbuf = new byte[4];
 
-        ExtendedPngConfig config = new ExtendedPngConfig();
+        PngConfig config = new PngConfig();
         config.setWarningsFatal(true);
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         BufferedReader r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/images.txt")));

@@ -10,13 +10,12 @@ public class PngCheck
     public static void main(String[] args)
     throws IOException
     {
-        final List errors = new ArrayList();
-        PngConfig config = new PngConfig(){
+        PngConfig config = new PngConfig();
+        config.setReadLimit(PngConfig.READ_UNTIL_DATA);
+        (new PngImage(config){
             public void handleWarning(PngWarning e) {
                 System.out.println("Warning: " + e.getMessage());
             }
-        };
-        config.setReadLimit(PngConfig.READ_UNTIL_DATA);
-        new PngImage(config).read(new File(args[0]));
+        }).read(new File(args[0]));
     }
 }

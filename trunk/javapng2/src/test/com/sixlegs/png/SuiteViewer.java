@@ -76,7 +76,7 @@ public class SuiteViewer
                 Color bg = png.getBackground();
                 if (bg != null) {
                     g.setPaint(bg);
-                    g.fillRect(x, y, png.getWidth(), png.getHeight());
+                    g.fillRect(x, y, img.getWidth(), img.getHeight());
                 }
                 g.drawImage(img, x, y, null);
             }
