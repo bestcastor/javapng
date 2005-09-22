@@ -81,7 +81,7 @@ extends PngTestCase
         readResource("/images/misc/cc1.png", new PngImage(){
             protected boolean handleProgress(BufferedImage image, float pct) {
                 progress.add(new Float(pct));
-                return true;
+                return pct < 60f;
             }
         });
         assertEquals(Arrays.asList(new Float[]{
@@ -97,13 +97,6 @@ extends PngTestCase
             new Float(50.555557f),
             new Float(55.555557f),
             new Float(60.555557f),
-            new Float(65.55556f),
-            new Float(70.55556f),
-            new Float(75.55556f),
-            new Float(80.55556f),
-            new Float(85.55556f),
-            new Float(90.55556f),
-            new Float(95.55556f), 
         }), progress);
     }
 
