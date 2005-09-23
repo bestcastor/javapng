@@ -77,12 +77,17 @@
         <compile module="test" refid="path.examples"/>
     </target>
 
-    <target name="compile-all" depends="compile-test,compile-viewer" description="Compile all classes"/>
+    <target name="compile-iio" depends="compile-examples" description="Compile ImageIO plugin">
+        <compile module="iio" refid="path.main" compile.target="1.4"/>
+    </target>
+
+    <target name="compile-all" depends="compile-test,compile-viewer,compile-iio" description="Compile all classes"/>
 
     <macrodef name="compile">
         <attribute name="module"/>
         <attribute name="refid"/>
         <attribute name="bootclasspath" default=""/>
+        <attribute name="compile.target" default="${compile.target}"/>
         <sequential>
             <mkdir dir="build/@{module}"/>
             <copy todir="build/@{module}">
@@ -90,7 +95,7 @@
             </copy>
             <javac srcdir="src/@{module}" destdir="build/@{module}"
               source="${compile.source}"
-              target="${compile.target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
+              target="@{compile.target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
               debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
                  <classpath refid="@{refid}"/>
             </javac>
@@ -182,7 +187,7 @@
         <delete file="${suite.file}"/>
     </target>
 
-    <target name="jar" depends="compile" description="Create Jar">
+    <target name="jar" depends="compile,compile-iio" description="Create Jar">
         <mkdir dir="dist"/>
 	<jar jarfile="dist/${prefix}.jar">
 	    <fileset dir="build/main"/>
@@ -190,11 +195,20 @@
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
 	</jar>
-	<jar jarfile="dist/pngext-${version}.jar">
+	<jar jarfile="dist/${prefix}-ext.jar">
 	    <fileset dir="build/ext"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
+	</jar>
+        <mkdir dir="build/services"/>
+        <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
+	<jar jarfile="dist/${prefix}-iio.jar">
+	    <fileset dir="build/iio"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+            <metainf dir="build" includes="services/**"/>
 	</jar>
     </target>
 
