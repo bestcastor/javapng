@@ -149,9 +149,9 @@ extends ImageReader
         protected boolean handleFrame(BufferedImage image, int framesLeft)
         {
             // TODO: processPassXXX
-            if (framesLeft == 0)
+            if (framesLeft == 0) {
                 processImageComplete();
-            if (abortRequested()) {
+            } else if (abortRequested()) {
                 processReadAborted();
                 return false;
             }
