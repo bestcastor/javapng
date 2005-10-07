@@ -26,7 +26,7 @@ Getting Started
 
 Revision History
 
-  Changes from v2.0-rc2 -> v2.0-rc3 (2005-9-??):
+  Changes from v2.0-rc2 -> v2.0-rc3 (2005-10-7):
 
     * Fix decoding when there is leftover IDAT data
     * Move some methods from PngConfig to PngImage
