@@ -36,9 +36,9 @@ exception statement from your version.
 
 package com.sixlegs.png.iio;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Locale;
-import javax.imageio.*;
+import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 
@@ -53,7 +53,7 @@ extends ImageReaderSpi
               "2.0",
               new String[]{ "png", "PNG" },
               new String[]{ "png", "PNG" },
-              new String[]{ "image/png", },
+              new String[]{ "image/png", "image/x-png"},
               "com.sixlegs.png.iio.PngImageReader",
               new Class[]{ ImageInputStream.class, },
               null, // writer
