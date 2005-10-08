@@ -44,7 +44,7 @@ extends IIOMetadataFormatImpl
 {
 	private static final String rootName = "com.sixlegs.png.iio.PngImageMetadata_v1";
 
-	// -------------------------------------------------- Node names
+	// ---------------------------------------- XML Node and attribute names
 
 	// IHDR attribute names
 	static final String n_IHDR	= "IHDR";
@@ -57,7 +57,7 @@ extends IIOMetadataFormatImpl
 	static final String n_IHDR_interlaceMethod 	= "interlaceMethod";
 
 	// text chunk attribute names
-	//FIXME: Should the different text chunks be differentiated?
+	// represents tEXt, zTXt and iTXt
 	static final String n_TEXT= "TEXT";
 	static final String n_TEXT_keyword 	= "keyword";
 	static final String n_TEXT_text 	= "text";
@@ -68,7 +68,7 @@ extends IIOMetadataFormatImpl
 	static final String n_pHYs_ppuy = "pixelsPerUnitY";
 	static final String n_pHYs_unit = "unitsSpecifier";
 
-	// time modified attributes
+	// time modified attribute names
 	static final String n_tIME = "tIME";
 	static final String n_tIME_year 	= "year";
 	static final String n_tIME_month 	= "month";
@@ -77,7 +77,83 @@ extends IIOMetadataFormatImpl
 	static final String n_tIME_minute 	= "minute";
 	static final String n_tIME_second 	= "second";
 
-	//TODO more chunks
+	// PLTE chunk attribute names
+	static final String n_PLTE = "PLTE";
+	static final String n_PLTE_sample = "entry";
+	static final String n_PLTE_sample_num = "index";
+	static final String n_PLTE_sample_r = "red";
+	static final String n_PLTE_sample_g = "green";
+	static final String n_PLTE_sample_b = "blue";
+
+	// gAMA chunk attribute names
+	static final String n_gAMA = "gAMA";
+	static final String n_gAMA_val= "value";
+
+	// tRNS chunk attribute names
+	static final String n_tRNS = "tRNS";
+	static final String n_tRNS_gs = "greyScaleTrans";
+	static final String n_tRNS_r = "redTrans";
+	static final String n_tRNS_g = "greenTrans";
+	static final String n_tRNS_b = "blueTrans";
+	static final String n_tRNS_plt	= "palleteTrans";
+	static final String n_tRNS_plt_num = "index";
+	static final String n_tRNS_plt_val = "value";
+
+	// bKGD
+	static final String n_bKGD = "bKGD";
+	static final String n_bKGD_plt = "paletteIndex";
+	static final String n_bKGD_grey = "grey";
+	static final String n_bKGD_r = "red";
+	static final String n_bKGD_g = "green";
+	static final String n_bKGD_b = "blue";
+
+	// sRGB
+	static final String n_sRGB = "sRGB";
+	static final String n_sRGB_val = "value";
+
+	// sBIT
+	static final String n_sBIT = "sBIT";
+	static final String n_sBIT_gray = "gray";
+	static final String n_sBIT_r = "red";
+	static final String n_sBIT_g = "green";
+	static final String n_sBIT_b = "blue";
+	static final String n_sBIT_a = "alpha";
+
+	// cHRM
+	static final String n_cHRM = "cHRM";
+	static final String n_cHRM_wx = "whitePointX";
+	static final String n_cHRM_wy = "whitePointY";
+	static final String n_cHRM_rx = "redX";
+	static final String n_cHRM_ry = "redY";
+	static final String n_cHRM_gx = "greenX";
+	static final String n_cHRM_gy = "greenY";
+	static final String n_cHRM_bx = "blueX";
+	static final String n_cHRM_by = "blueY";
+
+	// iCCP
+	static final String n_iCCP = "iCCP";
+	static final String n_iCCP_name = "name";
+	static final String n_iCCP_prof = "profile";
+
+	// hIST
+	static final String n_hIST = "hIST";
+	static final String n_hIST_name= "entry";
+	static final String n_hIST_idx = "index";
+	static final String n_hIST_val = "value";
+
+	// sPLT
+	// TODO the sPLT chunk is not tested as no png image was found with a sPLT
+	// chunk.
+	// The reference test images contain spAL chunks.
+	static final String n_sPLT = "sPLT";
+	static final String n_sPLT_name = "paletteName";
+	static final String n_sPLT_depth= "depth";
+	static final String n_sPLT_node = "entry";
+	static final String n_sPLT_r = "red";
+	static final String n_sPLT_g = "green";
+	static final String n_sPLT_b = "blue";
+	static final String n_sPLT_f = "frequency";
+
 
 	// singleton
 	private static PngImageMetadataFormat defaultInstance =
@@ -90,9 +166,19 @@ extends IIOMetadataFormatImpl
 		super(rootName, CHILD_POLICY_REPEAT);
 
 		setup_IHDR();
-		setup_TextChunks();
+		setup_PLTE();
+		setup_tRNS();
+		setup_gAMA();
 		setup_pHYs();
 		setup_tIME();
+		setup_TextChunks();
+		setup_bKGD();
+		setup_sRGB();
+		setup_sBIT();
+		setup_cHRM();
+		setup_iCCP();
+		setup_hIST();
+		setup_sPLT();
 	}
 
 	private void setup_IHDR()
@@ -106,6 +192,114 @@ extends IIOMetadataFormatImpl
 		addAttribute(n_IHDR, n_IHDR_compressionMethod, DATATYPE_INTEGER, true, null);
 		addAttribute(n_IHDR, n_IHDR_filterMethod, DATATYPE_INTEGER, true, null);
 		addAttribute(n_IHDR, n_IHDR_interlaceMethod, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_sPLT()
+	{
+		addElement(n_sPLT, rootName, CHILD_POLICY_REPEAT);
+
+		addAttribute(n_sPLT, n_sPLT_name, DATATYPE_STRING, true, null);
+		addAttribute(n_sPLT, n_sPLT_depth, DATATYPE_INTEGER, true, null);
+		
+		addElement(n_sPLT_node, n_sPLT, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_sPLT_node, n_sPLT_r, DATATYPE_INTEGER, true, null);
+		addAttribute(n_sPLT_node, n_sPLT_g, DATATYPE_INTEGER, true, null);
+		addAttribute(n_sPLT_node, n_sPLT_b, DATATYPE_INTEGER, true, null);
+		addAttribute(n_sPLT_node, n_sPLT_f, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_hIST()
+	{
+		addElement(n_hIST, rootName, CHILD_POLICY_REPEAT);
+		addElement(n_hIST_name, n_hIST, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_hIST_name, n_hIST_idx, DATATYPE_INTEGER, true, null);
+		addAttribute(n_hIST_name, n_hIST_val, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_iCCP()
+	{
+		addElement(n_iCCP, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_iCCP, n_iCCP_name, DATATYPE_STRING, true, null);
+		addAttribute(n_iCCP, n_iCCP_prof, DATATYPE_STRING, true, null);
+	}
+
+	private void setup_cHRM()
+	{
+		addElement(n_cHRM, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_cHRM, n_cHRM_wx, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_wy, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_rx, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_ry, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_gx, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_gy, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_bx, DATATYPE_FLOAT, true, null);
+		addAttribute(n_cHRM, n_cHRM_by, DATATYPE_FLOAT, true, null);
+	}
+
+	private void setup_sBIT()
+	{
+		addElement(n_sBIT, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_sBIT, n_sBIT_gray, DATATYPE_INTEGER, false, null);
+		addAttribute(n_sBIT, n_sBIT_r, DATATYPE_INTEGER, false, null);
+		addAttribute(n_sBIT, n_sBIT_g, DATATYPE_INTEGER, false, null);
+		addAttribute(n_sBIT, n_sBIT_b, DATATYPE_INTEGER, false, null);
+		addAttribute(n_sBIT, n_sBIT_a, DATATYPE_INTEGER, false, null);
+	}
+
+	private void setup_PLTE()
+	{
+		addElement(n_PLTE, rootName, CHILD_POLICY_REPEAT);
+		addElement(n_PLTE_sample, n_PLTE, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_PLTE_sample, n_PLTE_sample_num, DATATYPE_INTEGER, true, null);
+		addAttribute(n_PLTE_sample, n_PLTE_sample_r, DATATYPE_INTEGER, true, null);
+		addAttribute(n_PLTE_sample, n_PLTE_sample_g, DATATYPE_INTEGER, true, null);
+		addAttribute(n_PLTE_sample, n_PLTE_sample_b, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_tRNS()
+	{
+		addElement(n_tRNS, rootName, CHILD_POLICY_REPEAT);
+		
+		addAttribute(n_tRNS, n_tRNS_gs, DATATYPE_INTEGER, false, null);
+		addAttribute(n_tRNS, n_tRNS_r, DATATYPE_INTEGER, false, null);
+		addAttribute(n_tRNS, n_tRNS_g, DATATYPE_INTEGER, false, null);
+		addAttribute(n_tRNS, n_tRNS_b, DATATYPE_INTEGER, false, null);
+
+		addElement(n_tRNS, n_tRNS_plt, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_tRNS_plt, n_tRNS_plt_num, DATATYPE_INTEGER, true, null);
+		addAttribute(n_tRNS_plt, n_tRNS_plt_val, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_bKGD()
+	{
+		addElement(n_bKGD, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_bKGD, n_bKGD_plt, DATATYPE_INTEGER, false, null);
+		addAttribute(n_bKGD, n_bKGD_grey, DATATYPE_INTEGER, false, null);
+		addAttribute(n_bKGD, n_bKGD_r, DATATYPE_INTEGER, false, null);
+		addAttribute(n_bKGD, n_bKGD_g, DATATYPE_INTEGER, false, null);
+		addAttribute(n_bKGD, n_bKGD_b, DATATYPE_INTEGER, false, null);
+	}
+
+	private void setup_sRGB()
+	{
+		addElement(n_sRGB, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_sRGB, n_sRGB_val, DATATYPE_INTEGER, true, null);
+	}
+
+	private void setup_gAMA()
+	{
+		addElement(n_gAMA, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_gAMA, n_gAMA_val, DATATYPE_FLOAT, true, null);
 	}
 
 	private void setup_TextChunks()
@@ -138,12 +332,27 @@ extends IIOMetadataFormatImpl
 	}
 
 	// Check for legal element names
-	public boolean canNodeAppear(String elementName, ImageTypeSpecifier imageType) 
+	public boolean canNodeAppear(String e, ImageTypeSpecifier imageType) 
 	{
-		if(elementName.equals(n_IHDR)
-				|| elementName.equals(n_TEXT)
-				|| elementName.equals(n_pHYs)
-				|| elementName.equals(n_tIME))
+		if(		   e.equals(n_IHDR)
+				|| e.equals(n_TEXT)
+				|| e.equals(n_pHYs)
+				|| e.equals(n_tIME)
+				|| e.equals(n_PLTE)
+				|| e.equals(n_PLTE_sample)
+				|| e.equals(n_gAMA)
+				|| e.equals(n_tRNS)
+				|| e.equals(n_tRNS_plt)
+				|| e.equals(n_bKGD)
+				|| e.equals(n_sRGB)
+				|| e.equals(n_sBIT)
+				|| e.equals(n_cHRM)
+				|| e.equals(n_iCCP)
+				|| e.equals(n_hIST)
+				|| e.equals(n_hIST_name)
+				|| e.equals(n_sPLT)
+				|| e.equals(n_sPLT_node)
+				)
 			return true;
 		return false;
 	}
