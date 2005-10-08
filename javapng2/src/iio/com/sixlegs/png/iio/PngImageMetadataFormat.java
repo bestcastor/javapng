@@ -45,37 +45,39 @@ extends IIOMetadataFormatImpl
 	private static final String rootName = "com.sixlegs.png.iio.PngImageMetadata_v1";
 
 	// -------------------------------------------------- Node names
-	// FIXME Is there a convention for attribute and node names?
 
-	// root attributes
-	static final String root_width 				= "width";
-	static final String root_height 			= "height";
-	static final String root_bitDepth 			= "bit_depth";
-	static final String root_colorType 			= "color_type";
-	static final String root_compressionMethod 	= "compression_method";
-	static final String root_filterMethod 		= "filter_method";
-	static final String root_interlaceMethod 	= "interlace_method";
+	// IHDR attribute names
+	static final String n_IHDR	= "IHDR";
+	static final String n_IHDR_width 			= "width";
+	static final String n_IHDR_height 			= "height";
+	static final String n_IHDR_bitDepth 		= "bit_depth";
+	static final String n_IHDR_colorType 		= "colorType";
+	static final String n_IHDR_compressionMethod= "compressionMethod";
+	static final String n_IHDR_filterMethod 	= "filterMethod";
+	static final String n_IHDR_interlaceMethod 	= "interlaceMethod";
 
-	// text attributes
-	static final String textData = "TextualInformation";
-	static final String textData_keyValue 		= "KeywordValuePair";
-	static final String textData_keyValue_key 	= "key";
-	static final String textData_keyValue_val 	= "value";
+	// text chunk attribute names
+	//FIXME: Should the different text chunks be differentiated?
+	static final String n_TEXT= "TEXT";
+	static final String n_TEXT_keyword 	= "keyword";
+	static final String n_TEXT_text 	= "text";
 
-	// physical dimension attributes
-	static final String physDimData = "PhysicalDimensions";
-	static final String physDimData_ppux = "pixels_per_unit_X";
-	static final String physDimData_ppuy = "pixels_per_unit_Y";
-	static final String physDimData_unit = "units_specifier";
+	// pHYs chunk attribute names
+	static final String n_pHYs = "pHYs";
+	static final String n_pHYs_ppux = "pixelsPerUnitX";
+	static final String n_pHYs_ppuy = "pixelsPerUnitY";
+	static final String n_pHYs_unit = "unitsSpecifier";
 
 	// time modified attributes
-	static final String timeData = "ImageLastModificationTime";
-	static final String timeData_year 		= "year";
-	static final String timeData_month	 	= "month";
-	static final String timeData_day 		= "day";
-	static final String timeData_hour	 	= "hour";
-	static final String timeData_minute 	= "minute";
-	static final String timeData_second 	= "second";
+	static final String n_tIME = "tIME";
+	static final String n_tIME_year 	= "year";
+	static final String n_tIME_month 	= "month";
+	static final String n_tIME_day 		= "day";
+	static final String n_tIME_hour	 	= "hour";
+	static final String n_tIME_minute 	= "minute";
+	static final String n_tIME_second 	= "second";
+
+	//TODO more chunks
 
 	// singleton
 	private static PngImageMetadataFormat defaultInstance =
@@ -87,57 +89,61 @@ extends IIOMetadataFormatImpl
 		// Set the name of the root node
 		super(rootName, CHILD_POLICY_REPEAT);
 
-		setupRootNode();
-		setupTextualInfo();
-		setupPhysicalPixelDim();
-		setupImageLastModTime();
+		setup_IHDR();
+		setup_TextChunks();
+		setup_pHYs();
+		setup_tIME();
 	}
 
-	private void setupRootNode()
+	private void setup_IHDR()
 	{
-		addAttribute(rootName, root_width, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_height, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_bitDepth, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_colorType, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_compressionMethod, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_filterMethod, DATATYPE_INTEGER, true, null);
-		addAttribute(rootName, root_interlaceMethod, DATATYPE_INTEGER, true, null);
+		addElement(n_IHDR, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_IHDR, n_IHDR_width, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_height, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_bitDepth, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_colorType, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_compressionMethod, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_filterMethod, DATATYPE_INTEGER, true, null);
+		addAttribute(n_IHDR, n_IHDR_interlaceMethod, DATATYPE_INTEGER, true, null);
 	}
 
-	private void setupTextualInfo()
+	private void setup_TextChunks()
 	{
-		addElement(textData, rootName, CHILD_POLICY_REPEAT);
-		addElement(textData_keyValue, textData, CHILD_POLICY_EMPTY);
-		addAttribute(textData_keyValue, textData_keyValue_key, DATATYPE_STRING, true, null);
-		addAttribute(textData_keyValue, textData_keyValue_val, DATATYPE_STRING, true, null);
+		addElement(n_TEXT, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_TEXT, n_TEXT_keyword, DATATYPE_STRING, true, null);
+		addAttribute(n_TEXT, n_TEXT_keyword, DATATYPE_STRING, true, null);
 	}
 
-	private void setupPhysicalPixelDim()
+	private void setup_pHYs()
 	{
-		addElement(physDimData, rootName, CHILD_POLICY_EMPTY);
-		addAttribute(physDimData, physDimData_ppux, DATATYPE_INTEGER, true, null);
-		addAttribute(physDimData, physDimData_ppuy, DATATYPE_INTEGER, true, null);
-		addAttribute(physDimData, physDimData_unit, DATATYPE_INTEGER, true, null);
+		addElement(n_pHYs, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_pHYs, n_pHYs_ppux, DATATYPE_INTEGER, true, null);
+		addAttribute(n_pHYs, n_pHYs_ppuy, DATATYPE_INTEGER, true, null);
+		addAttribute(n_pHYs, n_pHYs_unit, DATATYPE_INTEGER, true, null);
 	}
 
-	private void setupImageLastModTime()
+	private void setup_tIME()
 	{
-		addElement(timeData, rootName, CHILD_POLICY_EMPTY);
-		addAttribute(timeData, timeData_year  , DATATYPE_INTEGER, true, null);
-		addAttribute(timeData, timeData_month , DATATYPE_INTEGER, true, null);
-		addAttribute(timeData, timeData_day   , DATATYPE_INTEGER, true, null);
-		addAttribute(timeData, timeData_hour  , DATATYPE_INTEGER, true, null);
-		addAttribute(timeData, timeData_minute, DATATYPE_INTEGER, true, null);
-		addAttribute(timeData, timeData_second, DATATYPE_INTEGER, true, null);
+		addElement(n_tIME, rootName, CHILD_POLICY_EMPTY);
+
+		addAttribute(n_tIME, n_tIME_year  , DATATYPE_INTEGER, true, null);
+		addAttribute(n_tIME, n_tIME_month , DATATYPE_INTEGER, true, null);
+		addAttribute(n_tIME, n_tIME_day   , DATATYPE_INTEGER, true, null);
+		addAttribute(n_tIME, n_tIME_hour  , DATATYPE_INTEGER, true, null);
+		addAttribute(n_tIME, n_tIME_minute, DATATYPE_INTEGER, true, null);
+		addAttribute(n_tIME, n_tIME_second, DATATYPE_INTEGER, true, null);
 	}
 
 	// Check for legal element names
 	public boolean canNodeAppear(String elementName, ImageTypeSpecifier imageType) 
 	{
-		if(elementName.equals(timeData)
-				|| elementName.equals(textData)
-				|| elementName.equals(textData_keyValue)
-				|| elementName.equals(physDimData))
+		if(elementName.equals(n_IHDR)
+				|| elementName.equals(n_TEXT)
+				|| elementName.equals(n_pHYs)
+				|| elementName.equals(n_tIME))
 			return true;
 		return false;
 	}
