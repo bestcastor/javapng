@@ -60,60 +60,76 @@ extends IIOMetadata
 	private static final String nativeMetadataFormatName = 
 		"com.sixlegs.png.iio.PngImageMetadata_v1";
 
-	// class to hold the metadata
+	// IHDR chunk attributes
+	private class IHDR
+	{
+		int width;
+		int height;
+		int bitDepth;
+		int colorType;
+		int compressionMethod;
+		int filterMethod;
+		int interlaceMethod;
+	}
+
+	// tEXt, zTXt and iTXt attributes
+	private class TEXT
+	{
+		String keyword;
+		String text;
+	}
+
+	// pHYs attributes
+	private class pHYs
+	{
+		int pixelsPerUnitX;
+		int pixelsPerUnitY;
+		int unitsSpecifier;
+	}
+
+	//tIME attributes
+	private class tIME
+	{
+		int year;
+		int month;
+		int day;
+		int hour;
+		int minute;
+		int second;
+	}
+
+	// class to hold the metadata before it is created into an XML document
 	private class Metadata
 	{
-		// IHDR attributes
-		public int width;
-		public int height;
-		public int bitDepth;
-		public int colorType;
-		public int compressionMethod;
-		public int filterMethod;
-		public int interlaceMethod;
-
-		// tEXt, zTXt and iTXt attributes
-		public List textKeys = new ArrayList();
-		public List textVals = new ArrayList();
-
-		// pHYs attributes
-		public boolean pHYs_flag = false;
-		public int pixelsPerUnitX;
-		public int pixelsPerUnitY;
-		public int unitsSpecifier;
-
-		//tIME attributes
-		public boolean tIME_flag = false;
-		public int year;
-		public int month;
-		public int day;
-		public int hour;
-		public int minute;
-		public int second;
+		// metadata is stored here
+		IHDR _IHDR = null;
+		pHYs _pHYs = null;
+		tIME _tIME = null;
+		List _TEXT = new ArrayList();
 
 		// Sets up the metadata
-		public void readPng(PngImage png)
+		public Metadata(PngImage png)
 		{
-			readIHDR(png);
-			readTextAttribs(png);
-			readPhysAttribs(png);
-			readTimeAttribs(png);
+			read_IHDR(png);
+			read_TEXT(png);
+			read_pHYs(png);
+			read_tIME(png);
 		}
 
-		private void readIHDR(PngImage png)
+		private void read_IHDR(PngImage png)
 		{
-			width = png.getWidth();
-			height = png.getHeight();
-			bitDepth = png.getBitDepth();
-			colorType = png.getColorType();
-			compressionMethod = ((Integer)
+			_IHDR.width = png.getWidth();
+			_IHDR.height = png.getHeight();
+			_IHDR.bitDepth = png.getBitDepth();
+			_IHDR.colorType = png.getColorType();
+			_IHDR.compressionMethod = ((Integer)
 					png.getProperty(PngConstants.COMPRESSION)).intValue();
-			filterMethod = ((Integer)
+			_IHDR.filterMethod = ((Integer)
 					png.getProperty(PngConstants.FILTER)).intValue();
-			interlaceMethod = png.getInterlace();
+			_IHDR.interlaceMethod = png.getInterlace();
 		}
 
-		private void readTextAttribs(PngImage png)
+		private void read_TEXT(PngImage png)
 		{
 			List text_chunks = (List)
 				png.getProperty(PngConstants.TEXT_CHUNKS);
@@ -121,55 +137,56 @@ extends IIOMetadata
 			if (text_chunks == null)
 				return;
 
-
 			Iterator itr = text_chunks.iterator();
 
 			while (itr.hasNext())
 			{
 				TextChunk t = (TextChunk) itr.next();
 
-				//NOTE: unsure about these
-				metadata.textKeys.add(t.getKeyword());
-				metadata.textVals.add(t.getText());
+				TEXT txt = new TEXT();
+				txt.keyword = t.getKeyword();
+				txt.text = t.getText();
+
+				_TEXT.add(txt);
 			}
 		}
 
-		private void readPhysAttribs(PngImage png)
+		private void read_pHYs(PngImage png)
 		{
 			// Make sure a pHYs chunk was read
 			if (png.getProperty(PngConstants.PIXELS_PER_UNIT_X) == null)
 				return;
 
-			pHYs_flag = true;
+			_pHYs = new pHYs();
 
-			pixelsPerUnitX = ((Integer)
+			_pHYs.pixelsPerUnitX = ((Integer)
 					png.getProperty(PngConstants.PIXELS_PER_UNIT_X)).intValue();
-			pixelsPerUnitY = ((Integer)
+			_pHYs.pixelsPerUnitY = ((Integer)
 					png.getProperty(PngConstants.PIXELS_PER_UNIT_Y)).intValue();
-			unitsSpecifier = ((Integer)
+			_pHYs.unitsSpecifier = ((Integer)
 					png.getProperty(PngConstants.UNIT)).intValue();
 		}
 
 		// Have to do this because there is no way (that i know of) to store a
 		// date in an XML Node
-		private void readTimeAttribs(PngImage png)
+		private void read_tIME(PngImage png)
 		{
 			Date date = (Date) png.getProperty(PngConstants.TIME);
 
 			if (date == null)
 				return;
 
-			tIME_flag = true;
+			_tIME = new tIME();
 
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(date);
 
-			year 	= cal.get(Calendar.YEAR);
-			month 	= cal.get(Calendar.MONTH);
-			day 	= cal.get(Calendar.DAY_OF_MONTH);
-			hour 	= cal.get(Calendar.HOUR_OF_DAY);
-			minute 	= cal.get(Calendar.MINUTE);
-			second 	= cal.get(Calendar.SECOND);
+			_tIME.year 		= cal.get(Calendar.YEAR);
+			_tIME.month 	= cal.get(Calendar.MONTH);
+			_tIME.day 		= cal.get(Calendar.DAY_OF_MONTH);
+			_tIME.hour 		= cal.get(Calendar.HOUR_OF_DAY);
+			_tIME.minute 	= cal.get(Calendar.MINUTE);
+			_tIME.second 	= cal.get(Calendar.SECOND);
 		}
 	}
 
@@ -179,8 +196,7 @@ extends IIOMetadata
 	{
 		super(false, nativeMetadataFormatName,
 				"com.sixlegs.png.iio.PngImageMetadata", null, null);
-		metadata = new Metadata();
-		metadata.readPng(png);
+		metadata = new Metadata(png);
 	}
 
 	private void checkFormatName(String formatName)
@@ -203,97 +219,93 @@ extends IIOMetadata
 		IIOMetadataNode root =
 			new IIOMetadataNode(nativeMetadataFormatName);
 
-		setRootAttributes(root);
-		addTextMetadata(root);
-		addPhysicalMetadata(root);
-		addTimeMetadata(root);
+		add_IHDR(root);
+		add_TEXT(root);
+		add_pHYs(root);
+		add_tIME(root);
 
 		return root;
 	}
 
-	private void setRootAttributes(IIOMetadataNode root)
+	private void add_IHDR(IIOMetadataNode root)
 	{
-		root.setAttribute(PngImageMetadataFormat.root_width,
-				Integer.toString(metadata.width));
-		root.setAttribute(PngImageMetadataFormat.root_height,
-				Integer.toString(metadata.height));
-		root.setAttribute(PngImageMetadataFormat.root_bitDepth,
-				Integer.toString(metadata.bitDepth));
-		root.setAttribute(PngImageMetadataFormat.root_colorType,
-				Integer.toString(metadata.colorType));
-		root.setAttribute(PngImageMetadataFormat.root_compressionMethod,
-				Integer.toString(metadata.compressionMethod));
-		root.setAttribute(PngImageMetadataFormat.root_filterMethod,
-				Integer.toString(metadata.filterMethod));
-		root.setAttribute(PngImageMetadataFormat.root_interlaceMethod,
-				Integer.toString(metadata.interlaceMethod));
+		IIOMetadataNode node = new
+			IIOMetadataNode(PngImageMetadataFormat.n_IHDR);
+
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_width,
+				Integer.toString(metadata._IHDR.width));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_height,
+				Integer.toString(metadata._IHDR.height));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_bitDepth,
+				Integer.toString(metadata._IHDR.bitDepth));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_colorType,
+				Integer.toString(metadata._IHDR.colorType));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_compressionMethod,
+				Integer.toString(metadata._IHDR.compressionMethod));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_filterMethod,
+				Integer.toString(metadata._IHDR.filterMethod));
+		node.setAttribute(PngImageMetadataFormat.n_IHDR_interlaceMethod,
+				Integer.toString(metadata._IHDR.interlaceMethod));
+
+		root.appendChild(node);
 	}
 
-	private void addTextMetadata(IIOMetadataNode root)
+	private void add_TEXT(IIOMetadataNode root)
 	{
-		IIOMetadataNode textNode = new
-			IIOMetadataNode(PngImageMetadataFormat.textData);
-
-		Iterator keywordIter = metadata.textKeys.iterator();
-		Iterator valueIter = metadata.textVals.iterator();
-
-		while (keywordIter.hasNext()) 
+		Iterator textChunks = metadata._TEXT.iterator();
+		while (textChunks.hasNext()) 
 		{
+			TEXT txt = (TEXT) textChunks.next();
+
 			IIOMetadataNode node = new
-				IIOMetadataNode(PngImageMetadataFormat.textData_keyValue);
+				IIOMetadataNode(PngImageMetadataFormat.n_TEXT);
+			node.setAttribute(PngImageMetadataFormat.n_TEXT_keyword, txt.keyword);
+			node.setAttribute(PngImageMetadataFormat.n_TEXT_text, txt.text);
 
-			node.setAttribute(PngImageMetadataFormat.textData_keyValue_key, 
-					(String) keywordIter.next());
-			node.setAttribute(PngImageMetadataFormat.textData_keyValue_val, 
-					(String) valueIter.next());
-
-			textNode.appendChild(node);
-		}
-
-		root.appendChild(textNode);
-	}
-
-	private void addPhysicalMetadata(IIOMetadataNode root)
-	{
-		if (metadata.pHYs_flag)
-		{
-			IIOMetadataNode phys = new
-				IIOMetadataNode(PngImageMetadataFormat.physDimData);
-
-			phys.setAttribute(PngImageMetadataFormat.physDimData_ppux,
-					Integer.toString(metadata.pixelsPerUnitX));
-			phys.setAttribute(PngImageMetadataFormat.physDimData_ppuy,
-					Integer.toString(metadata.pixelsPerUnitY));
-			phys.setAttribute(PngImageMetadataFormat.physDimData_unit,
-					Integer.toString(metadata.unitsSpecifier));
-
-			root.appendChild(phys);
+			root.appendChild(node);
 		}
 	}
 
-	private void addTimeMetadata(IIOMetadataNode root)
+	private void add_pHYs(IIOMetadataNode root)
 	{
-		
-		if (metadata.tIME_flag)
-		{
-			IIOMetadataNode time= new
-				IIOMetadataNode(PngImageMetadataFormat.timeData);
+		if (metadata._pHYs == null)
+			return;
 
-			time.setAttribute(PngImageMetadataFormat.timeData_year,
-					Integer.toString(metadata.year));
-			time.setAttribute(PngImageMetadataFormat.timeData_month,
-					Integer.toString(metadata.month));
-			time.setAttribute(PngImageMetadataFormat.timeData_day,
-					Integer.toString(metadata.day));
-			time.setAttribute(PngImageMetadataFormat.timeData_hour,
-					Integer.toString(metadata.hour));
-			time.setAttribute(PngImageMetadataFormat.timeData_minute,
-					Integer.toString(metadata.minute));
-			time.setAttribute(PngImageMetadataFormat.timeData_second,
-					Integer.toString(metadata.second));
+		IIOMetadataNode node = new
+			IIOMetadataNode(PngImageMetadataFormat.n_pHYs);
 
-			root.appendChild(time);
-		}
+		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppux,
+				Integer.toString(metadata._pHYs.pixelsPerUnitX));
+		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppuy,
+				Integer.toString(metadata._pHYs.pixelsPerUnitY));
+		node.setAttribute(PngImageMetadataFormat.n_pHYs_unit,
+				Integer.toString(metadata._pHYs.unitsSpecifier));
+
+		root.appendChild(node);
+	}
+
+	private void add_tIME(IIOMetadataNode root)
+	{
+		if (metadata._tIME == null)
+			return;
+
+		IIOMetadataNode node = new
+			IIOMetadataNode(PngImageMetadataFormat.n_tIME);
+
+		node.setAttribute(PngImageMetadataFormat.n_tIME_year,
+				Integer.toString(metadata._tIME.year));
+		node.setAttribute(PngImageMetadataFormat.n_tIME_month,
+				Integer.toString(metadata._tIME.month));
+		node.setAttribute(PngImageMetadataFormat.n_tIME_day,
+				Integer.toString(metadata._tIME.day));
+		node.setAttribute(PngImageMetadataFormat.n_tIME_hour,
+				Integer.toString(metadata._tIME.hour));
+		node.setAttribute(PngImageMetadataFormat.n_tIME_minute,
+				Integer.toString(metadata._tIME.minute));
+		node.setAttribute(PngImageMetadataFormat.n_tIME_second,
+				Integer.toString(metadata._tIME.second));
+
+		root.appendChild(node);
 	}
 
 	// To suport writeable metadata, implement the following
