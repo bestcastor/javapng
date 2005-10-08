@@ -36,7 +36,8 @@ exception statement from your version.
 
 package com.sixlegs.png.iio;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 import javax.imageio.stream.ImageInputStream;
 
 // TODO: add flushing for performance?
