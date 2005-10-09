@@ -20,8 +20,11 @@ import com.sixlegs.png.iio.PngImageReaderSpi;
 
 import org.w3c.dom.*;
 
-public class Test_PngImageReader extends TestCase {
+public class Test_NativeMetadata extends TestCase {
 	static final String dir = "images/suite/";
+	static final String logFile = "iiometadata_native";
+
+	private PrintWriter out;
 
 	/* Dynamicaly select the tests using reflection.
 	 * Note: make all tests public. 
@@ -29,14 +32,32 @@ public class Test_PngImageReader extends TestCase {
 	 * method.
 	 */
 	public static Test suite() {
-		return new TestSuite(Test_PngImageReader.class);
+		return new TestSuite(Test_NativeMetadata.class);
 	}
 
 	/* Constructor */
-	public Test_PngImageReader(String name) 
+	public Test_NativeMetadata(String name) 
 	throws Exception
 	{
 		super(name);
+
+		// Clear the log file
+		out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, false)));
+		out.close();
+		out = null;
+	}
+
+	/* Code to set up test scaffold for each test */
+	protected void setUp() 
+	throws Exception
+	{
+		out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)));
+	}
+	
+	/* Code to destroy the scaffold after each test */
+	protected void tearDown() {
+		out.close();
+		out = null;
 	}
 
 	private void doTst(String fName)
@@ -48,7 +69,62 @@ public class Test_PngImageReader extends TestCase {
 		ImageReader ir = new PngImageReader(new PngImageReaderSpi());
 		ir.setInput(iis);
 		BufferedImage bi = ir.read(0);
+		printImageReaderDetails(ir);
 		assertTrue(bi != null);
+	}
+
+	private void printImageReaderDetails(ImageReader ir)
+	throws Exception
+	{
+		out.println("==================================================");
+		out.println("                                                  ");
+		IIOMetadata iiom = ir.getImageMetadata(0);
+		Node n = iiom.getAsTree("com.sixlegs.png.iio.PngImageMetadata_v1");
+		displayMetadata(n);
+		out.println("                                                  ");
+	}
+
+
+	private void displayMetadata(Node root) 
+	{
+		displayMetadata(root, 0);
+	}
+
+	private void indent(int level) 
+	{
+		for (int i = 0; i < level; i++) 
+			out.print("\t");
+	} 
+
+	private void displayMetadata(Node node, int level) 
+	{
+		indent(level); // emit open tag
+		out.print("<" + node.getNodeName());
+		NamedNodeMap map = node.getAttributes();
+		if (map != null)  // print attribute values
+		{
+			int length = map.getLength();
+			for (int i = 0; i < length; i++) 
+			{
+				Node attr = map.item(i);
+				out.print(" " + attr.getNodeName() +
+								 "=\"" + attr.getNodeValue() + "\"");
+			}
+		}
+
+		Node child = node.getFirstChild();
+		if (child != null) 
+		{
+			out.println(">"); // close current tag
+			while (child != null) // emit child tags recursively
+			{
+				displayMetadata(child, level + 1);
+				child = child.getNextSibling();
+			}
+			indent(level); // emit close tag
+			out.println("</" + node.getNodeName() + ">");
+		} else 
+			out.println("/>");
 	}
 
 	/* ---------------------------------------- Tests start here */
