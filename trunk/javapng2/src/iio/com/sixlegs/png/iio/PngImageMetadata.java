@@ -72,32 +72,11 @@ extends IIOMetadata
 		int interlaceMethod;
 	}
 
-	// gAMA chunk attribute
-	private class gAMA
-	{
-		float value;
-	}
-
 	// tEXt, zTXt and iTXt attributes
 	private class TEXT
 	{
 		String keyword;
 		String text;
-	}
-
-	// tRNS chunk attributes
-	private class tRNS
-	{
-		int [] trans;
-		byte [] plt;
-	}
-
-	// pHYs attributes
-	private class pHYs
-	{
-		int pixelsPerUnitX;
-		int pixelsPerUnitY;
-		int unitsSpecifier;
 	}
 
 	//tIME attributes
@@ -116,17 +95,17 @@ extends IIOMetadata
 	{
 		// metadata is stored here
 		IHDR _IHDR = null;
-		pHYs _pHYs = null;
 		tIME _tIME = null;
-		gAMA _gAMA = null;
-		tRNS _tRNS = null;
 		int[] _bKGD = null;
 		int[] _sRGB = null;
 		int[] _sBIT = null;
 		int[] _hIST = null;
 		byte[] _PLTE = null;
 		float[] _cHRM = null;
+		Integer[] _pHYs = null;
 		String[] _iCCP = null;
+		Float _gAMA = null;
+		Object _tRNS = null;
 		List _TEXT = null;
 		List _sPLT = null;
 
@@ -259,16 +238,14 @@ extends IIOMetadata
 					Object trans = png.getProperty(PngConstants.TRANSPARENCY);
 					if (trans == null)
 						return;
-					_tRNS = new tRNS();
-					_tRNS.trans = (int []) trans;
+					_tRNS = trans;
 					break;
 
 				case PngConstants.COLOR_TYPE_PALETTE:
 					Object pltObj = png.getProperty(PngConstants.PALETTE_ALPHA);
 					if (pltObj == null)
 						return;
-					_tRNS = new tRNS();
-					_tRNS.plt = (byte []) pltObj;
+					_tRNS = pltObj;
 					break;
 			}
 		}
@@ -304,24 +281,20 @@ extends IIOMetadata
 			if (gamma == null)
 				return;
 
-			_gAMA = new gAMA();
-			_gAMA.value = ((Float) gamma).floatValue();
+			_gAMA = (Float) gamma;
 		}
 
 		private void read_pHYs(PngImage png)
 		{
-			// Make sure a pHYs chunk was read
-			if (png.getProperty(PngConstants.PIXELS_PER_UNIT_X) == null)
+			Object p = png.getProperty(PngConstants.PIXELS_PER_UNIT_X);
+			if (p == null)
 				return;
 
-			_pHYs = new pHYs();
-
-			_pHYs.pixelsPerUnitX = ((Integer)
-					png.getProperty(PngConstants.PIXELS_PER_UNIT_X)).intValue();
-			_pHYs.pixelsPerUnitY = ((Integer)
-					png.getProperty(PngConstants.PIXELS_PER_UNIT_Y)).intValue();
-			_pHYs.unitsSpecifier = ((Integer)
-					png.getProperty(PngConstants.UNIT)).intValue();
+			_pHYs = new Integer[] {
+				(Integer) png.getProperty(PngConstants.PIXELS_PER_UNIT_X),
+				(Integer) png.getProperty(PngConstants.PIXELS_PER_UNIT_Y),
+				(Integer) png.getProperty(PngConstants.UNIT)
+			};
 		}
 
 		// Have to do this because there is no way (that i know of) to store a
@@ -663,9 +636,7 @@ extends IIOMetadata
 
 	private void add_tRNS(IIOMetadataNode root)
 	{
-		tRNS _tRNS = metadata._tRNS;
-
-		if (_tRNS == null)
+		if (metadata._tRNS == null)
 			return;
 
 		IIOMetadataNode node = new
@@ -674,27 +645,23 @@ extends IIOMetadata
 		switch (metadata._IHDR.colorType)
 		{
 			case PngConstants.COLOR_TYPE_GRAY:
-				if (_tRNS.trans == null)
-					return;
+				int[] g = (int[]) metadata._tRNS;
 				node.setAttribute(PngImageMetadataFormat.n_tRNS_gs,
-						Integer.toString(_tRNS.trans[0]));
+						Integer.toString(g[0]));
 				break;
 
 			case PngConstants.COLOR_TYPE_RGB:
-				if (_tRNS.trans == null)
-					return;
+				int[] trans = (int[]) metadata._tRNS;
 				node.setAttribute(PngImageMetadataFormat.n_tRNS_r,
-						Integer.toString(_tRNS.trans[0]));
+						Integer.toString(trans[0]));
 				node.setAttribute(PngImageMetadataFormat.n_tRNS_g,
-						Integer.toString(_tRNS.trans[1]));
+						Integer.toString(trans[1]));
 				node.setAttribute(PngImageMetadataFormat.n_tRNS_b,
-						Integer.toString(_tRNS.trans[2]));
+						Integer.toString(trans[2]));
 				break;
 
 			case PngConstants.COLOR_TYPE_PALETTE:
-				if (_tRNS.plt == null)
-					return;
-				byte [] t = _tRNS.plt;
+				byte [] t = (byte[]) metadata._tRNS;
 				for (int i=0; i<t.length; i++)
 				{
 					IIOMetadataNode n = new
@@ -720,7 +687,7 @@ extends IIOMetadata
 			IIOMetadataNode(PngImageMetadataFormat.n_gAMA);
 
 		node.setAttribute(PngImageMetadataFormat.n_gAMA_val,
-				Float.toString(metadata._gAMA.value));
+				metadata._gAMA.toString());
 
 		root.appendChild(node);
 	}
@@ -753,11 +720,11 @@ extends IIOMetadata
 			IIOMetadataNode(PngImageMetadataFormat.n_pHYs);
 
 		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppux,
-				Integer.toString(metadata._pHYs.pixelsPerUnitX));
+				metadata._pHYs[0].toString());
 		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppuy,
-				Integer.toString(metadata._pHYs.pixelsPerUnitY));
+				metadata._pHYs[1].toString());
 		node.setAttribute(PngImageMetadataFormat.n_pHYs_unit,
-				Integer.toString(metadata._pHYs.unitsSpecifier));
+				metadata._pHYs[2].toString());
 
 		root.appendChild(node);
 	}

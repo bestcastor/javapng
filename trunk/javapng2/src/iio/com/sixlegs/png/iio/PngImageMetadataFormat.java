@@ -131,6 +131,7 @@ extends IIOMetadataFormatImpl
 	static final String n_cHRM_by = "blueY";
 
 	// iCCP
+	// TODO the iCCP chunks is not tested.
 	static final String n_iCCP = "iCCP";
 	static final String n_iCCP_name = "name";
 	static final String n_iCCP_prof = "profile";
