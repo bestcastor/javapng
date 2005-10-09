@@ -639,7 +639,6 @@ implements Transparency
      * By default this method will return a {@code PngChunk} implementation
      * for all of the chunk types defined in Version 1.2 of the PNG Specification
      * (except {@code IDAT}).
-     * @param png the image requesting the chunk
      * @param type the chunk type
      * @return an instance of {@code PngChunk} which will read the following chunk data, or null
      * @throws IllegalArgumentException if the type is IDAT
