@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.*;
 import junit.framework.*;
 
-public class SimpleTest
+public class TestSimple
 extends PngTestCase
 {
     public void testRecolorMonochrome()
@@ -153,13 +153,13 @@ extends PngTestCase
         return png;
     }
 
-    public SimpleTest(String name)
+    public TestSimple(String name)
     {
         super(name);
     }
 
     public static Test suite()
     {
-        return getSuite(SimpleTest.class);
+        return getSuite(TestSimple.class);
     }
 }

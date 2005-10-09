@@ -26,6 +26,11 @@ Getting Started
 
 Revision History
 
+  Changes from v2.0-rc3 -> v2.0-rc4 (2005-?-?)
+
+    * Change sBIT to use byte[] instead of int[]
+    * ...
+
   Changes from v2.0-rc2 -> v2.0-rc3 (2005-10-7):
 
     * Fix decoding when there is leftover IDAT data

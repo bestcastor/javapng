@@ -3,7 +3,7 @@ package com.sixlegs.png;
 import java.io.*;
 import junit.framework.*;
 
-public class SuiteTest
+public class TestPngSuite
 extends PngTestCase
 {
     public void testRead()
@@ -15,13 +15,13 @@ extends PngTestCase
         System.err.println("Read PngSuite in " + t + " ms");
     }
 
-    public SuiteTest(String name)
+    public TestPngSuite(String name)
     {
         super(name);
     }
 
     public static Test suite()
     {
-        return getSuite(SuiteTest.class);
+        return getSuite(TestPngSuite.class);
     }
 }
