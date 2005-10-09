@@ -49,9 +49,9 @@ extends PngChunk
         checkLength(in.getRemaining(), count);
 
         int depth = paletted ? 8 : png.getBitDepth();
-        int[] array = new int[count];
+        byte[] array = new byte[count];
         for (int i = 0; i < count; i++) {
-            int bits = in.readByte();
+            byte bits = in.readByte();
             if (bits <= 0 || bits > depth)
                 throw new PngWarning("Illegal sBIT sample depth");
             array[i] = bits;
