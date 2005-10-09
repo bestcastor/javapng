@@ -15,7 +15,7 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="product" value="javapng"/>
-    <property name="version" value="2.0-rc2"/>
+    <property name="version" value="2.0-rc3"/>
     <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
@@ -204,6 +204,7 @@
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
 	<jar jarfile="dist/${prefix}-iio.jar">
+	    <fileset dir="build/main"/>
 	    <fileset dir="build/iio"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
@@ -243,7 +244,7 @@
 
     <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
         <mkdir dir="dist"/>
-        <jar jarfile="dist/${prefix}-dist.jar" filesonly="true">
+        <jar jarfile="dist/${prefix}-src.jar" filesonly="true">
             <zipfileset dir="src" prefix="${prefix}/src">
                 <exclude name="**/*.java~"/>
                 <exclude name="**/*.save"/>
@@ -251,7 +252,7 @@
             </zipfileset>
             <zipfileset dir="lib" prefix="${prefix}/lib"/>
             <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,README,benchmark.txt"/>
-            <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,api/**"/>
+            <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,${prefix}-iio.jar,api/**"/>
         </jar>
     </target>
 </project>
