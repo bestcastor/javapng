@@ -8,7 +8,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import junit.framework.*;
 
-public class DataTest
+public class TestData
 extends PngTestCase
 {
     public void testImages()
@@ -84,13 +84,13 @@ extends PngTestCase
        return hex.toString().toUpperCase();
     }
 
-    public DataTest(String name)
+    public TestData(String name)
     {
         super(name);
     }
 
     public static Test suite()
     {
-        return getSuite(DataTest.class);
+        return getSuite(TestData.class);
     }
 }

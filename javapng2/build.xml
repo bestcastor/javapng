@@ -37,13 +37,17 @@
             <path refid="path.main"/>
             <pathelement path="build/ext"/>
         </path>
-        <path id="path.examples">
-            <path refid="path.ext"/>
-            <pathelement path="build/examples"/>
-        </path>
         <path id="path.viewer">
             <path refid="path.ext"/>
             <pathelement path="build/viewer"/>
+        </path>
+        <path id="path.iio">
+            <path refid="path.ext"/>
+            <pathelement path="build/iio"/>
+        </path>
+        <path id="path.examples">
+            <path refid="path.iio"/>
+            <pathelement path="build/examples"/>
         </path>
         <path id="path.test">
             <path refid="path.examples"/>
@@ -65,23 +69,23 @@
         <compile module="ext" refid="path.main" bootclasspath="${compile.bootclasspath}"/>
     </target>
 
-    <target name="compile-examples" depends="compile" description="Compile examples">
-        <compile module="examples" refid="path.ext"/>
-    </target>
-
     <target name="compile-viewer" depends="compile" description="Compile viewer">
         <compile module="viewer" refid="path.ext"/>
+    </target>
+
+    <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
+        <compile module="iio" refid="path.ext" compile.target="1.4"/>
+    </target>
+
+    <target name="compile-examples" depends="compile-iio" description="Compile examples">
+        <compile module="examples" refid="path.iio"/>
     </target>
 
     <target name="compile-test" depends="compile-examples" description="Compile tests">
         <compile module="test" refid="path.examples"/>
     </target>
 
-    <target name="compile-iio" depends="compile-examples" description="Compile ImageIO plugin">
-        <compile module="iio" refid="path.main" compile.target="1.4"/>
-    </target>
-
-    <target name="compile-all" depends="compile-test,compile-viewer,compile-iio" description="Compile all classes"/>
+    <target name="compile-all" depends="compile-test,compile-viewer" description="Compile all classes"/>
 
     <macrodef name="compile">
         <attribute name="module"/>
@@ -103,13 +107,14 @@
     </macrodef>
 
     <macrodef name="mytest">
-        <attribute name="includes" default="**/*Test.java"/>
+        <attribute name="includes" default="**/Test*.java"/>
         <attribute name="refid"/>
         <attribute name="fork" default="false"/>
+        <attribute name="usefile" default="false"/>
         <sequential>
             <junit fork="@{fork}">
                 <sysproperty key="testmethods" value="${testmethods}"/>
-                <formatter type="brief" usefile="false"/>
+                <formatter type="brief" usefile="@{usefile}"/>
                 <classpath refid="@{refid}"/>
                 <test name="${testcase}" if="testcase"/>
                 <batchtest unless="testcase">
@@ -120,7 +125,8 @@
     </macrodef>
 
     <target name="test" depends="compile-test" description="Run JUnit tests">
-        <mytest refid="path.test"/>
+        <mytest refid="path.test" includes="com/sixlegs/png/Test*.java"/>
+        <mytest refid="path.test" includes="com/sixlegs/png/iio/Test*.java" usefile="true"/>
     </target>
 
     <target name="todo" depends="compile-test" description="Known JUnit failures">
