@@ -13,8 +13,10 @@ public class TestsMain {
 		TestSuite t = new TestSuite();
 
 		/* Adding tests */
-		t.addTest(Test_PngImageReaderSpi.suite());
-		t.addTest(Test_PngImageReader.suite());
+		//t.addTest(Test_PngImageReaderSpi.suite());
+		//t.addTest(Test_PngImageReader.suite());
+		//t.addTest(Test_NativeMetadata.suite());
+		t.addTest(Test_StandardMetadata.suite());
 
 		return t;
 	}
