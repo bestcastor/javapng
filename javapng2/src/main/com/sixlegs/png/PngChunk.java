@@ -41,7 +41,7 @@ import java.io.*;
 /**
  * Individual chunks in a PNG image are read by implementations of this
  * class. The {@code PngChunk} instance used to read a particular chunk
- * is returned by {@link PngConfig#getChunk}. In addition, the type of
+ * is returned by {@link PngImage#getChunk}. In addition, the type of
  * chunk being read is passed to the {@link #read} method, to make it
  * possible for a single {@code PngChunk} implementation to handle
  * reading multiple chunk types.
