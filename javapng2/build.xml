@@ -48,18 +48,14 @@
         <path id="path.examples">
             <path refid="path.iio"/>
             <pathelement path="build/examples"/>
+            <fileset dir="libdev" includes="**/*.jar"/>
         </path>
         <path id="path.test">
             <path refid="path.examples"/>
             <pathelement path="build/test"/>
         </path>
-        <path id="path.libdev">
-            <path refid="path.lib"/>
-            <fileset dir="libdev" includes="**/*.jar"/>
-        </path>
         <path id="path.test.emma">
-            <path refid="path.libdev"/>
-            <pathelement path="build/test"/>
+            <path refid="path.test"/>
             <pathelement path="build/emma"/>
         </path>
     </target>
