@@ -481,7 +481,7 @@ implements Transparency
      * <td>{@code byte[]}</td>
      * <td>Palette alpha</td></tr>
      * <tr><td>{@link PngConstants#TRANSPARENCY TRANSPARENCY}</td>
-     * <td>{@code byte[]}</td>
+     * <td>{@code int[]}</td>
      * <td>Transparency samples</td></tr>
      * <tr><td>{@link PngConstants#BACKGROUND BACKGROUND}</td>
      * <td>{@code int[]}</td>
