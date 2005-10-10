@@ -61,8 +61,6 @@ extends IIOMetadata
 		"com.sixlegs.png.iio.PngImageMetadata_v1";
 
 	private Metadata metadata;
-	private NativePngImageMetadata nativeMetadata = null;
-	private StandardPngImageMetadata standardMetadata = null;
 
 	public PngImageMetadata(PngImage png) 
 	{
