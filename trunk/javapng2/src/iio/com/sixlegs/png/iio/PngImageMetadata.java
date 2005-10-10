@@ -41,14 +41,12 @@ import com.sixlegs.png.TextChunk;
 import com.sixlegs.png.SuggestedPalette;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.NamedNodeMap;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
-import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataFormat;
 import javax.imageio.metadata.IIOMetadataNode;

@@ -41,8 +41,6 @@ import com.sixlegs.png.PngImage;
 import com.sixlegs.png.PngWarning;
 import java.awt.image.BufferedImage;
 import java.awt.color.ColorSpace;
-import java.awt.Point;
-import java.awt.Rectangle;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageTypeSpecifier;
