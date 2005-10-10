@@ -36,9 +36,7 @@ exception statement from your version.
 
 package com.sixlegs.png.iio;
 
-import com.sixlegs.png.PngConstants;
-import com.sixlegs.png.PngImage;
-import com.sixlegs.png.PngWarning;
+import com.sixlegs.png.*;
 import java.awt.image.BufferedImage;
 import java.awt.color.ColorSpace;
 import javax.imageio.ImageReader;
@@ -47,8 +45,7 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 public class PngImageReader
 extends ImageReader
@@ -57,6 +54,8 @@ extends ImageReader
 	private PngHeader pngHeader;
 	private PngImageMetadata pngMetadata;
 	private BufferedImage pngImage;
+    private PngChunk unknownReader = new UnknownChunk();
+    private Map unknownChunks = new HashMap();
     
     public PngImageReader(PngImageReaderSpi provider)
     {
@@ -275,10 +274,28 @@ extends ImageReader
             }
             return true;
         }
+
+        protected PngChunk getChunk(int type)
+        {
+            PngChunk chunk = super.getChunk(type);
+            return (chunk != null) ? chunk : unknownReader;
+        }
+    }
+
+    private class UnknownChunk
+    extends PngChunk
+    {
+        public void read(int type, PngInputStream in, PngImage png)
+        throws IOException
+        {
+            byte[] bytes = new byte[in.getRemaining()];
+            in.readFully(bytes);
+            unknownChunks.put(new Integer(type), bytes);
+        }
     }
 
 	/* Reads a PNG header */
-	private class PngHeader
+	private static class PngHeader
 	{
 		public int width;
 		public int height;
