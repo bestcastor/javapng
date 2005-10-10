@@ -65,4 +65,13 @@ public interface TextChunk
      * Returns the text of this TextChunk.
      */
     String getText();
+
+    /**
+     * Returns the type of this TextChunk.
+     * @return 
+     *    {@link PngChunk#tEXt},<br>
+     *    {@link PngChunk#zTXt},<br>
+     *    or {@link PngChunk#iTXt}
+     */
+     int getType();
 }

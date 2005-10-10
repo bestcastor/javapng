@@ -88,7 +88,7 @@ extends PngChunk
         List chunks = (List)props.get(PngConstants.TEXT_CHUNKS);
         if (chunks == null)
             props.put(PngConstants.TEXT_CHUNKS, chunks = new ArrayList());
-        chunks.add(new TextChunkImpl(keyword, text, language, translated));
+        chunks.add(new TextChunkImpl(keyword, text, language, translated, type));
     }
 
     private static class TextChunkImpl
@@ -98,13 +98,15 @@ extends PngChunk
         private String text;
         private String language;
         private String translated;
+        private int type;
     
-        public TextChunkImpl(String keyword, String text, String language, String translated)
+        public TextChunkImpl(String keyword, String text, String language, String translated, int type)
         {
             this.keyword = keyword;
             this.text = text;
             this.language = language;
             this.translated = translated;
+            this.type = type;
         }
     
         public String getKeyword()
@@ -125,6 +127,11 @@ extends PngChunk
         public String getText()
         {
             return text;
+        }
+
+        public int getType()
+        {
+            return type;
         }
     }
 }
