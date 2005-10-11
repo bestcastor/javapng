@@ -69,18 +69,15 @@ extends PngChunk
         switch (colorType) {
         case PngConstants.COLOR_TYPE_RGB:
         case PngConstants.COLOR_TYPE_GRAY: 
-            sbits = new byte[]{ bitDepth, bitDepth, bitDepth };
             break;
         case PngConstants.COLOR_TYPE_PALETTE: 
             if (bitDepth == 16)
                 throw new PngError("Bad bit depth for color type " + colorType + ": " + bitDepth);
-            sbits = new byte[]{ 8, 8, 8 };
             break;
         case PngConstants.COLOR_TYPE_GRAY_ALPHA: 
         case PngConstants.COLOR_TYPE_RGB_ALPHA: 
             if (bitDepth <= 4)
                 throw new PngError("Bad bit depth for color type " + colorType + ": " + bitDepth);
-            sbits = new byte[]{ bitDepth, bitDepth, bitDepth, bitDepth };
             break;
         default:
             throw new PngError("Bad color type: " + colorType);
@@ -111,6 +108,5 @@ extends PngChunk
         props.put(PngConstants.COMPRESSION, Integers.valueOf(compression));
         props.put(PngConstants.FILTER, Integers.valueOf(filter));
         props.put(PngConstants.COLOR_TYPE, Integers.valueOf(colorType));
-        props.put(PngConstants.SIGNIFICANT_BITS, sbits);
     }
 }
