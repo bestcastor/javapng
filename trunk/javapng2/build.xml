@@ -187,6 +187,9 @@
         <delete file="${user.dir}/coverage.em"/>
         <delete file="${user.dir}/coverage.ec"/>
         <delete file="${suite.file}"/>
+		<delete>
+			<fileset dir="." includes="TEST*"/>
+		</delete>
     </target>
 
     <target name="jar" depends="compile,compile-iio" description="Create Jar">
