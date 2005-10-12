@@ -1,7 +1,9 @@
 package com.sixlegs.png.iio;
 
 import javax.imageio.metadata.IIOMetadataFormatImpl;
+import javax.imageio.metadata.IIOMetadata;
 import junit.framework.Test;
+import org.w3c.dom.*;
 
 public class TestStandardMetadata
 extends MetadataTestCase
@@ -21,4 +23,10 @@ extends MetadataTestCase
     {
         return IIOMetadataFormatImpl.standardMetadataFormatName;
     }
+
+	protected Node getSunsTree()
+	throws Exception
+	{
+		return sunIR.getImageMetadata(0).getAsTree("javax_imageio_1.0");
+	}
 }

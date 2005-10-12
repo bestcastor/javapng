@@ -4,7 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import javax.imageio.ImageIO;
+import javax.imageio.*;
+import javax.imageio.metadata.*;
 import javax.imageio.stream.ImageInputStream;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -87,9 +88,17 @@ extends TestCase
         return suite;
     }
 
+	protected ImageReader sunIR = null;
+
     public void test()
     throws Exception
     {
+		// Initialise sun's plugin
+		sunIR = new com.sun.imageio.plugins.png.PNGImageReader(
+				new com.sun.imageio.plugins.png.PNGImageReaderSpi());
+		sunIR.setInput(ImageIO.createImageInputStream(
+					getClass().getResourceAsStream(name)));
+
         InputStream in = getClass().getResourceAsStream(name);
 		ImageInputStream iis = ImageIO.createImageInputStream(in);
         PngImageReaderSpi spi = new PngImageReaderSpi();
