@@ -38,15 +38,18 @@ package com.sixlegs.png.iio;
 import com.sixlegs.png.PngImage;
 import com.sixlegs.png.PngConstants;
 import com.sixlegs.png.TextChunk;
+import com.sixlegs.png.PngChunk;
 import com.sixlegs.png.SuggestedPalette;
 
 import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.TimeZone;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataFormat;
 import javax.imageio.metadata.IIOMetadataNode;
@@ -55,16 +58,18 @@ import javax.imageio.metadata.IIOMetadataFormatImpl;
 public class PngImageMetadata 
 extends IIOMetadata 
 {
+	// Format defined by syn - with bug
 	static final String nativeMetadataFormatName = 
-		"com.sixlegs.png.iio.PngImageMetadata_v1";
+		"javax_imageio_png_1.0";
 
 	private Metadata metadata;
 
-	public PngImageMetadata(PngImage png) 
+	public PngImageMetadata(PngImage png, Map unknownChunks) 
 	{
 		super(true, nativeMetadataFormatName,
-				"com.sixlegs.png.iio.PngImageMetadata", null, null);
-		metadata = new Metadata(png);
+				"com.sixlegs.png.iio.PngImageMetadata", 
+				null, null);
+		metadata = new Metadata(png, unknownChunks);
 	}
 
 	public IIOMetadataFormat getMetadataFormat(String formatName) 
@@ -112,24 +117,141 @@ extends IIOMetadata
 	//
 
 	// Used to separate elements such as in a List of Integers
-	private static final String list_sperator = ",";
+	private static final String list_sperator = " ";
 
 	protected IIOMetadataNode getStandardChromaNode()
 	{
+		boolean not_empty = false;
 		IIOMetadataNode chroma = new IIOMetadataNode("Chroma");
 
-		add_ColorSpaceType(chroma);
-		add_NumChannels(chroma);
-		add_Gamma(chroma);
-		add_BlackIsZero(chroma);
-		add_Palette(chroma);
-		add_BackgroundIndex(chroma);
-		add_BackgroundColor(chroma);
+		not_empty |= add_ColorSpaceType(chroma);
+		not_empty |= add_NumChannels(chroma);
+		not_empty |= add_Gamma(chroma);
+		not_empty |= add_BlackIsZero(chroma);
+		not_empty |= add_Palette(chroma);
+		not_empty |= add_BackgroundIndex(chroma);
+		not_empty |= add_BackgroundColor(chroma);
 
-		return chroma;
+		if (not_empty)
+			return chroma;
+		return null;
 	}
 
-	private void add_ColorSpaceType(IIOMetadataNode root)
+	protected IIOMetadataNode getStandardCompressionNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Compression");
+
+		not_empty |= add_CompressionTypeName(node);
+		not_empty |= add_Lossless(node);
+		not_empty |= add_NumProgressiveScans(node);
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	protected IIOMetadataNode getStandardDataNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Data");
+
+		not_empty |= add_PlanarConfiguration(node);
+		not_empty |= add_SampleFormat(node);
+		not_empty |= add_BitsPerSample(node);
+		not_empty |= add_SignificantBitsPerSample(node);
+		//not_empty |= add_SampleMSB(node);
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	protected IIOMetadataNode getStandardDimensionNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Dimension");
+
+		not_empty |= add_PixelAspectRatio(node);
+		not_empty |= add_ImageOrientation(node);
+		not_empty |= add_HorizontalPixelSize(node);
+		not_empty |= add_VerticalPixelSize(node);
+		//not_empty |= add_HorizontalScreenSize(node);
+		//not_empty |= add_VerticalScreenSize(node);
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	protected IIOMetadataNode getStandardDocumentNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Document");
+
+		not_empty |= add_ImageModificationTime(node);
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	protected IIOMetadataNode getStandardTextNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Text");
+
+		if (metadata._TEXT != null)
+		{
+			Iterator textChunks = metadata._TEXT.iterator();
+			while (textChunks.hasNext()) 
+			{
+				TextChunk txt = (TextChunk) textChunks.next();
+
+				IIOMetadataNode t = new IIOMetadataNode("TextEntry");
+
+				t.setAttribute("keyword", txt.getKeyword());
+				t.setAttribute("value", txt.getText());
+
+				//FIXME Sun sometimes has the encoding attribute; figure out
+				//when they use it.
+				//if (txt.getType() == PngChunk.iTXt)
+					t.setAttribute("encoding", "ISO-8859-1");
+				
+				//FIXME what about compressed iTXt?
+				if (txt.getType() == PngChunk.zTXt)
+					t.setAttribute("compression", "deflate");
+				else
+					t.setAttribute("compression", "none");
+
+				node.appendChild(t);
+			}
+			not_empty = true;
+		}
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	// Could not find specification for this element in DTD
+	//protected IIOMetadataNode getStandardTileNode()
+	//{
+	//}
+
+	protected IIOMetadataNode getStandardTransparencyNode()
+	{
+		boolean not_empty = false;
+		IIOMetadataNode node = new IIOMetadataNode("Transparency");
+
+		not_empty |= add_Alpha(node);
+
+		if (not_empty)
+			return node;
+		return null;
+	}
+
+	private boolean add_ColorSpaceType(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("ColorSpaceType");
 
@@ -146,15 +268,17 @@ extends IIOMetadata
 				clr = "GRAY";
 				break;
 			default:
-				return;
+				return false;
 		}
 
 		node.setAttribute("name", clr);
 		root.appendChild(node);
+
+		return true;
 	}
 
 	// DTD wants "List of Integer" here?
-	private void add_NumChannels(IIOMetadataNode root)
+	private boolean add_NumChannels(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("NumChannels");
 
@@ -162,62 +286,80 @@ extends IIOMetadata
 		switch (metadata._IHDR.colorType)
 		{
 			case PngConstants.COLOR_TYPE_GRAY:
-			case PngConstants.COLOR_TYPE_PALETTE:
 				num = "1";
 				break;
 			case PngConstants.COLOR_TYPE_GRAY_ALPHA:
 				num = "2";
 				break;
+			case PngConstants.COLOR_TYPE_PALETTE:
+				if (metadata._tRNS == null)
+					num = "3";
+				else
+					num = "4";
+				break;
 			case PngConstants.COLOR_TYPE_RGB:
-				num = "4";
+				num = "3";
 				break;
 			case PngConstants.COLOR_TYPE_RGB_ALPHA:
 				num = "4";
 				break;
 			default:
-				return;
+				return false;
 		}
 
 		node.setAttribute("value", num);
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_Gamma(IIOMetadataNode root)
+	private boolean add_Gamma(IIOMetadataNode root)
 	{
 		if (metadata._gAMA == null)
-			return;
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("Gamma");
 
 		node.setAttribute("value", metadata._gAMA.toString());
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_BlackIsZero(IIOMetadataNode root)
+	private boolean add_BlackIsZero(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("BlackIsZero");
 
-		node.setAttribute("value", "TRUE");
+		node.setAttribute("value", "true");
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_Palette(IIOMetadataNode root)
+	private boolean add_Palette(IIOMetadataNode root)
 	{
 		if (metadata._PLTE == null)
-			return;
+			return false;
+
+		IIOMetadataNode node = new IIOMetadataNode("Palette");
 
 		byte[] trans = null;
 		if (metadata._tRNS != null)
 			trans = (byte []) metadata._tRNS;
 
-		IIOMetadataNode node = new IIOMetadataNode("Palette");
-
 		byte [] plt = metadata._PLTE;
+
+		int entries = plt.length/3;
+		int extraEntries = getPLTENumOfEntries(entries) - entries;
+
 		for (int i=0; i<plt.length; i+=3)
 		{
-			int alpha = 255;
-			if (trans != null && i/3 < trans.length)
-				alpha = trans[i/3];
+			int alpha = -1;
+			if (trans != null )
+			{
+				if (i/3 < trans.length)
+					alpha = trans[i/3];
+				else
+					alpha = 255;
+			}
+
 			add_PaletteEntry(node, 
 					(int) (i/3), 
 					0xFF & plt[i], 
@@ -225,8 +367,11 @@ extends IIOMetadata
 					0xFF & plt[i+2],
 					alpha);
 		}
+		for (int i=0; i<extraEntries; i++)
+			add_PaletteEntry(node, i+entries, 0, 0, 0, trans == null ? -1 : 255);
 
 		root.appendChild(node);
+		return true;
 	}
 
 	private void add_PaletteEntry(IIOMetadataNode root, int i, int r, int g, int b, int a)
@@ -237,28 +382,30 @@ extends IIOMetadata
 		node.setAttribute("red",	Integer.toString(r));
 		node.setAttribute("green",	Integer.toString(g));
 		node.setAttribute("blue",	Integer.toString(b));
-		node.setAttribute("alpha",	Integer.toString(a));
+		if (a >= 0)
+			node.setAttribute("alpha",	Integer.toString(a));
 
 		root.appendChild(node);
 	}
 
-	private void add_BackgroundIndex(IIOMetadataNode root)
+	private boolean add_BackgroundIndex(IIOMetadataNode root)
 	{
 		if (metadata._bKGD == null || 
 				metadata._IHDR.colorType != PngConstants.COLOR_TYPE_PALETTE)
-			return;
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("BackgroundIndex");
 
 		node.setAttribute("value", Integer.toString(metadata._bKGD[0]));
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_BackgroundColor(IIOMetadataNode root)
+	private boolean add_BackgroundColor(IIOMetadataNode root)
 	{
 		if (metadata._bKGD == null ||
 				metadata._IHDR.colorType == PngConstants.COLOR_TYPE_PALETTE)
-			return;
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("BackgroundColor");
 
@@ -279,89 +426,70 @@ extends IIOMetadata
 		node.setAttribute("blue", b);
 
 		root.appendChild(node);
+		return true;
 	}
 
-
-	protected IIOMetadataNode getCompressionNode()
-	{
-		IIOMetadataNode node = new IIOMetadataNode("Compression");
-
-		add_CompressionTypeName(node);
-		add_Lossless(node);
-		add_NumProgressiveScans(node);
-
-		return node;
-	}
-
-	private void add_CompressionTypeName(IIOMetadataNode root)
+	private boolean add_CompressionTypeName(IIOMetadataNode root)
 	{
 		if (metadata._IHDR.compressionMethod != 0)
-			return;
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("CompressionTypeName");
 
-		//XXX Is this correct?
-		node.setAttribute("value", "DEFLATE/INFLATE");
+		node.setAttribute("value", "deflate");
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_Lossless(IIOMetadataNode root)
+	private boolean add_Lossless(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("Lossless");
 		
-		node.setAttribute("value", "TRUE");
+		node.setAttribute("value", "true");
 
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_NumProgressiveScans(IIOMetadataNode root)
+	private boolean add_NumProgressiveScans(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("NumProgressiveScans");
 
 		String num;
 		if (metadata._IHDR.interlaceMethod == 0)
-			num = "0";
+			num = "1";
 		else
 			num = "7";
 
 		node.setAttribute("value",num);
 
 		root.appendChild(node);
+		return true;
 	}
 
-	protected IIOMetadataNode getStandardDataNode()
-	{
-		IIOMetadataNode node = new IIOMetadataNode("Data");
 
-		add_PlanarConfiguration(node);
-		add_SampleFormat(node);
-		add_BitsPerSample(node);
-		//add_SignificantBitsPerSample(node);
-		//add_SampleMSB(node);
-
-		return node;
-	}
-
-	// XXX Not sure what to put here, options are
-	// "PixelInterleaved", "PlaneInterleaved", "LineInterleaved",
-	// "TileInterleaved"
-	private void add_PlanarConfiguration(IIOMetadataNode root)
+	private boolean add_PlanarConfiguration(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("PlanarConfiguration");
-		node.setAttribute("value", "PlaneInterleaved" );
+		node.setAttribute("value", "PixelInterleaved" );
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_SampleFormat(IIOMetadataNode root)
+	private boolean add_SampleFormat(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("SampleFormat");
 
-		node.setAttribute("value", "UnsignedIntegral");
+		if (metadata._IHDR.colorType == PngConstants.COLOR_TYPE_PALETTE)
+			node.setAttribute("value", "Index");
+		else
+			node.setAttribute("value", "UnsignedIntegral");
 
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_BitsPerSample(IIOMetadataNode root)
+	private boolean add_BitsPerSample(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("BitsPerSample");
 
@@ -377,7 +505,11 @@ extends IIOMetadata
 				list = d + _ + d;
 				break;
 			case PngConstants.COLOR_TYPE_PALETTE:
-				list = "8";
+				int s = getPLTENumOfEntries(metadata._PLTE.length/3);
+				s = (int) Math.round(Math.log(s)/Math.log(2));
+				list = s + _ + s + _ + s;
+				if (metadata._tRNS != null)
+					list += _ + s;
 				break;
 			case PngConstants.COLOR_TYPE_RGB:
 				list = d + _ + d + _ + d;
@@ -386,177 +518,132 @@ extends IIOMetadata
 				list = d + _ + d + _ + d + _ + d;
 				break;
 			default:
-				return;
+				return false;
 		}
 
 		node.setAttribute("value", list);
 		root.appendChild(node);
+		return true;
 	}
 
-	//TODO
-	//private void add_SignificantBitsPerSample(IIOMetadataNode root)
-	//{
-	//	IIOMetadataNode node = new IIOMetadataNode("SignificantBitsPerSample");
-	//	root.appendChild(node);
-	//}
+	private boolean add_SignificantBitsPerSample(IIOMetadataNode root)
+	{
+		IIOMetadataNode node = new IIOMetadataNode("SignificantBitsPerSample");
 
-	//private void add_SampleMSB(IIOMetadataNode root)
+		if (metadata._IHDR.colorType != PngConstants.COLOR_TYPE_PALETTE)
+			return false;
+
+		node.setAttribute("value", "4 4 4");
+		root.appendChild(node);
+		return true;
+	}
+
+	//private boolean add_SampleMSB(IIOMetadataNode root)
 	//{
 	//	IIOMetadataNode node = new IIOMetadataNode("SampleMSB");
 	//	root.appendChild(node);
+	//	return true;
 	//}
 
-
-
-	protected IIOMetadataNode getStandardDimensionNode()
+	private boolean add_PixelAspectRatio(IIOMetadataNode root)
 	{
-		IIOMetadataNode node = new IIOMetadataNode("Dimension");
-
-		add_PixelAspectRatio(node);
-		add_ImageOrientation(node);
-		add_HorizontalPixelSize(node);
-		add_VerticalPixelSize(node);
-		add_HorizontalScreenSize(node);
-		add_VerticalScreenSize(node);
-
-		return node;
-	}
-
-	private void add_PixelAspectRatio(IIOMetadataNode root)
-	{
-		if (metadata._pHYs == null)
-			return;
-
 		IIOMetadataNode node = new IIOMetadataNode("PixelAspectRatio");
-
-		node.setAttribute("value",
-				Float.toString((float)(metadata._pHYs[0].intValue()
-						/ metadata._pHYs[1].intValue())));
-
+		float par;
+		if (metadata._pHYS == null)
+		{
+			par = 1.0f;
+		}
+		else
+		{
+			float ppx = metadata._pHYS[0].intValue();
+			float ppy = metadata._pHYS[1].intValue();
+			par = ppx/ppy;
+		}
+		node.setAttribute("value", Float.toString(par));
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_ImageOrientation(IIOMetadataNode root)
+	private boolean add_ImageOrientation(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("ImageOrientation");
 
 		node.setAttribute("value", "Normal");
 
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_HorizontalPixelSize(IIOMetadataNode root)
+	private boolean add_HorizontalPixelSize(IIOMetadataNode root)
 	{
-		if (metadata._pHYs == null || metadata._pHYs[2].intValue() == 0)
-			return;
+		if (metadata._pHYS == null || metadata._pHYS[2].intValue() == 0)
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("HorizontalPixelSize");
 
 		node.setAttribute("value",
-				Float.toString(1000/metadata._pHYs[0].intValue()));
+				Float.toString(1000/metadata._pHYS[0].intValue()));
 
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_VerticalPixelSize(IIOMetadataNode root)
+	private boolean add_VerticalPixelSize(IIOMetadataNode root)
 	{
-		if (metadata._pHYs == null || metadata._pHYs[2].intValue() == 0)
-			return;
+		if (metadata._pHYS == null || metadata._pHYS[2].intValue() == 0)
+			return false;
 
 		IIOMetadataNode node = new IIOMetadataNode("VerticalPixelSize");
 
 		node.setAttribute("value",
-				Float.toString(1000/metadata._pHYs[1].intValue()));
+				Float.toString(1000/metadata._pHYS[1].intValue()));
 
 		root.appendChild(node);
+		return true;
 	}
 
-	private void add_HorizontalScreenSize(IIOMetadataNode root)
+	private boolean add_HorizontalScreenSize(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("HorizontalScreenSize");
 
 		node.setAttribute("value", Integer.toString(metadata._IHDR.width));
 
 		root.appendChild(node);
+		return false;
 	}
 
-	private void add_VerticalScreenSize(IIOMetadataNode root)
+	private boolean add_VerticalScreenSize(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("VerticalScreenSize");
 
 		node.setAttribute("value", Integer.toString(metadata._IHDR.height));
 
 		root.appendChild(node);
+		return true;
 	}
 
-	protected IIOMetadataNode getStandardDocumentNode()
-	{
-		IIOMetadataNode node = new IIOMetadataNode("Document");
-
-		add_ImageModificationTime(node);
-
-		return node;
-	}
-
-	private void add_ImageModificationTime(IIOMetadataNode root)
+	private boolean add_ImageModificationTime(IIOMetadataNode root)
 	{
 		if (metadata._tIME == null)
-			return;
+			return false;
 
-		IIOMetadataNode node = new IIOMetadataNode("ImageCreationTime");
+		Calendar cal = metadata._tIME;
 
-		node.setAttribute("year",	Integer.toString(metadata._tIME.year));
-		node.setAttribute("month",	Integer.toString(metadata._tIME.month));
-		node.setAttribute("day",	Integer.toString(metadata._tIME.day));
-		node.setAttribute("hour",	Integer.toString(metadata._tIME.hour));
-		node.setAttribute("minute",	Integer.toString(metadata._tIME.minute));
-		node.setAttribute("second",	Integer.toString(metadata._tIME.second));
+		IIOMetadataNode node = new IIOMetadataNode("ImageModificationTime");
+
+		node.setAttribute("year", Integer.toString(cal.get(Calendar.YEAR)));
+		node.setAttribute("month", Integer.toString(cal.get(Calendar.MONTH) + 1));
+		node.setAttribute("day", Integer.toString(cal.get(Calendar.DAY_OF_MONTH)));
+		node.setAttribute("hour", Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+		node.setAttribute("minute", Integer.toString(cal.get(Calendar.MINUTE)));
+		node.setAttribute("second", Integer.toString(cal.get(Calendar.SECOND)));
 
 		root.appendChild(node);
+		return true;
 	}
 
 
-	//TODO flesh these out more by treating them as
-	// tEXt, iTXt and zTXt
-	protected IIOMetadataNode getStandardTextNode()
-	{
-		IIOMetadataNode node = new IIOMetadataNode("Text");
-
-		if (metadata._TEXT != null)
-		{
-			Iterator textChunks = metadata._TEXT.iterator();
-			while (textChunks.hasNext()) 
-			{
-				Metadata.TEXT txt = (Metadata.TEXT) textChunks.next();
-
-				IIOMetadataNode t = new IIOMetadataNode("TextEntry");
-
-				t.setAttribute("keyword", txt.keyword);
-				t.setAttribute("value", txt.text);
-				//t.setAttribute("compression", "none");
-
-				node.appendChild(t);
-			}
-		}
-
-		return node;
-	}
-
-	// Could not find specification for this element in DTD
-	//protected IIOMetadataNode getStandardTileNode()
-	//{
-	//}
-
-	protected IIOMetadataNode getStandardTransparencyNode()
-	{
-		IIOMetadataNode node = new IIOMetadataNode("Transparency");
-
-		add_Alpha(node);
-
-		return node;
-	}
-
-	private void add_Alpha(IIOMetadataNode root)
+	private boolean add_Alpha(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new IIOMetadataNode("Alpha");
 
@@ -564,15 +651,19 @@ extends IIOMetadata
 		if (metadata._IHDR.colorType == PngConstants.COLOR_TYPE_RGB_ALPHA
 				|| metadata._IHDR.colorType == PngConstants.COLOR_TYPE_GRAY_ALPHA
 				|| metadata._tRNS != null)
-				val = "nonpremultiplied";
+				val = "nonpremultipled";
 
 		node.setAttribute("value", val);
 		root.appendChild(node);
+		return true;
 	}
 
 	// ----------- Methods needed to support the Native metadata format
 	//
-	// The format is described by PngImageMetadataFormat
+	// This format is very similar to the javax_imageio_png_1.0
+	//
+	// It differs in that it is not susceptible to the bug described here
+	// http://developer.java.sun.com/developer/bugParade/bugs/4518989.html
 	//
 
 	private IIOMetadataNode getNativeTree()
@@ -582,18 +673,21 @@ extends IIOMetadata
 
 		add_IHDR(root);
 		add_PLTE(root);
+		add_bKGD(root);
+		add_cHRM(root);
 		add_gAMA(root);
-		add_TEXT(root);
-		add_pHYs(root);
+		add_hIST(root);
+		add_iCCP(root);
+		add_iTXt(root);
+		add_pHYS(root);
+		add_sBIT(root);
+		add_sPLT(root);
+		add_sRGB(root);
+		add_tEXt(root);
 		add_tIME(root);
 		add_tRNS(root);
-		add_bKGD(root);
-		add_sRGB(root);
-		add_sBIT(root);
-		add_cHRM(root);
-		add_iCCP(root);
-		add_hIST(root);
-		add_sPLT(root);
+		add_zTXt(root);
+		add_unknown_chunks(root);
 
 		return root;
 	}
@@ -601,26 +695,69 @@ extends IIOMetadata
 	private void add_IHDR(IIOMetadataNode root)
 	{
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_IHDR);
+			IIOMetadataNode("IHDR");
 
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_width,
-				Integer.toString(metadata._IHDR.width));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_height,
-				Integer.toString(metadata._IHDR.height));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_bitDepth,
-				Integer.toString(metadata._IHDR.bitDepth));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_colorType,
-				Integer.toString(metadata._IHDR.colorType));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_compressionMethod,
-				Integer.toString(metadata._IHDR.compressionMethod));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_filterMethod,
-				Integer.toString(metadata._IHDR.filterMethod));
-		node.setAttribute(PngImageMetadataFormat.n_IHDR_interlaceMethod,
-				Integer.toString(metadata._IHDR.interlaceMethod));
+		String colorType = null;
+		switch (metadata._IHDR.colorType)
+		{
+			case PngConstants.COLOR_TYPE_GRAY:
+				colorType = "Grayscale";
+				break;
+			case PngConstants.COLOR_TYPE_GRAY_ALPHA:
+				colorType = "GrayAlpha";
+				break;
+			case PngConstants.COLOR_TYPE_PALETTE:
+				colorType = "Palette";
+				break;
+			case PngConstants.COLOR_TYPE_RGB:
+				colorType = "RGB";
+				break;
+			case PngConstants.COLOR_TYPE_RGB_ALPHA:
+				colorType = "RGBAlpha";
+				break;
+		}
+				
+		node.setAttribute("width", Integer.toString(metadata._IHDR.width));
+		node.setAttribute("height", Integer.toString(metadata._IHDR.height));
+		node.setAttribute("bitDepth", Integer.toString(metadata._IHDR.bitDepth));
+		node.setAttribute("colorType", colorType);
+		node.setAttribute("compressionMethod", "deflate");
+		node.setAttribute("filterMethod", "adaptive");
+		node.setAttribute("interlaceMethod", 
+				metadata._IHDR.interlaceMethod == 0 ? "none" : "adam7");
+
+		root.appendChild(node);
+	}
+	
+	private void add_unknown_chunks(IIOMetadataNode root)
+	{
+		Map map = metadata._unknownChunks;
+		if (map.isEmpty())
+			return;
+
+		IIOMetadataNode node = new IIOMetadataNode("UnknownChunks");
+
+		Iterator keyItr = map.keySet().iterator();
+		while (keyItr.hasNext())
+		{
+			Integer type = (Integer) keyItr.next();
+			int typeInt = type.intValue();
+			char[] typeChars = new char[] {
+				(char) ((typeInt >> 24 ) & 0xFF),
+				(char) ((typeInt >> 16 ) & 0xFF),
+				(char) ((typeInt >>  8 ) & 0xFF),
+				(char) ( typeInt         & 0xFF)
+			};
+			String typeName = new String(typeChars);
+			IIOMetadataNode ucn = new IIOMetadataNode("UnknownChunk");
+			ucn.setAttribute("type", typeName);
+			node.appendChild(ucn);
+		}
 
 		root.appendChild(node);
 	}
 
+	// Not tested
 	private void add_sPLT(IIOMetadataNode root)
 	{
 		if (metadata._sPLT == null)
@@ -631,13 +768,7 @@ extends IIOMetadata
 		{
 			SuggestedPalette s = (SuggestedPalette) itr.next();
 
-			IIOMetadataNode splt_node = new
-				IIOMetadataNode(PngImageMetadataFormat.n_sPLT);
-
-			splt_node.setAttribute(PngImageMetadataFormat.n_sPLT_name,
-					s.getName());
-			splt_node.setAttribute(PngImageMetadataFormat.n_sPLT_depth,
-					Integer.toString(s.getSampleDepth()));
+			IIOMetadataNode splt_node = new IIOMetadataNode("sPLT");
 
 			int count = s.getSampleCount();
 			for (int i=0; i<count; i++)
@@ -645,17 +776,13 @@ extends IIOMetadata
 				short[] pixels = new short[4];
 				s.getSample(i, pixels);
 
-				IIOMetadataNode node = new
-					IIOMetadataNode(PngImageMetadataFormat.n_sPLT_node);
+				IIOMetadataNode node = new IIOMetadataNode("sPLTEntry");
 
-				node.setAttribute(PngImageMetadataFormat.n_sPLT_r,
-						Integer.toString(pixels[0]));
-				node.setAttribute(PngImageMetadataFormat.n_sPLT_g,
-						Integer.toString(pixels[1]));
-				node.setAttribute(PngImageMetadataFormat.n_sPLT_b,
-						Integer.toString(pixels[2]));
-				node.setAttribute(PngImageMetadataFormat.n_sPLT_f,
-						Integer.toString(pixels[3]));
+				node.setAttribute("index", Integer.toString(i));
+				node.setAttribute("red", Integer.toString(pixels[0]));
+				node.setAttribute("green", Integer.toString(pixels[1]));
+				node.setAttribute("blue", Integer.toString(pixels[2]));
+				node.setAttribute("alpha", Integer.toString(pixels[3]));
 
 				splt_node.appendChild(node);
 			} //for
@@ -669,18 +796,14 @@ extends IIOMetadata
 		if (metadata._hIST == null)
 			return;
 
-		IIOMetadataNode main_node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_hIST);
+		IIOMetadataNode main_node = new IIOMetadataNode("hIST");
 
 		for (int i=0; i<metadata._hIST.length; i++)
 		{
-			IIOMetadataNode node = new
-				IIOMetadataNode(PngImageMetadataFormat.n_hIST_name);
+			IIOMetadataNode node = new IIOMetadataNode("hISTEntry");
 
-			node.setAttribute(PngImageMetadataFormat.n_hIST_idx,
-					Integer.toString(i));
-			node.setAttribute(PngImageMetadataFormat.n_hIST_val,
-					Integer.toString(metadata._hIST[i]));
+			node.setAttribute("index", Integer.toString(i));
+			node.setAttribute("value", Integer.toString(metadata._hIST[i]));
 
 			main_node.appendChild(node);
 		}
@@ -693,13 +816,11 @@ extends IIOMetadata
 		if (metadata._iCCP == null)
 			return;
 
-		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_iCCP);
+		IIOMetadataNode node = new IIOMetadataNode("iCCP");
 
-		node.setAttribute(PngImageMetadataFormat.n_iCCP_name,
-				metadata._iCCP[0]);
-		node.setAttribute(PngImageMetadataFormat.n_iCCP_prof,
-				metadata._iCCP[1]);
+		node.setAttribute("profileName", metadata._iCCP[0]);
+		node.setAttribute("compressionMethod", "deflate");
+		//node.setAttribute("data", metadata._iCCP[1]);
 
 		root.appendChild(node);
 	}
@@ -710,26 +831,23 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_cHRM);
+			IIOMetadataNode("cHRM");
 
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_wx,
-				Float.toString(metadata._cHRM[0]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_wy,
-				Float.toString(metadata._cHRM[1]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_rx,
-				Float.toString(metadata._cHRM[2]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_ry,
-				Float.toString(metadata._cHRM[3]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_gx,
-				Float.toString(metadata._cHRM[4]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_gy,
-				Float.toString(metadata._cHRM[5]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_bx,
-				Float.toString(metadata._cHRM[6]));
-		node.setAttribute(PngImageMetadataFormat.n_cHRM_by,
-				Float.toString(metadata._cHRM[7]));
+		node.setAttribute("whitePointX",	conv_cHRM(0));
+		node.setAttribute("whitePointY",	conv_cHRM(1));
+		node.setAttribute("redX", 			conv_cHRM(2));
+		node.setAttribute("redY", 			conv_cHRM(3));
+		node.setAttribute("greenX", 		conv_cHRM(4));
+		node.setAttribute("greenY", 		conv_cHRM(5));
+		node.setAttribute("blueX", 			conv_cHRM(6));
+		node.setAttribute("blueY", 			conv_cHRM(7));
 
 		root.appendChild(node);
+	}
+
+	private String conv_cHRM(int idx)
+	{
+		return Integer.toString((int) Math.round(metadata._cHRM[idx] * 1e5));
 	}
 
 	private void add_sBIT(IIOMetadataNode root)
@@ -738,52 +856,50 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_sBIT);
+			IIOMetadataNode("sBIT");
+
+		String nodeName = null;
+		String nodeValue = null;
+
+		IIOMetadataNode sbit = null;
 
 		switch (metadata._IHDR.colorType)
 		{
 			case PngConstants.COLOR_TYPE_GRAY:
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_gray,
-					Integer.toString(metadata._sBIT[0]));
+				sbit = new IIOMetadataNode("sBIT_Grayscale");
+				sbit.setAttribute("gray", Integer.toString(metadata._sBIT[0]));
 				break;
 
 			case PngConstants.COLOR_TYPE_RGB:
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_r,
-					Integer.toString(metadata._sBIT[0]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_g,
-					Integer.toString(metadata._sBIT[1]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_b,
-					Integer.toString(metadata._sBIT[2]));
+				sbit = new IIOMetadataNode("sBIT_RGB");
+				sbit.setAttribute("red", Integer.toString(metadata._sBIT[0]));
+				sbit.setAttribute("green", Integer.toString(metadata._sBIT[1]));
+				sbit.setAttribute("blue", Integer.toString(metadata._sBIT[2]));
 				break;
 
 			case PngConstants.COLOR_TYPE_PALETTE:
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_r,
-					Integer.toString(metadata._sBIT[0]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_g,
-					Integer.toString(metadata._sBIT[1]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_b,
-					Integer.toString(metadata._sBIT[2]));
+				sbit = new IIOMetadataNode("sBIT_Palette");
+				sbit.setAttribute("red", Integer.toString(metadata._sBIT[0]));
+				sbit.setAttribute("green", Integer.toString(metadata._sBIT[1]));
+				sbit.setAttribute("blue", Integer.toString(metadata._sBIT[2]));
 				break;
 
 			case PngConstants.COLOR_TYPE_GRAY_ALPHA:
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_gray,
-					Integer.toString(metadata._sBIT[0]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_a,
-					Integer.toString(metadata._sBIT[1]));
+				sbit = new IIOMetadataNode("sBIT_GrayAlpha");
+				sbit.setAttribute("gray", Integer.toString(metadata._sBIT[0]));
+				sbit.setAttribute("alpha", Integer.toString(metadata._sBIT[1]));
 				break;
 				
 			case PngConstants.COLOR_TYPE_RGB_ALPHA:
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_r,
-					Integer.toString(metadata._sBIT[0]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_g,
-					Integer.toString(metadata._sBIT[1]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_b,
-					Integer.toString(metadata._sBIT[2]));
-				node.setAttribute(PngImageMetadataFormat.n_sBIT_a,
-					Integer.toString(metadata._sBIT[3]));
+				sbit = new IIOMetadataNode("");
+				sbit.setAttribute("red", Integer.toString(metadata._sBIT[0]));
+				sbit.setAttribute("green", Integer.toString(metadata._sBIT[1]));
+				sbit.setAttribute("blue", Integer.toString(metadata._sBIT[2]));
+				sbit.setAttribute("alpha", Integer.toString(metadata._sBIT[3]));
 				break;
 		}
 
+		node.appendChild(sbit);
 		root.appendChild(node);
 	}
 
@@ -792,13 +908,41 @@ extends IIOMetadata
 		if (metadata._sRGB == null)
 			return;
 
-		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_sRGB);
+		IIOMetadataNode node = new IIOMetadataNode("sRGB");
 
-		node.setAttribute(PngImageMetadataFormat.n_sRGB_val,
-				metadata._sRGB.toString());
+		String ri = null;
+		switch (metadata._sRGB.intValue())
+		{
+			case 0:
+				ri = "Perceptual";
+				break;
+			case 1:
+				ri = "Relative colorimetric";
+				break;
+			case 2:
+				ri = "Saturation";
+				break;
+			case 3:
+				ri = "Absolute colorimetric";
+				break;
+		}
+		node.setAttribute("renderingIntent", ri);
 
 		root.appendChild(node);
+	}
+
+	// Sun seems to insist on having extra (enpty) palette entries
+	private int getPLTENumOfEntries(int entries)
+	{
+		if (entries == 0)
+			return 0;
+		if (entries <= 2)
+			return 2;
+		if (entries <= 4)
+			return 4;
+		if (entries <= 16)
+			return 16;
+		return 256;
 	}
 
 	private void add_PLTE(IIOMetadataNode root)
@@ -807,25 +951,28 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode plt_node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_PLTE);
+			IIOMetadataNode("PLTE");
 
 		byte [] plt = metadata._PLTE;
+
+		int entries = plt.length/3;
+		int extraEntries = getPLTENumOfEntries(entries) - entries;
+
 		for (int i=0; i<plt.length; i+=3)
 		{
 			IIOMetadataNode node = new
-				IIOMetadataNode(PngImageMetadataFormat.n_PLTE_sample);
+				IIOMetadataNode("PLTEEntry");
 
-			node.setAttribute(PngImageMetadataFormat.n_PLTE_sample_num, 
-					Integer.toString((int) (i/3)));
-			node.setAttribute(PngImageMetadataFormat.n_PLTE_sample_r, 
-					Integer.toString(0xFF & plt[i]));
-			node.setAttribute(PngImageMetadataFormat.n_PLTE_sample_g, 
-					Integer.toString(0xFF & plt[i+1]));
-			node.setAttribute(PngImageMetadataFormat.n_PLTE_sample_b, 
-					Integer.toString(0xFF & plt[i+2]));
+			node.setAttribute("index", Integer.toString((int) (i/3)));
+			node.setAttribute("red", Integer.toString(0xFF & plt[i]));
+			node.setAttribute("green", Integer.toString(0xFF & plt[i+1]));
+			node.setAttribute("blue", Integer.toString(0xFF & plt[i+2]));
 
 			plt_node.appendChild(node);
 		}
+
+		for (int i=0; i<extraEntries; i++)
+			add_PaletteEntry(plt_node, i + entries, 0, 0, 0, -1);
 
 		root.appendChild(plt_node);
 	}
@@ -836,32 +983,32 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_bKGD);
+			IIOMetadataNode("bKGD");
 
+		IIOMetadataNode n = null;
 		switch (metadata._IHDR.colorType)
 		{
 			case PngConstants.COLOR_TYPE_GRAY:
 			case PngConstants.COLOR_TYPE_GRAY_ALPHA:
-				node.setAttribute(PngImageMetadataFormat.n_bKGD_grey,
-						Integer.toString(metadata._bKGD[0]));
+				n = new IIOMetadataNode("bKGD_Grayscale");
+				n.setAttribute("gray", Integer.toString(metadata._bKGD[0]));
 				break;
 
 			case PngConstants.COLOR_TYPE_RGB:
 			case PngConstants.COLOR_TYPE_RGB_ALPHA:
-				node.setAttribute(PngImageMetadataFormat.n_bKGD_r,
-						Integer.toString(metadata._bKGD[0]));
-				node.setAttribute(PngImageMetadataFormat.n_bKGD_g,
-						Integer.toString(metadata._bKGD[1]));
-				node.setAttribute(PngImageMetadataFormat.n_bKGD_b,
-						Integer.toString(metadata._bKGD[2]));
+				n = new IIOMetadataNode("bKGD_RGB");
+				n.setAttribute("red", Integer.toString(metadata._bKGD[0]));
+				n.setAttribute("green", Integer.toString(metadata._bKGD[1]));
+				n.setAttribute("blue", Integer.toString(metadata._bKGD[2]));
 				break;	
 
 			case PngConstants.COLOR_TYPE_PALETTE:
-				node.setAttribute(PngImageMetadataFormat.n_bKGD_plt,
-						Integer.toString(metadata._bKGD[0]));
+				n = new IIOMetadataNode("bKGD_Palette");
+				n.setAttribute("index", Integer.toString(metadata._bKGD[0]));
 				break;
 		}
 
+		node.appendChild(n);
 		root.appendChild(node);
 	}
 
@@ -871,41 +1018,43 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_tRNS);
+			IIOMetadataNode("tRNS");
+
+		IIOMetadataNode subNode = null;
 
 		switch (metadata._IHDR.colorType)
 		{
 			case PngConstants.COLOR_TYPE_GRAY:
+				subNode = new IIOMetadataNode("tRNS_Grayscale");
 				int[] g = (int[]) metadata._tRNS;
-				node.setAttribute(PngImageMetadataFormat.n_tRNS_gs,
+				subNode.setAttribute("gray",
 						Integer.toString(g[0]));
 				break;
 
 			case PngConstants.COLOR_TYPE_RGB:
+				subNode = new IIOMetadataNode("tRNS_RGB");
 				int[] trans = (int[]) metadata._tRNS;
-				node.setAttribute(PngImageMetadataFormat.n_tRNS_r,
-						Integer.toString(trans[0]));
-				node.setAttribute(PngImageMetadataFormat.n_tRNS_g,
-						Integer.toString(trans[1]));
-				node.setAttribute(PngImageMetadataFormat.n_tRNS_b,
-						Integer.toString(trans[2]));
+				subNode.setAttribute("red", Integer.toString(trans[0]));
+				subNode.setAttribute("green", Integer.toString(trans[1]));
+				subNode.setAttribute("blue", Integer.toString(trans[2]));
 				break;
 
 			case PngConstants.COLOR_TYPE_PALETTE:
+				subNode = new IIOMetadataNode("tRNS_Palette");
 				byte [] t = (byte[]) metadata._tRNS;
 				for (int i=0; i<t.length; i++)
 				{
 					IIOMetadataNode n = new
-						IIOMetadataNode(PngImageMetadataFormat.n_tRNS_plt);
-					n.setAttribute(PngImageMetadataFormat.n_tRNS_plt_num,
-							Integer.toString(i));
-					n.setAttribute(PngImageMetadataFormat.n_tRNS_plt_val,
-							Integer.toString((int) t[i]));
-					node.appendChild(n);
+						IIOMetadataNode("tRNS_PaletteEntry");
+
+					n.setAttribute("index", Integer.toString(i));
+					n.setAttribute("alpha", Integer.toString((int) t[i]));
+
+					subNode.appendChild(n);
 				}
 				break;
 		}
-
+		node.appendChild(subNode);
 		root.appendChild(node);
 	}
 
@@ -915,47 +1064,124 @@ extends IIOMetadata
 			return;
 
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_gAMA);
+			IIOMetadataNode("gAMA");
 
-		node.setAttribute(PngImageMetadataFormat.n_gAMA_val,
-				metadata._gAMA.toString());
+		String val = Integer.toString((int)
+				Math.round(metadata._gAMA.floatValue() * 1e5));
+
+		node.setAttribute("value", val);
 
 		root.appendChild(node);
 	}
 
-	private void add_TEXT(IIOMetadataNode root)
+	private void add_zTXt(IIOMetadataNode root)
 	{
 		if (metadata._TEXT == null)
 			return;
 
+		boolean textPresent = false;
+
+		IIOMetadataNode node = new
+			IIOMetadataNode("tEXt");
+
 		Iterator textChunks = metadata._TEXT.iterator();
 		while (textChunks.hasNext()) 
 		{
-			Metadata.TEXT txt = (Metadata.TEXT) textChunks.next();
+			TextChunk txt = (TextChunk) textChunks.next();
 
-			IIOMetadataNode node = new
-				IIOMetadataNode(PngImageMetadataFormat.n_TEXT);
-			node.setAttribute(PngImageMetadataFormat.n_TEXT_keyword, txt.keyword);
-			node.setAttribute(PngImageMetadataFormat.n_TEXT_text, txt.text);
+			if (txt.getType() != PngChunk.zTXt)
+				continue;
 
-			root.appendChild(node);
+			IIOMetadataNode n = new
+				IIOMetadataNode("zTXtEntry");
+
+			n.setAttribute("keyword", txt.getKeyword());
+			n.setAttribute("compressionMethod", "deflate");
+			n.setAttribute("text", txt.getText());
+
+			node.appendChild(n);
+			textPresent = true;
 		}
+
+		if (textPresent)
+			root.appendChild(node);
 	}
 
-	private void add_pHYs(IIOMetadataNode root)
+	private void add_iTXt(IIOMetadataNode root)
 	{
-		if (metadata._pHYs == null)
+		if (metadata._TEXT == null)
 			return;
 
+		boolean textPresent = false;
 		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_pHYs);
+			IIOMetadataNode("iTXt");
 
-		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppux,
-				metadata._pHYs[0].toString());
-		node.setAttribute(PngImageMetadataFormat.n_pHYs_ppuy,
-				metadata._pHYs[1].toString());
-		node.setAttribute(PngImageMetadataFormat.n_pHYs_unit,
-				metadata._pHYs[2].toString());
+		Iterator textChunks = metadata._TEXT.iterator();
+		while (textChunks.hasNext()) 
+		{
+			TextChunk txt = (TextChunk) textChunks.next();
+
+			if (txt.getType() != PngChunk.iTXt)
+				continue;
+
+			IIOMetadataNode n = new
+				IIOMetadataNode("iTXtEntry");
+
+			n.setAttribute("keyword", txt.getKeyword());
+			//FIXME Find out whether this iTXt was compressed
+			n.setAttribute("compressionFlag", "FALSE");
+			n.setAttribute("languageTag", txt.getLanguage());
+			n.setAttribute("translatedKeyword", txt.getTranslatedKeyword());
+			n.setAttribute("text", txt.getText());
+
+			node.appendChild(n);
+			textPresent = true;
+		}
+
+		if (textPresent)
+			root.appendChild(node);
+	}
+
+	private void add_tEXt(IIOMetadataNode root)
+	{
+		if (metadata._TEXT == null)
+			return;
+
+		boolean textPresent = false;
+		IIOMetadataNode node = new IIOMetadataNode("tEXt");
+
+		Iterator textChunks = metadata._TEXT.iterator();
+		while (textChunks.hasNext()) 
+		{
+			TextChunk txt = (TextChunk) textChunks.next();
+
+			if (txt.getType() != PngChunk.tEXt)
+				continue;
+
+			IIOMetadataNode n = new IIOMetadataNode("tEXtEntry");
+
+			n.setAttribute("keyword", txt.getKeyword());
+			n.setAttribute("value", txt.getText());
+
+			node.appendChild(n);
+			textPresent = true;
+		}
+
+		if (textPresent)
+			root.appendChild(node);
+	}
+
+	private void add_pHYS(IIOMetadataNode root)
+	{
+		if (metadata._pHYS == null)
+			return;
+
+		IIOMetadataNode node = new IIOMetadataNode("pHYS");
+
+		node.setAttribute("pixelsPerUnitXAxis", metadata._pHYS[0].toString());
+		node.setAttribute("pixelsPerUnitYAxis", metadata._pHYS[1].toString());
+		node.setAttribute("unitSpecifier", 
+				metadata._pHYS[2].intValue() == 0 ? "unknown" : "meter");
 
 		root.appendChild(node);
 	}
@@ -965,21 +1191,16 @@ extends IIOMetadata
 		if (metadata._tIME == null)
 			return;
 
-		IIOMetadataNode node = new
-			IIOMetadataNode(PngImageMetadataFormat.n_tIME);
+		Calendar cal = metadata._tIME;
 
-		node.setAttribute(PngImageMetadataFormat.n_tIME_year,
-				Integer.toString(metadata._tIME.year));
-		node.setAttribute(PngImageMetadataFormat.n_tIME_month,
-				Integer.toString(metadata._tIME.month));
-		node.setAttribute(PngImageMetadataFormat.n_tIME_day,
-				Integer.toString(metadata._tIME.day));
-		node.setAttribute(PngImageMetadataFormat.n_tIME_hour,
-				Integer.toString(metadata._tIME.hour));
-		node.setAttribute(PngImageMetadataFormat.n_tIME_minute,
-				Integer.toString(metadata._tIME.minute));
-		node.setAttribute(PngImageMetadataFormat.n_tIME_second,
-				Integer.toString(metadata._tIME.second));
+		IIOMetadataNode node = new IIOMetadataNode("tIME");
+
+		node.setAttribute("year", Integer.toString(cal.get(Calendar.YEAR)));
+		node.setAttribute("month", Integer.toString(cal.get(Calendar.MONTH) + 1));
+		node.setAttribute("day", Integer.toString(cal.get(Calendar.DAY_OF_MONTH)));
+		node.setAttribute("hour", Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+		node.setAttribute("minute", Integer.toString(cal.get(Calendar.MINUTE)));
+		node.setAttribute("second", Integer.toString(cal.get(Calendar.SECOND)));
 
 		root.appendChild(node);
 	}
@@ -997,44 +1218,29 @@ extends IIOMetadata
 			int interlaceMethod;
 		}
 
-		class TEXT
-		{
-			String keyword;
-			String text;
-		}
-
-		class tIME
-		{
-			int year;
-			int month;
-			int day;
-			int hour;
-			int minute;
-			int second;
-		}
-
 		IHDR _IHDR = null;
-		tIME _tIME = null;
 		int[] _bKGD = null;
 		int[] _hIST = null;
 		byte[] _sBIT = null;
 		byte[] _PLTE = null;
 		float[] _cHRM = null;
 		Integer _sRGB = null;
-		Integer[] _pHYs = null;
+		Integer[] _pHYS = null;
 		String[] _iCCP = null;
 		Float _gAMA = null;
 		Object _tRNS = null;
 		List _TEXT = null;
 		List _sPLT = null;
+		Map _unknownChunks = null;
+		Calendar _tIME = null;
 
-		public Metadata(PngImage png)
+		public Metadata(PngImage png, Map unknownChunks)
 		{
 			read_IHDR(png);
 			read_PLTE(png);
 			read_gAMA(png);
 			read_TEXT(png);
-			read_pHYs(png);
+			read_pHYS(png);
 			read_tIME(png);
 			read_tRNS(png);
 			read_bKGD(png);
@@ -1044,6 +1250,7 @@ extends IIOMetadata
 			read_iCCP(png);
 			read_hIST(png);
 			read_sPLT(png);
+			_unknownChunks = unknownChunks;
 		}
 
 		private void read_IHDR(PngImage png)
@@ -1076,7 +1283,6 @@ extends IIOMetadata
 			if (prof == null)
 				return;
 
-			//FIXME what is an iCCP profile? text? assuming it is text here.
 			_iCCP = new String [] {
 				new String((byte[]) prof),
 				(String) png.getProperty(PngConstants.ICC_PROFILE_NAME)
@@ -1125,26 +1331,7 @@ extends IIOMetadata
 
 		private void read_TEXT(PngImage png)
 		{
-			List text_chunks = (List)
-				png.getProperty(PngConstants.TEXT_CHUNKS);
-
-			if (text_chunks == null)
-				return;
-
-			_TEXT = new ArrayList();
-
-			Iterator itr = text_chunks.iterator();
-
-			while (itr.hasNext())
-			{
-				TextChunk t = (TextChunk) itr.next();
-
-				TEXT txt = new TEXT();
-				txt.keyword = t.getKeyword();
-				txt.text = t.getText();
-
-				_TEXT.add(txt);
-			}
+			_TEXT = (List) png.getProperty(PngConstants.TEXT_CHUNKS);
 		}
 
 		private void read_gAMA(PngImage png)
@@ -1152,13 +1339,13 @@ extends IIOMetadata
 			_gAMA = (Float) png.getProperty(PngConstants.GAMMA);
 		}
 
-		private void read_pHYs(PngImage png)
+		private void read_pHYS(PngImage png)
 		{
 			Object p = png.getProperty(PngConstants.PIXELS_PER_UNIT_X);
 			if (p == null)
 				return;
 
-			_pHYs = new Integer[] {
+			_pHYS = new Integer[] {
 				(Integer) png.getProperty(PngConstants.PIXELS_PER_UNIT_X),
 				(Integer) png.getProperty(PngConstants.PIXELS_PER_UNIT_Y),
 				(Integer) png.getProperty(PngConstants.UNIT)
@@ -1172,17 +1359,9 @@ extends IIOMetadata
 			if (date == null)
 				return;
 
-			_tIME = new tIME();
-
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-
-			_tIME.year 		= cal.get(Calendar.YEAR);
-			_tIME.month 	= cal.get(Calendar.MONTH);
-			_tIME.day 		= cal.get(Calendar.DAY_OF_MONTH);
-			_tIME.hour 		= cal.get(Calendar.HOUR_OF_DAY);
-			_tIME.minute 	= cal.get(Calendar.MINUTE);
-			_tIME.second 	= cal.get(Calendar.SECOND);
+			TimeZone tz = TimeZone.getTimeZone("UTC");
+			_tIME = Calendar.getInstance(tz);
+			_tIME.setTime(date);
 		}
 	}
 }

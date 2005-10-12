@@ -210,7 +210,7 @@ extends ImageReader
 		{
 			readHeader();
 			readImage();
-			pngMetadata = new PngImageMetadata(png);
+			pngMetadata = new PngImageMetadata(png, unknownChunks);
 		}
 	}
 
