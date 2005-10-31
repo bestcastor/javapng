@@ -26,24 +26,25 @@ extends IIOTestCase
 
 		IIOMetadata iiom = ir.getImageMetadata(0);
 		Node n = iiom.getAsTree(getFormatName());
-		Node sunTree = getSunsTree();
-
 		writeNode(n);
 
-		if (sunTree == null)
-		{
-			System.out.println("Sun's tree is null; no comparision is done.");
-		}
-		else
-		if (compare(n, sunTree) == false)
-		{
+		java.io.PrintStream stderr = System.err;
+        System.setErr(System.out);
+		Node sunTree = null;
+        try {
+            sunTree = getSunsTree();
+        } catch (Exception e) {
+            System.out.println("Exception getting Sun's tree, no comparison will be done:");
+            e.printStackTrace(System.out);
+        } finally {
+            System.setErr(stderr);
+        }
+		if (sunTree != null && compare(n, sunTree) == false) {
 			System.out.println(">>>>>>>> Sun's is different! <<<<<<<<");
 			System.out.println("");
-
 			writeNode(sunTree);
 			fail("Sun's metadata is different.");
 		}
-
 		System.out.println("");
 	}
 
@@ -95,6 +96,28 @@ extends IIOTestCase
 			return  false;
 
 		boolean state = true;
+        Object u1 = ((IIOMetadataNode)n1).getUserObject();
+        Object u2 = ((IIOMetadataNode)n2).getUserObject();
+        if (u1 != null || u2 != null) {
+            if (u1 == null || u2 == null) {
+                System.out.println("*** One node has a user object but the other doesn't");
+                System.out.println(u1);
+                System.out.println(u2);
+                state = false;
+            } else if (!u1.getClass().equals(u2.getClass())) {
+                System.out.println("*** User objects are not the same type");
+                System.out.println(u1.getClass());
+                System.out.println(u2.getClass());
+                state = false;
+            } else if (u1 instanceof byte[]) {
+                if (!java.util.Arrays.equals((byte[])u1, (byte[])u2)) {
+                    System.out.println("*** User objects do not have the same value");
+                    state = false;
+                }
+            } else {
+                System.out.println("*** Need to implement equality checking for " + u1.getClass());
+            }
+        }
 
 		// Compare attributes of current node
 		NamedNodeMap map1 = n1.getAttributes();

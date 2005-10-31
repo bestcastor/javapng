@@ -36,16 +36,30 @@ exception statement from your version.
 
 package com.sixlegs.png.iio;
 
+import java.awt.*;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadataFormatImpl;
+import java.util.*;
 
 public class PngImageMetadataFormat 
 extends IIOMetadataFormatImpl 
 {
 	private static final String rootName = "javax_imageio_png_1.0";
 
+    private static final Set validNodes = Collections.unmodifiableSet(new HashSet(Arrays.asList(new String[]{
+        "IHDR", "iCCP", "cHRM", "sRGB", "gAMA", "pHYS", "tIME",
+        "sPLT", "sPLTEntry",
+        "hIST", "hISTEntry",
+        "sBIT", "sBIT_Grayscale", "sBIT_GrayAlpha", "sBIT_RGB", "sBIT_RGBAlpha", "sBIT_Palette",
+        "PLTE", "PLTEEntry",
+        "tRNS", "tRNS_Grayscale", "tRNS_RGB", "tRNS_Palette",
+        "bKGD", "bKGD_Grayscale", "bKGD_Palette", "bKGD_Palette", "bKGD_RGB",
+        "iTXt", "iTXtEntry", "zTXt", "zTXtEntry", "tEXt", "tEXtEntry",
+        "UnknownChunks", "UnknownChunk",
+    })));
+
 	// singleton
-	private static PngImageMetadataFormat defaultInstance =
+	private static final PngImageMetadataFormat defaultInstance =
 		new PngImageMetadataFormat();
 
 	// Make constructor private to enforce the singleton pattern
@@ -79,7 +93,7 @@ extends IIOMetadataFormatImpl
 
 		addAttribute("IHDR", "width", DATATYPE_INTEGER, true, null);
 		addAttribute("IHDR", "height", DATATYPE_INTEGER, true, null);
-		addAttribute("IHDR", "bitdepth", DATATYPE_INTEGER, true, null);
+		addAttribute("IHDR", "bitDepth", DATATYPE_INTEGER, true, null);
 		addAttribute("IHDR", "colorType", DATATYPE_STRING, true, null);
 		addAttribute("IHDR", "compressionMethod", DATATYPE_STRING, true, null);
 		addAttribute("IHDR", "filterMethod", DATATYPE_STRING, true, null);
@@ -118,8 +132,8 @@ extends IIOMetadataFormatImpl
 	{
 		addElement("cHRM", rootName, CHILD_POLICY_EMPTY);
 
-		addAttribute("cHRM", "whitPointX", DATATYPE_INTEGER, true, null);
-		addAttribute("cHRM", "whitPointY", DATATYPE_INTEGER, true, null);
+		addAttribute("cHRM", "whitePointX", DATATYPE_INTEGER, true, null);
+		addAttribute("cHRM", "whitePointY", DATATYPE_INTEGER, true, null);
 		addAttribute("cHRM", "redX", DATATYPE_INTEGER, true, null);
 		addAttribute("cHRM", "redY", DATATYPE_INTEGER, true, null);
 		addAttribute("cHRM", "greenX", DATATYPE_INTEGER, true, null);
@@ -253,10 +267,10 @@ extends IIOMetadataFormatImpl
 	private void setup_tIME()
 	{
 		addElement("tIME", rootName, CHILD_POLICY_EMPTY);
-		addAttribute("tIME", "year"  , DATATYPE_INTEGER, true, null);
-		addAttribute("tIME", "month" , DATATYPE_INTEGER, true, null);
-		addAttribute("tIME", "day"   , DATATYPE_INTEGER, true, null);
-		addAttribute("tIME", "hour"  , DATATYPE_INTEGER, true, null);
+		addAttribute("tIME", "year",   DATATYPE_INTEGER, true, null);
+		addAttribute("tIME", "month",  DATATYPE_INTEGER, true, null);
+		addAttribute("tIME", "day",    DATATYPE_INTEGER, true, null);
+		addAttribute("tIME", "hour",   DATATYPE_INTEGER, true, null);
 		addAttribute("tIME", "minute", DATATYPE_INTEGER, true, null);
 		addAttribute("tIME", "second", DATATYPE_INTEGER, true, null);
 	}
@@ -268,48 +282,11 @@ extends IIOMetadataFormatImpl
 		addAttribute("UnknownChunk", "type", DATATYPE_STRING, true, null);
 	}
 
-	// Check for legal element names
 	public boolean canNodeAppear(String e, ImageTypeSpecifier imageType) 
 	{
-		if(		   e.equals("IHDR")
-				|| e.equals("sPLT")
-				|| e.equals("sPLTEntry")
-				|| e.equals("hIST")
-				|| e.equals("hISTEntry")
-				|| e.equals("iCCP")
-				|| e.equals("cHRM")
-				|| e.equals("sBIT")
-				|| e.equals("sBIT_Grayscale")
-				|| e.equals("sBIT_GrayAlpha")
-				|| e.equals("sBIT_RGB")
-				|| e.equals("sBIT_RGBAlpha")
-				|| e.equals("sBIT_Palette")
-				|| e.equals("PLTE")
-				|| e.equals("PLTEEntry")
-				|| e.equals("tRNS")
-				|| e.equals("tRNS_Grayscale")
-				|| e.equals("tRNS_RGB")
-				|| e.equals("tRNS_Palette")
-				|| e.equals("bKGD")
-				|| e.equals("bKGD_Grayscale")
-				|| e.equals("bKGD_Palette")
-				|| e.equals("bKGD_Palette")
-				|| e.equals("bKGD_RGB")
-				|| e.equals("sRGB")
-				|| e.equals("gAMA")
-				|| e.equals("iTXt")
-				|| e.equals("iTXtEntry")
-				|| e.equals("zTXt")
-				|| e.equals("zTXtEntry")
-				|| e.equals("tEXt")
-				|| e.equals("tEXtEntry")
-				|| e.equals("pHYS")
-				|| e.equals("tIME")
-				|| e.equals("UnknownChunks")
-				|| e.equals("UnknownChunk")
-				)
-			return true;
-		return false;
+        // TODO: A PLTE chunk may not appear in a Gray or GrayAlpha image
+        // TODO: A tRNS chunk may not appear in GrayAlpha and RGBA images
+        return validNodes.contains(e);
 	}
 
 	// Return the singleton instance

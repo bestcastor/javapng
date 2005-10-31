@@ -33,19 +33,6 @@ extends MetadataTestCase
 	protected Node getSunsTree()
 	throws Exception
 	{
-		// Redirecting stderr to stdout
-		java.io.PrintStream stderr = System.err;
-		System.setErr(System.out);
-
-		Node n = null;
-		try {
-			n = sunIR.getImageMetadata(0).getAsTree("javax_imageio_png_1.0");
-		}
-		catch (Throwable e)
-		{ }
-
-		// re-enabling stderr
-		System.setErr(stderr);
-		return n;
-	}
+        return sunIR.getImageMetadata(0).getAsTree("javax_imageio_png_1.0");
+    }
 }
