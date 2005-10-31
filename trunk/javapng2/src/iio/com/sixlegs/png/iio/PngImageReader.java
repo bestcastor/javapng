@@ -50,7 +50,7 @@ import java.util.*;
 public class PngImageReader
 extends ImageReader
 {
-    private PngImage png;
+    private PngImage png = new IIOPngImage();
 	private PngHeader pngHeader;
 	private PngImageMetadata pngMetadata;
 	private BufferedImage pngImage;
@@ -60,7 +60,6 @@ extends ImageReader
     public PngImageReader(PngImageReaderSpi provider)
     {
         super(provider);
-        png = new IIOPngImage();
     }
 
     public void dispose()
@@ -69,24 +68,18 @@ extends ImageReader
 		pngHeader = null;
 		pngMetadata = null;
 		pngImage = null;
+        unknownChunks = null;
     }
 
     public void setInput(Object input, boolean seekForwardOnly, boolean ignoreMetadata)
     {
-		if (input instanceof ImageInputStream)
-		{
-			super.setInput(input, seekForwardOnly, ignoreMetadata);
-			pngHeader = null;
-			pngMetadata = null;
-			pngImage = null;
-		}
-		else
-		{
-			throw new IllegalArgumentException(
-					"Error: Bad input. Should be ImageInputStream, instead input =" 
-					+ input);
-		}
-
+		if (!(input instanceof ImageInputStream))
+			throw new IllegalArgumentException("Expected ImageInputStream, got " + input);
+        super.setInput(input, seekForwardOnly, ignoreMetadata);
+		pngHeader = null;
+		pngMetadata = null;
+		pngImage = null;
+        unknownChunks.clear();
     }
 
     public int getNumImages(boolean allowSearch)
@@ -94,10 +87,10 @@ extends ImageReader
         return 1;
     }
 
-	private void checkIndex(int imageIndex) {
-		if (imageIndex != 0) {
+	private void checkIndex(int imageIndex)
+    {
+		if (imageIndex != 0)
 			throw new IndexOutOfBoundsException("Requested image " + imageIndex);
-		}
 	}
 
 	private void readHeader() 
@@ -206,19 +199,18 @@ extends ImageReader
 	public void readMetadata() 
 	throws IOException 
 	{
-		if (pngMetadata == null)
-		{
+		if (pngMetadata == null) {
 			readHeader();
 			readImage();
-			pngMetadata = new PngImageMetadata(png, unknownChunks);
+			pngMetadata = new PngImageMetadata(new HashMap(png.getProperties()),
+                                               new HashMap(unknownChunks));
 		}
 	}
 
 	private void readImage()
 	throws IOException
 	{
-		if (pngImage == null)
-		{
+		if (pngImage == null) {
 			clearAbortRequest();
 			processImageStarted(0);
 			pngImage = png.read(new StreamWrapper((ImageInputStream)input), false);
@@ -297,11 +289,11 @@ extends ImageReader
 	/* Reads a PNG header */
 	private static class PngHeader
 	{
-		public int width;
-		public int height;
-		public int colorType;
-		public int bitDepth;
-		public int interlaceType;
+		public final int width;
+		public final int height;
+		public final int colorType;
+		public final int bitDepth;
+		public final int interlaceType;
 
 		public PngHeader(ImageInputStream in)
 		throws IOException

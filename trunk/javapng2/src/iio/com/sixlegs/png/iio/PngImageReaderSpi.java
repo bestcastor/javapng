@@ -63,7 +63,7 @@ extends ImageReaderSpi
 
     public String getDescription(Locale locale)
     {
-        return "com.sixlegs.png ImageIO plugin, Copyright (c) Chris Nokleberg";
+        return "com.sixlegs.png ImageIO plugin";
     }
 
     public boolean canDecodeInput(Object source)

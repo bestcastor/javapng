@@ -73,5 +73,5 @@ public interface TextChunk
      *    {@link PngChunk#zTXt},<br>
      *    or {@link PngChunk#iTXt}
      */
-     int getType();
+    int getType();
 }
