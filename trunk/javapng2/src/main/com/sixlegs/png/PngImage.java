@@ -585,32 +585,27 @@ implements Transparency
             throw new IllegalStateException("Image has not been read");
     }
 
-    private static final PngChunk IHDR = loadChunk(PngChunk.IHDR);
-    private static final PngChunk PLTE = loadChunk(PngChunk.PLTE);
-    private static final PngChunk IEND = loadChunk(PngChunk.IEND);
-    private static final PngChunk bKGD = loadChunk(PngChunk.bKGD);
-    private static final PngChunk cHRM = loadChunk(PngChunk.cHRM);
-    private static final PngChunk gAMA = loadChunk(PngChunk.gAMA);
-    private static final PngChunk pHYs = loadChunk(PngChunk.pHYs);
-    private static final PngChunk sBIT = loadChunk(PngChunk.sBIT);
-    private static final PngChunk sRGB = loadChunk(PngChunk.sRGB);
-    private static final PngChunk tIME = loadChunk(PngChunk.tIME);
-    private static final PngChunk tRNS = loadChunk(PngChunk.tRNS);
-    private static final PngChunk hIST = loadChunk(PngChunk.hIST);
-    private static final PngChunk iCCP = loadChunk(PngChunk.iCCP);
-    private static final PngChunk sPLT = loadChunk(PngChunk.sPLT);
+    private static final PngChunk IHDR = loadChunk("com.sixlegs.png.Chunk_IHDR");
+    private static final PngChunk PLTE = loadChunk("com.sixlegs.png.Chunk_PLTE");
+    private static final PngChunk IEND = loadChunk("com.sixlegs.png.Chunk_IEND");
+    private static final PngChunk bKGD = loadChunk("com.sixlegs.png.Chunk_bKGD");
+    private static final PngChunk cHRM = loadChunk("com.sixlegs.png.Chunk_cHRM");
+    private static final PngChunk gAMA = loadChunk("com.sixlegs.png.Chunk_gAMA");
+    private static final PngChunk pHYs = loadChunk("com.sixlegs.png.Chunk_pHYs");
+    private static final PngChunk sBIT = loadChunk("com.sixlegs.png.Chunk_sBIT");
+    private static final PngChunk sRGB = loadChunk("com.sixlegs.png.Chunk_sRGB");
+    private static final PngChunk tIME = loadChunk("com.sixlegs.png.Chunk_tIME");
+    private static final PngChunk tRNS = loadChunk("com.sixlegs.png.Chunk_tRNS");
+    private static final PngChunk hIST = loadChunk("com.sixlegs.png.Chunk_hIST");
+    private static final PngChunk iCCP = loadChunk("com.sixlegs.png.Chunk_iCCP");
+    private static final PngChunk sPLT = loadChunk("com.sixlegs.png.Chunk_sPLT");
     private static final PngChunk text = loadChunk("com.sixlegs.png.TextChunkReader");
 
-    private static final PngChunk gIFg = loadChunk(PngChunk.gIFg);
-    private static final PngChunk gIFx = loadChunk(PngChunk.gIFx);
-    private static final PngChunk oFFs = loadChunk(PngChunk.oFFs);
-    private static final PngChunk pCAL = loadChunk(PngChunk.pCAL);
-    private static final PngChunk sCAL = loadChunk(PngChunk.sCAL);
-
-    private static PngChunk loadChunk(int chunk)
-    {
-        return loadChunk("com.sixlegs.png.Chunk_" + PngChunk.getName(chunk));
-    }
+    private static final PngChunk gIFg = loadChunk("com.sixlegs.png.Chunk_gIFg");
+    private static final PngChunk gIFx = loadChunk("com.sixlegs.png.Chunk_gIFx");
+    private static final PngChunk oFFs = loadChunk("com.sixlegs.png.Chunk_oFFs");
+    private static final PngChunk pCAL = loadChunk("com.sixlegs.png.Chunk_pCAL");
+    private static final PngChunk sCAL = loadChunk("com.sixlegs.png.Chunk_sCAL");
 
     private static PngChunk loadChunk(String className)
     {
