@@ -42,24 +42,25 @@ import java.io.*;
 
 class Defilterer
 {
-    private InputStream in;
-    private WritableRaster raster;
-    private int bitDepth;
-    private int samples;
-    private PixelProcessor pp;
-    private int bpp;
+    private final InputStream in;
+    private final int width;
+    private final int bitDepth;
+    private final int samples;
+    private final PixelProcessor pp;
+    private final int bpp;
 
-    public Defilterer(InputStream in, WritableRaster raster, int bitDepth, int samples, PixelProcessor pp)
+    public Defilterer(InputStream in, int bitDepth, int samples, int width, PixelProcessor pp)
     {
         this.in = in;
-        this.raster = raster;
         this.bitDepth = bitDepth;
         this.samples = samples;
+        this.width = width;
         this.pp = pp;
         bpp = Math.max(1, (bitDepth * samples) >> 3);
     }
 
-    public boolean defilter(int xOffset, int yOffset,
+    public boolean defilter(boolean skip,
+                            int xOffset, int yOffset,
                             int xStep, int yStep,
                             int passWidth, int passHeight)
     throws IOException
@@ -67,14 +68,19 @@ class Defilterer
         if (passWidth == 0 || passHeight == 0)
             return true;
 
+        int bytesPerRow = (bitDepth * samples * passWidth + 7) / 8;
+        if (skip) {
+            PngUtils.skipFully(in, (bytesPerRow + 1) * passHeight);
+            return true;
+        }
+        
         boolean isShort = bitDepth == 16;
-        WritableRaster passRow = createInputRaster(bitDepth, samples, raster.getWidth());
+        WritableRaster passRow = createInputRaster(bitDepth, samples, width);
         DataBuffer dbuf = passRow.getDataBuffer();
         byte[] byteData = isShort ? null : ((DataBufferByte)dbuf).getData();
         short[] shortData = isShort ? ((DataBufferUShort)dbuf).getData() : null;
         int[] pixel = new int[4];
         
-        int bytesPerRow = (bitDepth * samples * passWidth + 7) / 8;
         int rowSize = bytesPerRow + bpp;
         byte[] prev = new byte[rowSize];
         byte[] cur = new byte[rowSize];

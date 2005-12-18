@@ -36,46 +36,56 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
+import java.awt.image.WritableRaster;
 
-class BasicPixelProcessor
-extends PixelProcessor
+class SubsamplingDestination
+extends Destination
 {
-    protected final Destination dst;
-    protected final int[] row;
-    protected final int samples;
+    private final int[] singlePixel;
+    private final int xsub;
+    private final int ysub;
+    private final int xoff;
+    private final int yoff;
     
-    public BasicPixelProcessor(Destination dst)
+    public SubsamplingDestination(WritableRaster raster, int sourceWidth,
+                                  int xsub, int ysub, int xoff, int yoff)
     {
-        this(dst, new int[dst.getRaster().getNumBands() * dst.getSourceWidth()]);
+        super(raster, sourceWidth);
+        this.xsub = xsub;
+        this.ysub = ysub;
+        this.xoff = xoff;
+        this.yoff = yoff;
+        singlePixel = new int[raster.getNumBands()];
     }
 
-    public BasicPixelProcessor(Destination dst, int[] row)
+    public void setPixels(int x, int y, int w, int[] pixels)
     {
-        this.dst = dst;
-        this.row = row;
-        samples = dst.getRaster().getNumBands();
-    }
-    
-    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
-    {
-        src.getPixels(0, 0, width, 1, row);
-        transfer(xOffset, xStep, y, width);
-        return true;
-    }
-
-    protected void transfer(int xOffset, int xStep, int y, int width)
-    {
-        if (xStep == 1) {
-            dst.setPixels(xOffset, y, width, row);
-        } else {
-            int dstX = xOffset;
-            for (int index = 0, total = samples * width; index < total; index += samples) {
-                for (int i = 0; i < samples; i++)
-                    row[i] = row[index + i];
-                dst.setPixel(dstX, y, row);
-                dstX += xStep;
+        if (((y - yoff) % ysub) == 0) {
+            int xdst = (x - xoff) / xsub;
+            int ydst = (y - yoff) / ysub;
+            int startSrc = xdst * xsub + xoff;
+            if (startSrc < x) {
+                xdst++;
+                startSrc += xsub;
+            }
+            int samples = raster.getNumBands();
+            for (int i = startSrc - x, end = x + w; i < end; i += xsub) {
+                System.arraycopy(pixels, i * samples, singlePixel, 0, samples);
+                super.setPixel(xdst++, ydst, singlePixel);
             }
         }
+    }
+
+    public void setPixel(int x, int y, int[] pixel)
+    {
+        x -= xoff;
+        y -= yoff;
+        if (x % xsub == 0 && y % ysub == 0)
+            super.setPixel(x / xsub, y / ysub, pixel);
+    }
+
+    public void getPixel(int x, int y, int[] pixel)
+    {
+        super.getPixel((x - xoff) / xsub, (y - yoff) / ysub, pixel);
     }
 }

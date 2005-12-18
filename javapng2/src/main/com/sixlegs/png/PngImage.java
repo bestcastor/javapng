@@ -106,7 +106,7 @@ implements Transparency
      * @throws IOException if any error occurred while reading the image
      * @see #read(java.io.InputStream, boolean)
      * @see #createImage
-     * @see #handleFrame
+     * @see #handlePass
      */
     public BufferedImage read(File file)
     throws IOException
@@ -133,7 +133,7 @@ implements Transparency
      * @throws IOException if any error occurred while reading the image
      * @see #read(java.io.File)
      * @see #createImage
-     * @see #handleFrame
+     * @see #handlePass
      */
     public BufferedImage read(InputStream in, boolean close)
     throws IOException
@@ -226,25 +226,25 @@ implements Transparency
     }
 
     /**
-     * A no-op method which subclasses may override to take some action
-     * after each "frame" has been decoded. An interlaced image has seven
-     * frames, and non-interlaced image only one. The {@code framesLeft}
-     * arguments indicates how many additional times the {@code handleFrame}
-     * method will be called. When it reaches zero, the image processing
-     * is complete.
+     * A method which subclasses may override to take some action
+     * after each pass has been decoded. An interlaced image has seven
+     * passes, and non-interlaced image only one. The {@code pass}
+     * arguments indicates the index of the completed
+     * pass, starting with zero.
      * <p>
      * For interlaced images, the state of the image data before the last
-     * frame is affected by the value of {@link PngConfig#getProgressive}.
+     * pass is affected by the value of {@link PngConfig#getProgressive}.
      * <p>
      * Image decoding can be aborted by returning false. The default
-     * implementation returns true.
+     * implementation returns false if the {@code pass} parameter
+     * is greater than the value of {@link PngConfig#getSourceMaxProgressivePass}.
      * @param image the partially or fully decoded image
-     * @param framesLeft how many additional frames remain
+     * @param pass the index of the completed pass
      * @return false to abort image decoding
      */
-    protected boolean handleFrame(BufferedImage image, int framesLeft)
+    protected boolean handlePass(BufferedImage image, int pass)
     {
-        return true;
+        return pass <= config.getSourceMaxProgressivePass();
     }
 
     /**
@@ -312,14 +312,14 @@ implements Transparency
     }
 
     /**
-     * Returns the image interlace type.
-     * @return {@link PngConstants#INTERLACE_NONE INTERLACE_NONE}
-     *    or {@link PngConstants#INTERLACE_ADAM7 INTERLACE_ADAM7}
+     * Returns true if the image interlace type ({@link PngConstants#INTERLACE})
+     * is something other than {@link PngConstants#INTERLACE_NONE INTERLACE_NONE}.
+     * @return true if the image is interlaced
      * @throws IllegalStateException if an image has not been read
      */
-    public int getInterlace()
+    public boolean isInterlaced()
     {
-        return getInt(PngConstants.INTERLACE);
+        return getInt(PngConstants.INTERLACE) != PngConstants.INTERLACE_NONE;
     }
 
     /**
