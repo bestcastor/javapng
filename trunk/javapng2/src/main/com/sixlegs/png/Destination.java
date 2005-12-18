@@ -36,46 +36,41 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
+import java.awt.image.WritableRaster;
 
-class BasicPixelProcessor
-extends PixelProcessor
+class Destination
 {
-    protected final Destination dst;
-    protected final int[] row;
-    protected final int samples;
+    protected final WritableRaster raster;
+    protected final int sourceWidth;
     
-    public BasicPixelProcessor(Destination dst)
+    public Destination(WritableRaster raster, int sourceWidth)
     {
-        this(dst, new int[dst.getRaster().getNumBands() * dst.getSourceWidth()]);
+        this.raster = raster;
+        this.sourceWidth = sourceWidth;
     }
 
-    public BasicPixelProcessor(Destination dst, int[] row)
+    public void setPixels(int x, int y, int w, int[] pixels)
     {
-        this.dst = dst;
-        this.row = row;
-        samples = dst.getRaster().getNumBands();
-    }
-    
-    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
-    {
-        src.getPixels(0, 0, width, 1, row);
-        transfer(xOffset, xStep, y, width);
-        return true;
+        raster.setPixels(x, y, w, 1, pixels);
     }
 
-    protected void transfer(int xOffset, int xStep, int y, int width)
+    public void setPixel(int x, int y, int[] pixel)
     {
-        if (xStep == 1) {
-            dst.setPixels(xOffset, y, width, row);
-        } else {
-            int dstX = xOffset;
-            for (int index = 0, total = samples * width; index < total; index += samples) {
-                for (int i = 0; i < samples; i++)
-                    row[i] = row[index + i];
-                dst.setPixel(dstX, y, row);
-                dstX += xStep;
-            }
-        }
+        raster.setPixel(x, y, pixel);
+    }
+
+    public void getPixel(int x, int y, int[] pixel)
+    {
+        raster.getPixel(x, y, pixel);
+    }
+
+    public WritableRaster getRaster()
+    {
+        return raster;
+    }
+
+    public int getSourceWidth()
+    {
+        return sourceWidth;
     }
 }

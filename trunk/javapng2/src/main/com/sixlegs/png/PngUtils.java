@@ -61,6 +61,14 @@ class PngUtils
         }
     }
 
+    public static void skipFully(InputStream in, long skip)
+    throws IOException
+    {
+        long total = 0;
+        while (total < skip)
+            total += in.skip(skip - total);
+    }
+
     public static byte[] readCompressed(PngInputStream in, int length)
     throws IOException
     {

@@ -47,7 +47,7 @@ extends BasicPixelProcessor
     final private int max;
     final private int samplesNoAlpha;
     
-    public TransGammaPixelProcessor(WritableRaster dst, short[] gammaTable, int[] trans, int shift)
+    public TransGammaPixelProcessor(Destination dst, short[] gammaTable, int[] trans, int shift)
     {
         super(dst);
         this.gammaTable = gammaTable;

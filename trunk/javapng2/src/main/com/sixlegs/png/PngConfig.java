@@ -59,7 +59,41 @@ public class PngConfig
     private boolean progressive;
     private boolean reduce16 = true;
     private boolean gammaCorrect = true;
-    
+    private int sourceXSubsampling = 1;
+    private int sourceYSubsampling = 1;
+    private int subsamplingXOffset = 0;
+    private int subsamplingYOffset = 0;
+    private int minPass = 0;
+    private int numPasses = Integer.MAX_VALUE;
+
+    /**
+     * TODO
+     */
+    public PngConfig()
+    {
+    }
+
+    /**
+     * TODO
+     */
+    public PngConfig(PngConfig copy)
+    {
+        this.readLimit = copy.readLimit;
+        this.defaultGamma = copy.defaultGamma;
+        this.displayExponent = copy.displayExponent;
+        this.userExponent = copy.userExponent;
+        this.warningsFatal = copy.warningsFatal;
+        this.progressive = copy.progressive;
+        this.reduce16 = copy.reduce16;
+        this.gammaCorrect = copy.gammaCorrect;
+        this.sourceXSubsampling = copy.sourceXSubsampling;
+        this.sourceYSubsampling = copy.sourceYSubsampling;
+        this.subsamplingXOffset = copy.subsamplingXOffset;
+        this.subsamplingYOffset = copy.subsamplingYOffset;
+        this.minPass = copy.minPass;
+        this.numPasses = copy.numPasses;
+    }
+
     /**
      * Returns the current 16-bit reduction setting.
      * @see #setReduce16
@@ -137,7 +171,7 @@ public class PngConfig
      * gradually replaces the old, at the cost of some additional processing time.
      * Default is <i>false</i>.
      * @param progressive use progressive display
-     * @see PngImage#handleFrame
+     * @see PngImage#handlePass
      */
     public void setProgressive(boolean progressive)
     {
@@ -229,5 +263,94 @@ public class PngConfig
     public void setWarningsFatal(boolean warningsFatal)
     {
         this.warningsFatal = warningsFatal;
+    }
+
+    /**
+     * TODO
+     */
+    public int getSourceXSubsampling()
+    {
+        return sourceXSubsampling;
+    }
+    
+    /**
+     * TODO
+     */
+    public int getSourceYSubsampling()
+    {
+        return sourceYSubsampling;
+    }
+    
+    /**
+     * TODO
+     */
+    public int getSubsamplingXOffset()
+    {
+        return subsamplingXOffset;
+    }
+    
+    /**
+     * TODO
+     */
+    public int getSubsamplingYOffset()
+    {
+        return subsamplingYOffset;
+    }
+    
+    /**
+     * TODO
+     * @throws IllegalArgumentException - if either period is negative
+     * or 0, or if either grid offset is negative or greater than
+     * or equal to the corresponding period.
+     * @throws IllegalStateException - if the source region is such that
+     * the subsampled output would contain no pixels.
+     */
+    public void setSourceSubsampling(int sourceXSubsampling, int sourceYSubsampling, int subsamplingXOffset, int subsamplingYOffset)
+    {
+        // TODO: exceptions
+        this.sourceXSubsampling = sourceXSubsampling;
+        this.sourceYSubsampling = sourceYSubsampling;
+        this.subsamplingXOffset = subsamplingXOffset;
+        this.subsamplingYOffset = subsamplingYOffset;
+    }
+
+    /**
+     * TODO
+     * @throws IllegalArgumentException - if minPass is negative,
+     * numPasses is negative or 0, or numPasses is smaller than
+     * Integer.MAX_VALUE but minPass + numPasses - 1 is greater than
+     * INTEGER.MAX_VALUE.
+     */
+    public void setSourceProgressivePasses(int minPass, int numPasses)
+    {
+        // TODO: exceptions
+        this.minPass = minPass;
+        this.numPasses = numPasses;
+    }
+    
+    /**
+     * TODO
+     */
+    public int getSourceMinProgressivePass()
+    {
+        return minPass;
+    }
+    
+    /**
+     * TODO
+     */
+    public int getSourceNumProgressivePasses()
+    {
+        return numPasses;
+    }
+
+    /**
+     * TODO
+     */
+    public int getSourceMaxProgressivePass()
+    {
+        if (numPasses == Integer.MAX_VALUE)
+            return numPasses;
+        return minPass + numPasses - 1;
     }
 }

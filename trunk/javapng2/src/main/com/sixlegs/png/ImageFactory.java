@@ -56,14 +56,13 @@ class ImageFactory
         int height    = png.getHeight();
         int colorType = png.getColorType();
         int bitDepth  = png.getBitDepth();
-        int interlace = png.getInterlace();
         int samples   = png.getSamples();
 
-        boolean interlaced = interlace == PngConstants.INTERLACE_ADAM7;
+        boolean interlaced = png.isInterlaced();
         short[] gammaTable = config.getGammaCorrect() ? png.getGammaTable() : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
-        WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
-        BufferedImage image = new BufferedImage(colorModel, raster, false, null);
+        Destination dst = createDestination(png, colorModel);
+        BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);
 
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
@@ -73,46 +72,80 @@ class ImageFactory
                 if (gammaTable == null)
                     gammaTable = getIdentityTable(bitDepth - shift);
                 if (trans != null) {
-                    pp = new TransGammaPixelProcessor(raster, gammaTable, trans, shift);
+                    pp = new TransGammaPixelProcessor(dst, gammaTable, trans, shift);
                 } else {
-                    pp = new GammaPixelProcessor(raster, gammaTable, shift);
+                    pp = new GammaPixelProcessor(dst, gammaTable, shift);
                 }
             }
         }
 
         if (pp == null)
-            pp = new BasicPixelProcessor(raster);            
+            pp = new BasicPixelProcessor(dst);            
         if (config.getProgressive() && interlaced)
             pp = new ProgressivePixelProcessor((BasicPixelProcessor)pp, width, height);
         pp = new ProgressUpdater(png, image, pp);
 
         InflaterInputStream inflate = new InflaterInputStream(in, new Inflater(), 0x1000);
-        Defilterer d = new Defilterer(inflate, raster, bitDepth, samples, pp);
+        Defilterer d = new Defilterer(inflate, bitDepth, samples, width, pp);
         
         // TODO: if not progressive, initialize to fully transparent?
+        int minPass = config.getSourceMinProgressivePass();
         boolean complete;
         if (interlaced) {
             complete =
-                d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8) &&
-                png.handleFrame(image, 6) &&
-                d.defilter(4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8) &&
-                png.handleFrame(image, 5) &&
-                d.defilter(0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8) &&
-                png.handleFrame(image, 4) &&
-                d.defilter(2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4) &&
-                png.handleFrame(image, 3) && 
-                d.defilter(0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4) &&
-                png.handleFrame(image, 2) &&
-                d.defilter(1, 0, 2, 2, width / 2, (height + 1) / 2) &&
-                png.handleFrame(image, 1) &&
-                d.defilter(0, 1, 1, 2, width, height / 2) &&
-                png.handleFrame(image, 0);
+                d.defilter(0 < minPass, 0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8) &&
+                (0 < minPass || png.handlePass(image, 0)) &&
+                d.defilter(1 < minPass, 4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8) &&
+                (1 < minPass || png.handlePass(image, 1)) &&
+                d.defilter(2 < minPass, 0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8) &&
+                (2 < minPass || png.handlePass(image, 2)) &&
+                d.defilter(3 < minPass, 2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4) &&
+                (3 < minPass || png.handlePass(image, 3)) && 
+                d.defilter(4 < minPass, 0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4) &&
+                (4 < minPass || png.handlePass(image, 4)) &&
+                d.defilter(5 < minPass, 1, 0, 2, 2, width / 2, (height + 1) / 2) &&
+                (5 < minPass || png.handlePass(image, 5)) &&
+                d.defilter(6 < minPass, 0, 1, 1, 2, width, height / 2) &&
+                (6 < minPass || png.handlePass(image, 6));
         } else {
             complete =
-                d.defilter(0, 0, 1, 1, width, height) &&
-                png.handleFrame(image, 0);
+                d.defilter(false, 0, 0, 1, 1, width, height) &&
+                png.handlePass(image, 0);
         }
+        // TODO: handle complete?
         return image;
+    }
+
+    private static boolean skipPass(PngConfig config, int pass)
+    {
+        return pass < config.getSourceMinProgressivePass();
+    }
+
+    private static Destination createDestination(PngImage png, ColorModel colorModel)
+    {
+        int width = png.getWidth();
+        int height = png.getHeight();
+        PngConfig config = png.getConfig();
+        int xsub = config.getSourceXSubsampling();
+        int ysub = config.getSourceYSubsampling();
+        if (xsub != 1 || ysub != 1) {
+            int xoff = config.getSubsamplingXOffset();
+            int yoff = config.getSubsamplingYOffset();
+            int subw = calcSubsamplingSize(width, xsub, xoff, 'X');
+            int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
+            return new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
+                                              width, xsub, ysub, xoff, yoff);
+        }
+        return new Destination(colorModel.createCompatibleWritableRaster(width, height), width);
+    }
+
+    private static int calcSubsamplingSize(int len, int sub, int off, char desc)
+    {
+        int size = (len - off + sub - 1) / sub;
+        if (size == 0)
+            throw new IllegalStateException("Source " + desc + " subsampling " + sub + ", offset " + off +
+                                            " is invalid for image dimension " + len);
+        return size;
     }
 
     private static ColorModel createColorModel(PngImage png, short[] gammaTable)

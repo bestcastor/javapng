@@ -102,9 +102,9 @@ public class Viewer
     private void open(File file)
     {
         new Thread(new ReadPngAction(new PngImage(config){
-            protected boolean handleFrame(final BufferedImage image, int framesLeft) {
+            protected boolean handlePass(final BufferedImage image, int pass) {
                 SwingUtilities.invokeLater(new UpdateImageAction(imagePanel, image));
-                if (progressiveDelay > 0 && framesLeft > 0) {
+                if (progressiveDelay > 0 && (pass == 6 || !isInterlaced())) {
                     try {
                         Thread.sleep(progressiveDelay);
                     } catch (InterruptedException e) {

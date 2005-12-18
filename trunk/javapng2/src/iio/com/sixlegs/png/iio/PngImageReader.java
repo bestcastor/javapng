@@ -245,10 +245,10 @@ extends ImageReader
             processWarningOccurred(e.getMessage());
         }
 
-        protected boolean handleFrame(BufferedImage image, int framesLeft)
+        protected boolean handlePass(BufferedImage image, int pass)
         {
             // TODO: processPassXXX
-            if (framesLeft == 0) {
+            if (pass == 6 || !isInterlaced()) {
                 processImageComplete();
             } else if (abortRequested()) {
                 processReadAborted();

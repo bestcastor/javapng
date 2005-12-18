@@ -47,7 +47,7 @@ extends BasicPixelProcessor
     final private boolean hasAlpha;
     final private boolean shiftAlpha;
     
-    public GammaPixelProcessor(WritableRaster dst, short[] gammaTable, int shift)
+    public GammaPixelProcessor(Destination dst, short[] gammaTable, int shift)
     {
         super(dst);
         this.gammaTable = gammaTable;
