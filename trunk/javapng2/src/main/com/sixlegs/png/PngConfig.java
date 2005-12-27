@@ -67,14 +67,15 @@ public class PngConfig
     private int numPasses = Integer.MAX_VALUE;
 
     /**
-     * TODO
+     * Create a new instance with default parameter values.
      */
     public PngConfig()
     {
     }
 
     /**
-     * TODO
+     * Create a copy of the given instance.
+     * @param copy the configuration object to copy
      */
     public PngConfig(PngConfig copy)
     {
@@ -266,7 +267,16 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#getSourceXSubsampling})</i>
+     * Returns the number of source columns to advance for each pixel.
+     *
+     * <p>If {@code setSourceSubsampling} has not been called, 1
+     * is returned (which is the correct value).
+     *
+     * @return the source subsampling X period.
+     *
+     * @see #setSourceSubsampling
+     * @see #getSourceYSubsampling
      */
     public int getSourceXSubsampling()
     {
@@ -274,7 +284,16 @@ public class PngConfig
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#getSourceYSubsampling})</i>
+     * Returns the number of rows to advance for each pixel.
+     *
+     * <p>If {@code setSourceSubsampling} has not been called, 1
+     * is returned (which is the correct value).
+     *
+     * @return the source subsampling Y period.
+     *
+     * @see #setSourceSubsampling
+     * @see #getSourceXSubsampling
      */
     public int getSourceYSubsampling()
     {
@@ -282,7 +301,16 @@ public class PngConfig
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#getSubsamplingXOffset})</i>
+     * Returns the horizontal offset of the subsampling grid.
+     *
+     * <p>If {@code setSourceSubsampling} has not been called, 0
+     * is returned (which is the correct value).
+     *
+     * @return the source subsampling grid X offset.
+     *
+     * @see #setSourceSubsampling
+     * @see #getSubsamplingYOffset
      */
     public int getSubsamplingXOffset()
     {
@@ -290,7 +318,16 @@ public class PngConfig
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#getSubsamplingYOffset})</i>
+     * Returns the vertical offset of the subsampling grid.
+     *
+     * <p>If {@code setSourceSubsampling} has not been called, 0
+     * is returned (which is the correct value).
+     *
+     * @return the source subsampling grid Y offset.
+     *
+     * @see #setSourceSubsampling
+     * @see #getSubsamplingXOffset
      */
     public int getSubsamplingYOffset()
     {
@@ -298,16 +335,55 @@ public class PngConfig
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#setSourceSubsampling})</i>
+     * Specifies a decimation subsampling to apply on I/O.  The
+     * {@code sourceXSubsampling} and
+     * {@code sourceYSubsampling} parameters specify the
+     * subsampling period (<i>i.e.</i>, the number of rows and columns
+     * to advance after every source pixel).  Specifically, a period of
+     * 1 will use every row or column; a period of 2 will use every
+     * other row or column.  The {@code subsamplingXOffset} and
+     * {@code subsamplingYOffset} parameters specify an offset
+     * from the image origin for the first subsampled pixel.
+     * Adjusting the origin of the subsample grid is useful for avoiding
+     * seams when subsampling a very large source image into destination
+     * regions that will be assembled into a complete subsampled image.
+     * Most users will want to simply leave these parameters at 0.
+     *
+     * <p> The number of pixels and scanlines to be used are calculated
+     * as follows.
+     * <p>
+     * The number of subsampled pixels in a scanline is given by
+     * <p>
+     * {@code truncate[(width - subsamplingXOffset + sourceXSubsampling - 1)
+     * / sourceXSubsampling]}.
+     * <p>
+     * The number of scanlines to be used can be computed similarly.
+     *
+     * <p> There is no {@code unsetSourceSubsampling} method;
+     * simply call {@code setSourceSubsampling(1, 1, 0, 0)} to
+     * restore default values.
+     *
+     * @param sourceXSubsampling the number of columns to advance
+     * between pixels.
+     * @param sourceYSubsampling the number of rows to advance between
+     * pixels.
+     * @param subsamplingXOffset the horizontal offset of the first subsample
+     * within the region, or within the image if no region is set.
+     * @param subsamplingYOffset the horizontal offset of the first subsample
+     * within the region, or within the image if no region is set.
      * @throws IllegalArgumentException - if either period is negative
      * or 0, or if either grid offset is negative or greater than
      * or equal to the corresponding period.
-     * @throws IllegalStateException - if the source region is such that
-     * the subsampled output would contain no pixels.
      */
     public void setSourceSubsampling(int sourceXSubsampling, int sourceYSubsampling, int subsamplingXOffset, int subsamplingYOffset)
     {
-        // TODO: exceptions
+        if (sourceXSubsampling <= 0 || sourceYSubsampling <= 0)
+            throw new IllegalArgumentException("Periods must be positive");
+        if (subsamplingXOffset < 0 || subsamplingXOffset >= sourceXSubsampling)
+            throw new IllegalArgumentException("X offset out of range");
+        if (subsamplingYOffset < 0 || subsamplingYOffset >= sourceYSubsampling)
+            throw new IllegalArgumentException("Y offset out of range");
         this.sourceXSubsampling = sourceXSubsampling;
         this.sourceYSubsampling = sourceYSubsampling;
         this.subsamplingXOffset = subsamplingXOffset;
@@ -315,21 +391,60 @@ public class PngConfig
     }
 
     /**
-     * TODO
-     * @throws IllegalArgumentException - if minPass is negative,
-     * numPasses is negative or 0, or numPasses is smaller than
-     * Integer.MAX_VALUE but minPass + numPasses - 1 is greater than
-     * INTEGER.MAX_VALUE.
+     * <i>(Documentation copied from {@link javax.imageio.ImageReadParam#setSourceProgressivePasses})</i>
+     * Sets the range of progressive passes that will be decoded.
+     * Passes outside of this range will be ignored.
+     *
+     * <p> In the PNG format, images may be interlaced using the Adam7 algorithm,
+     * which results in seven progressive passes. Thus if {@code minPass + numPasses - 1} is
+     * larger than the index of the last available passes, decoding
+     * will end with that pass.
+     *
+     * <p> A value of {@code numPasses} of
+     * {@code Integer.MAX_VALUE} indicates that all passes from
+     * {@code minPass} forward should be read.  Otherwise, the
+     * index of the last pass (<i>i.e.</i>, {@code minPass + numPasses
+     * - 1}) must not exceed {@code Integer.MAX_VALUE}.
+     *
+     * <p> There is no {@code unsetSourceProgressivePasses}
+     * method; the same effect may be obtained by calling
+     * {@code setSourceProgressivePasses(0, Integer.MAX_VALUE)}.
+     *
+     * @param minPass the index of the first pass to be decoded.
+     * @param numPasses the maximum number of passes to be decoded.
+     *
+     * @exception IllegalArgumentException if {@code minPass} is
+     * negative, {@code numPasses} is negative or 0, or
+     * {@code numPasses} is smaller than
+     * {@code Integer.MAX_VALUE} but {@code minPass +
+     * numPasses - 1} is greater than
+     * {@code INTEGER.MAX_VALUE}.
+     *
+     * @see #getSourceMinProgressivePass
+     * @see #getSourceMaxProgressivePass
      */
     public void setSourceProgressivePasses(int minPass, int numPasses)
     {
-        // TODO: exceptions
+        if (minPass < 0)
+            throw new IllegalArgumentException("minPass < 0");
+        if (numPasses <= 0)
+            throw new IllegalArgumentException("numPasses <= 0");
+        if ((numPasses != Integer.MAX_VALUE) && (((minPass + numPasses - 1) & 0x80000000) != 0))
+            throw new IllegalArgumentException("minPass + numPasses - 1 > INTEGER.MAX_VALUE!");
         this.minPass = minPass;
         this.numPasses = numPasses;
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.ImageReadParam#getSourceMinProgressivePass})</i>
+     * Returns the index of the first progressive pass that will be
+     * decoded. If no value has been set, 0 will be returned (which is
+     * the correct value).
+     *
+     * @return the index of the first pass that will be decoded.
+     *
+     * @see #setSourceProgressivePasses
+     * @see #getSourceNumProgressivePasses
      */
     public int getSourceMinProgressivePass()
     {
@@ -337,7 +452,16 @@ public class PngConfig
     }
     
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.ImageReadParam#getSourceNumProgressivePasses})</i>
+     * Returns the number of the progressive passes that will be
+     * decoded. If no value has been set,
+     * {@code Integer.MAX_VALUE} will be returned (which is the
+     * correct value).
+     *
+     * @return the number of the passes that will be decoded.
+     *
+     * @see #setSourceProgressivePasses
+     * @see #getSourceMinProgressivePass
      */
     public int getSourceNumProgressivePasses()
     {
@@ -345,7 +469,15 @@ public class PngConfig
     }
 
     /**
-     * TODO
+     * <i>(Documentation copied from {@link javax.imageio.ImageReadParam#getSourceMaxProgressivePass})</i>
+     * If {@code getSourceNumProgressivePasses} is equal to
+     * {@code Integer.MAX_VALUE}, returns
+     * {@code Integer.MAX_VALUE}.  Otherwise, returns
+     * {@code getSourceMinProgressivePass() +
+     * getSourceNumProgressivePasses() - 1}.
+     *
+     * @return the index of the last pass to be read, or
+     * {@code Integer.MAX_VALUE}.
      */
     public int getSourceMaxProgressivePass()
     {
