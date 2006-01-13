@@ -199,7 +199,7 @@ extends ImageReader
 	public void readMetadata() 
 	throws IOException 
 	{
-		if (pngMetadata == null) {
+		if (pngMetadata == null && !ignoreMetadata) {
 			readHeader();
 			readImage();
 			pngMetadata = new PngImageMetadata(new HashMap(png.getProperties()),
@@ -276,6 +276,18 @@ extends ImageReader
 
         protected PngChunk getChunk(int type)
         {
+            if (ignoreMetadata) {
+                switch (type) {
+                case PngChunk.IHDR:
+                case PngChunk.PLTE:
+                case PngChunk.tRNS:
+                case PngChunk.IEND:
+                case PngChunk.gAMA:
+                    break;
+                default:
+                    return null;
+                }
+            }
             PngChunk chunk = super.getChunk(type);
             return (chunk != null) ? chunk : unknownReader;
         }
