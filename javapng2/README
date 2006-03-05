@@ -1,7 +1,7 @@
-Copyright (C) 1998-2005 Chris Nokleberg
+Copyright (C) 1998-2006 Chris Nokleberg
 All rights reserved.
 
-README - Sixlegs PNG v2.0-rc3
+README - Sixlegs PNG v2.0-rc4
 
 Features
 
@@ -26,10 +26,12 @@ Getting Started
 
 Revision History
 
-  Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-?)
+  Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-05)
 
+    * Java IIO-compatible plugin (thanks to Dimitri Koussa)
     * Change sBIT to use byte[] instead of int[]
-    * ...
+    * Support decimation subsampling 
+    * Support limiting decoding of passes to a particular range
 
   Changes from v2.0-rc2 -> v2.0-rc3 (2005-10-7):
 
