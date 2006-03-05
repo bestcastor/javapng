@@ -15,7 +15,7 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="product" value="javapng"/>
-    <property name="version" value="2.0-rc3"/>
+    <property name="version" value="2.0-rc4"/>
     <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
@@ -28,6 +28,9 @@
         <tstamp/>
         <path id="path.lib">
             <fileset dir="lib" includes="**/*.jar"/>
+        </path>
+        <path id="path.libdev">
+            <fileset dir="libdev" includes="**/*.jar"/>
         </path>
         <path id="path.main">
             <path refid="path.lib"/>
@@ -47,11 +50,12 @@
         </path>
         <path id="path.examples">
             <path refid="path.iio"/>
+            <path refid="path.libdev"/>
             <pathelement path="build/examples"/>
-            <fileset dir="libdev" includes="**/*.jar"/>
         </path>
         <path id="path.test">
-            <path refid="path.examples"/>
+            <path refid="path.iio"/>
+            <path refid="path.libdev"/>
             <pathelement path="build/test"/>
         </path>
         <path id="path.test.emma">
