@@ -46,87 +46,87 @@ package com.sixlegs.png;
 public interface PngConstants
 {
     /** {@link PngChunk#IHDR IHDR}: Bit depth */
-    static final String BIT_DEPTH = "bit_depth";
+    String BIT_DEPTH = "bit_depth";
     /** {@link PngChunk#IHDR IHDR}: Color type */
-    static final String COLOR_TYPE = "color_type";
+    String COLOR_TYPE = "color_type";
     /** {@link PngChunk#IHDR IHDR}: Compression method */
-    static final String COMPRESSION = "compression";
+    String COMPRESSION = "compression";
     /** {@link PngChunk#IHDR IHDR}: Filter method */
-    static final String FILTER = "filter";
+    String FILTER = "filter";
     /** {@link PngChunk#gAMA gAMA}: Gamma */
-    static final String GAMMA = "gamma";
+    String GAMMA = "gamma";
     /** {@link PngChunk#IHDR IHDR}: Width */
-    static final String WIDTH = "width";
+    String WIDTH = "width";
     /** {@link PngChunk#IHDR IHDR}: Height */
-    static final String HEIGHT = "height";
+    String HEIGHT = "height";
     /** {@link PngChunk#IHDR IHDR}: Interlace method */
-    static final String INTERLACE = "interlace";
+    String INTERLACE = "interlace";
     /** {@link PngChunk#PLTE PLTE}: Palette entries */
-    static final String PALETTE = "palette";
+    String PALETTE = "palette";
     /** {@link PngChunk#PLTE PLTE}: Palette alpha */
-    static final String PALETTE_ALPHA = "palette_alpha";
+    String PALETTE_ALPHA = "palette_alpha";
     /** {@link PngChunk#tRNS tRNS}: Transparency samples */
-    static final String TRANSPARENCY = "transparency";
+    String TRANSPARENCY = "transparency";
     /** {@link PngChunk#bKGD bKGD}: Background samples */
-    static final String BACKGROUND = "background_rgb";
+    String BACKGROUND = "background_rgb";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, X axis */
-    static final String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
+    String PIXELS_PER_UNIT_X = "pixels_per_unit_x";
     /** {@link PngChunk#pHYs pHYs}: Pixels per unit, Y axis */
-    static final String PIXELS_PER_UNIT_Y = "pixels_per_unit_y";
+    String PIXELS_PER_UNIT_Y = "pixels_per_unit_y";
     /** {@link PngChunk#sRGB sRGB}: Rendering intent */
-    static final String RENDERING_INTENT = "rendering_intent";
+    String RENDERING_INTENT = "rendering_intent";
     /** {@link PngChunk#sBIT sBIT}: Significant bits */
-    static final String SIGNIFICANT_BITS = "significant_bits";
+    String SIGNIFICANT_BITS = "significant_bits";
     /** {@link PngChunk#tEXt tEXt}/{@link PngChunk#zTXt zTXt}/{@link PngChunk#iTXt iTXt}: List of {@linkplain TextChunk text chunks} */
-    static final String TEXT_CHUNKS = "text_chunks";
+    String TEXT_CHUNKS = "text_chunks";
     /** {@link PngChunk#tIME tIME}: Image last-modification time */
-    static final String TIME = "time";
+    String TIME = "time";
     /** {@link PngChunk#pHYs pHYs}: Unit specifier */
-    static final String UNIT = "unit";
+    String UNIT = "unit";
     /** {@link PngChunk#cHRM cHRM}: Chromaticity */
-    static final String CHROMATICITY = "chromaticity";
+    String CHROMATICITY = "chromaticity";
     /** {@link PngChunk#iCCP iCCP}: ICC profile */
-    static final String ICC_PROFILE = "icc_profile";
+    String ICC_PROFILE = "icc_profile";
     /** {@link PngChunk#iCCP iCCP}: ICC profile name */
-    static final String ICC_PROFILE_NAME = "icc_profile_name";
+    String ICC_PROFILE_NAME = "icc_profile_name";
     /** {@link PngChunk#hIST hIST}: Palette histogram */
-    static final String HISTOGRAM = "histogram";
+    String HISTOGRAM = "histogram";
     /** {@link PngChunk#sPLT sPLT}: List of {@linkplain SuggestedPalette suggested palettes} */
-    static final String SUGGESTED_PALETTES = "suggested_palettes";
+    String SUGGESTED_PALETTES = "suggested_palettes";
 
     /** {@link PngChunk#IHDR IHDR}: Grayscale color type */
-    static final int COLOR_TYPE_GRAY = 0;
+    int COLOR_TYPE_GRAY = 0;
     /** {@link PngChunk#IHDR IHDR}: Grayscale+alpha color type */
-    static final int COLOR_TYPE_GRAY_ALPHA = 4;
+    int COLOR_TYPE_GRAY_ALPHA = 4;
     /** {@link PngChunk#IHDR IHDR}: Palette color type */
-    static final int COLOR_TYPE_PALETTE = 3;
+    int COLOR_TYPE_PALETTE = 3;
     /** {@link PngChunk#IHDR IHDR}: RGB color type */
-    static final int COLOR_TYPE_RGB = 2;
+    int COLOR_TYPE_RGB = 2;
     /** {@link PngChunk#IHDR IHDR}: RGBA color type */
-    static final int COLOR_TYPE_RGB_ALPHA = 6;
+    int COLOR_TYPE_RGB_ALPHA = 6;
 
     /** {@link PngChunk#IHDR IHDR}: No interlace */
-    static final int INTERLACE_NONE = 0;
+    int INTERLACE_NONE = 0;
     /** {@link PngChunk#IHDR IHDR}: Adam7 interlace */
-    static final int INTERLACE_ADAM7 = 1;
+    int INTERLACE_ADAM7 = 1;
 
     /** {@link PngChunk#IHDR IHDR}: Adaptive filtering */
-    static final int FILTER_BASE = 0;
+    int FILTER_BASE = 0;
 
     /** {@link PngChunk#IHDR IHDR}: Deflate/inflate compression */
-    static final int COMPRESSION_BASE = 0;  
+    int COMPRESSION_BASE = 0;  
 
     /** {@link PngChunk#pHYs pHYs}: Unit is unknown */
-    static final int UNIT_UNKNOWN = 0;
+    int UNIT_UNKNOWN = 0;
     /** {@link PngChunk#pHYs pHYs}: Unit is the meter */
-    static final int UNIT_METER = 1;
+    int UNIT_METER = 1;
 
     /** {@link PngChunk#sRGB sRGB}: Perceptual rendering intent */
-    static final int SRGB_PERCEPTUAL = 0;
+    int SRGB_PERCEPTUAL = 0;
     /** {@link PngChunk#sRGB sRGB}: Relative colorimetric rendering intent */
-    static final int SRGB_RELATIVE_COLORIMETRIC = 1;
+    int SRGB_RELATIVE_COLORIMETRIC = 1;
     /** {@link PngChunk#sRGB sRGB}: Saturation rendering intent */
-    static final int SRGB_SATURATION_PRESERVING = 2;
+    int SRGB_SATURATION_PRESERVING = 2;
     /** {@link PngChunk#sRGB sRGB}: Absolute colormetric rendering intent */
-    static final int SRGB_ABSOLUTE_COLORIMETRIC = 3;
+    int SRGB_ABSOLUTE_COLORIMETRIC = 3;
 }
