@@ -39,19 +39,19 @@ package com.sixlegs.png;
 public interface ExtendedPngConstants
 extends PngConstants
 {
-    static final String GIF_DISPOSAL_METHOD = "gif_disposal_method";
-    static final String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
-    static final String GIF_DELAY_TIME = "gif_delay_time";
-    static final String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
-    static final String POSITION_UNIT = "position_unit";
-    static final String POSITION_X = "position_x";
-    static final String POSITION_Y = "position_y";
-    static final String SCALE_UNIT = "scale_unit";
-    static final String PIXEL_WIDTH = "pixel_width";
-    static final String PIXEL_HEIGHT = "pixel_height";
+    String GIF_DISPOSAL_METHOD = "gif_disposal_method";
+    String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
+    String GIF_DELAY_TIME = "gif_delay_time";
+    String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
+    String POSITION_UNIT = "position_unit";
+    String POSITION_X = "position_x";
+    String POSITION_Y = "position_y";
+    String SCALE_UNIT = "scale_unit";
+    String PIXEL_WIDTH = "pixel_width";
+    String PIXEL_HEIGHT = "pixel_height";
     
-    static final int POSITION_UNIT_PIXEL = 0;
-    static final int POSITION_UNIT_MICROMETER = 1;
-    static final int SCALE_UNIT_METER = 1;
-    static final int SCALE_UNIT_RADIAN = 2;
+    int POSITION_UNIT_PIXEL = 0;
+    int POSITION_UNIT_MICROMETER = 1;
+    int SCALE_UNIT_METER = 1;
+    int SCALE_UNIT_RADIAN = 2;
 }
