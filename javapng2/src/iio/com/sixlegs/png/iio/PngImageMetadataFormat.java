@@ -1,6 +1,6 @@
 /*
 com.sixlegs.png - Java package to read and display PNG images
-Copyright (C) 2005 Dimitri Koussa
+Copyright (C) 2006 Dimitri Koussa
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
