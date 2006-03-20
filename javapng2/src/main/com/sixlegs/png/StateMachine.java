@@ -136,6 +136,7 @@ class StateMachine
             case PngChunk.oFFs:
             case PngChunk.pCAL:
             case PngChunk.sCAL:
+            case PngChunk.sTER:
                 throw new PngError(PngChunk.getName(type) + " cannot appear after IDAT");
             }
             switch (state) {
