@@ -606,6 +606,7 @@ implements Transparency
     private static final PngChunk oFFs = loadChunk("com.sixlegs.png.Chunk_oFFs");
     private static final PngChunk pCAL = loadChunk("com.sixlegs.png.Chunk_pCAL");
     private static final PngChunk sCAL = loadChunk("com.sixlegs.png.Chunk_sCAL");
+    private static final PngChunk sTER = loadChunk("com.sixlegs.png.Chunk_sTER");
 
     private static PngChunk loadChunk(String className)
     {
@@ -660,6 +661,7 @@ implements Transparency
         case PngChunk.oFFs: return oFFs;
         case PngChunk.pCAL: return pCAL;
         case PngChunk.sCAL: return sCAL;
+        case PngChunk.sTER: return sTER;
         case PngChunk.iTXt:
         case PngChunk.tEXt:
         case PngChunk.zTXt:

@@ -96,6 +96,9 @@ abstract public class PngChunk
     public static final int gIFg = 0x67494667;
     /** GIF Application Extension */
     public static final int gIFx = 0x67494678;
+    /** Indicator of Stereo Image */
+    public static final int sTER = 0x73544552;
+    
 
     /**
      * Read the chunk data from the image input stream, storing properties

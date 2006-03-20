@@ -36,23 +36,18 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-public interface ExtendedPngConstants
-extends PngConstants
+import java.io.*;
+import java.util.Map;
+
+class Chunk_sTER
+extends PngChunk
 {
-    String GIF_DISPOSAL_METHOD = "gif_disposal_method";
-    String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
-    String GIF_DELAY_TIME = "gif_delay_time";
-    String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
-    String POSITION_UNIT = "position_unit";
-    String POSITION_X = "position_x";
-    String POSITION_Y = "position_y";
-    String SCALE_UNIT = "scale_unit";
-    String PIXEL_WIDTH = "pixel_width";
-    String PIXEL_HEIGHT = "pixel_height";
-    String STEREO_MODE = "stereo_mode";
-    
-    int POSITION_UNIT_PIXEL = 0;
-    int POSITION_UNIT_MICROMETER = 1;
-    int SCALE_UNIT_METER = 1;
-    int SCALE_UNIT_RADIAN = 2;
+    public void read(int type, PngInputStream in, PngImage png)
+    throws IOException
+    {
+        int mode = in.readByte();
+        if (mode != 0)
+            throw new PngWarning("sTER mode must be zero: " + mode);
+        png.getProperties().put(ExtendedPngConstants.STEREO_MODE, new Integer(mode));
+    }
 }
