@@ -55,4 +55,7 @@ extends PngConstants
     int POSITION_UNIT_MICROMETER = 1;
     int SCALE_UNIT_METER = 1;
     int SCALE_UNIT_RADIAN = 2;
+
+    int STEREO_MODE_CROSS = 0;
+    int STEREO_MODE_DIVERGING = 1;
 }
