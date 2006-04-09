@@ -46,8 +46,13 @@ extends PngChunk
     throws IOException
     {
         int mode = in.readByte();
-        if (mode != 0)
-            throw new PngWarning("sTER mode must be zero: " + mode);
+        switch (mode) {
+        case ExtendedPngConstants.STEREO_MODE_CROSS:
+        case ExtendedPngConstants.STEREO_MODE_DIVERGING:
+            break;
+        default:
+            throw new PngWarning("Unknown sTER mode: " + mode);
+        }
         png.getProperties().put(ExtendedPngConstants.STEREO_MODE, new Integer(mode));
     }
 }
