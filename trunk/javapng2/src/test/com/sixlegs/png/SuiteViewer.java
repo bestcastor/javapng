@@ -45,6 +45,13 @@ public class SuiteViewer
     private static final int PADDING = 8;
     private static final int ACROSS = 15;
     private static final int DOWN = 16;
+
+    private static final PngConfig config = new PngConfig();
+
+    static
+    {
+        config.setReadLimit(PngConfig.READ_EXCEPT_METADATA);
+    }
     
     public static void main(String[] args)
     throws Exception
@@ -70,7 +77,7 @@ public class SuiteViewer
             int x = (32 + PADDING) * ix + PADDING / 2;
             int y = (32 + PADDING) * iy + PADDING / 2;
             String resource = "/images/suite/" + IMAGES[i] + ".png";
-            PngImage png = new PngImage();
+            PngImage png = new PngImage(config);
             BufferedImage img = png.read(SuiteViewer.class.getResourceAsStream(resource), true);
             if (createImage) {
                 Color bg = png.getBackground();
