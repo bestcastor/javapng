@@ -37,6 +37,7 @@ exception statement from your version.
 package com.sixlegs.png;
 
 import java.awt.image.*;
+import java.util.Arrays;
 
 final class ProgressivePixelProcessor
 extends BasicPixelProcessor
@@ -44,6 +45,7 @@ extends BasicPixelProcessor
     final private PixelProcessor pp;
     final private int imgWidth;
     final private int imgHeight;
+    final private int pixelSize;
     
     public ProgressivePixelProcessor(BasicPixelProcessor pp, int imgWidth, int imgHeight)
     {
@@ -51,6 +53,7 @@ extends BasicPixelProcessor
         this.pp = pp;
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
+        this.pixelSize = dst.getRaster().getNumBands();
     }
     
     public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
@@ -67,11 +70,11 @@ extends BasicPixelProcessor
             for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
                 dst.getPixel(dstX, y, row);
                 int xMax = Math.min(dstX + blockWidth, imgWidth);
-                for (int i = dstX; i < xMax; i++) {
-                    for (int j = y; j < yMax; j++) {
-                        dst.setPixel(i, j, row);
-                    }
-                }
+                int xPixels = xMax - dstX;
+                for (int i = pixelSize, end = xPixels * pixelSize; i < end; i++)
+                    row[i] = row[i - pixelSize];
+                for (int i = y; i < yMax; i++)
+                    dst.setPixels(dstX, i, xPixels, row);
                 dstX += xStep;
             }
         }
