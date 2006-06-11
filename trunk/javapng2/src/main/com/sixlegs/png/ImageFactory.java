@@ -36,6 +36,7 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
+import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.*;
@@ -135,6 +136,14 @@ class ImageFactory
             int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
             return new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
                                               width, xsub, ysub, xoff, yoff);
+        }
+        Rectangle sourceRegion = config.getSourceRegion();
+        if (sourceRegion != null) {
+            if (!new Rectangle(width, height).contains(sourceRegion))
+                throw new IllegalStateException("Source region " + sourceRegion + " falls outside of " +
+                                                width + "x" + height + " image");
+            WritableRaster raster = colorModel.createCompatibleWritableRaster(sourceRegion.width, sourceRegion.height);
+            return new SourceRegionDestination(new RasterDestination(raster, width), sourceRegion);
         }
         return new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), width);
     }

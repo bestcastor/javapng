@@ -37,13 +37,63 @@ exception statement from your version.
 package com.sixlegs.png;
 
 import java.awt.image.WritableRaster;
+import java.awt.Rectangle;
 
-// not an interface for performance
-abstract class Destination
+final class SourceRegionDestination
+extends Destination
 {
-    abstract public void setPixels(int x, int y, int w, int[] pixels);
-    abstract public void setPixel(int x, int y, int[] pixel);
-    abstract public void getPixel(int x, int y, int[] pixel); // used only by ProgressivePixelProcessor
-    abstract public WritableRaster getRaster();
-    abstract public int getSourceWidth();
+    private final Destination dst;
+    private final int xoff;
+    private final int yoff;
+    private final int xlen;
+    private final int ylen;
+    
+    public SourceRegionDestination(Destination dst, Rectangle sourceRegion)
+    {
+        this.dst = dst;
+        xoff = sourceRegion.x;
+        yoff = sourceRegion.y;
+        xlen = sourceRegion.width;
+        ylen = sourceRegion.height;
+    }
+
+    public void setPixels(int x, int y, int w, int[] pixels)
+    {
+        /*
+        y -= yoff;
+        if (y >= 0 && y < ylen) {
+            // TODO
+        }
+        */
+
+        int samples = dst.getRaster().getNumBands();
+        int[] pixel = new int[samples];
+        for (int i = 0; i < w; i++) {
+            System.arraycopy(pixels, samples * i, pixel, 0, samples);
+            setPixel(x + i, y, pixel);
+        }
+    }
+
+    public void setPixel(int x, int y, int[] pixel)
+    {
+        x -= xoff;
+        y -= yoff;
+        if (x >= 0 && y >= 0 && x < xlen && y < ylen)
+            dst.setPixel(x, y, pixel);
+    }
+
+    public void getPixel(int x, int y, int[] pixel)
+    {
+        throw new UnsupportedOperationException("Cannot use progressive + source region");
+    }
+
+    public WritableRaster getRaster()
+    {
+        return dst.getRaster();
+    }
+
+    public int getSourceWidth()
+    {
+        return dst.getSourceWidth();
+    }
 }
