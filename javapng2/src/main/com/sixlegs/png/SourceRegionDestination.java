@@ -43,10 +43,7 @@ final class SourceRegionDestination
 extends Destination
 {
     private final Destination dst;
-    private final int xoff;
-    private final int yoff;
-    private final int xlen;
-    private final int ylen;
+    private final int xoff, yoff, xlen, ylen, samples;
     
     public SourceRegionDestination(Destination dst, Rectangle sourceRegion)
     {
@@ -55,22 +52,19 @@ extends Destination
         yoff = sourceRegion.y;
         xlen = sourceRegion.width;
         ylen = sourceRegion.height;
+        samples = dst.getRaster().getNumBands();
     }
 
     public void setPixels(int x, int y, int w, int[] pixels)
     {
-        /*
-        y -= yoff;
-        if (y >= 0 && y < ylen) {
-            // TODO
-        }
-        */
-
-        int samples = dst.getRaster().getNumBands();
-        int[] pixel = new int[samples];
-        for (int i = 0; i < w; i++) {
-            System.arraycopy(pixels, samples * i, pixel, 0, samples);
-            setPixel(x + i, y, pixel);
+        if (y >= yoff && y < yoff + ylen) {
+            int newx = Math.max(x, xoff);
+            int neww = Math.min(x + w, xoff + xlen) - newx;
+            if (neww > 0) {
+                if (newx > x)
+                    System.arraycopy(pixels, newx * samples, pixels, 0, neww * samples);
+                dst.setPixels(newx - xoff, y - yoff, neww, pixels);
+            }
         }
     }
 
