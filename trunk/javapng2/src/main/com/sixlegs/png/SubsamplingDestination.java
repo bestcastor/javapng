@@ -38,8 +38,8 @@ package com.sixlegs.png;
 
 import java.awt.image.WritableRaster;
 
-class SubsamplingDestination
-extends Destination
+final class SubsamplingDestination
+extends RasterDestination
 {
     private final int[] singlePixel;
     private final int xsub;

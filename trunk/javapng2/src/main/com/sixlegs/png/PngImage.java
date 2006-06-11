@@ -641,6 +641,13 @@ implements Transparency
      */
     protected PngChunk getChunk(int type)
     {
+        if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngChunk.isAncillary(type)) {
+            switch (type) {
+            case PngChunk.gAMA: return gAMA;
+            case PngChunk.tRNS: return tRNS;
+            }
+            return null;
+        }
         switch (type) {
         case PngChunk.IHDR: return IHDR;
         case PngChunk.PLTE: return PLTE;

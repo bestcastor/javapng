@@ -36,6 +36,8 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
+import java.awt.Rectangle;
+
 /**
  * Customizable parameters
  * used by {@link PngImage} when decoding an image.
@@ -50,6 +52,8 @@ public class PngConfig
     public static final int READ_UNTIL_DATA = 2;
     /** Read the entire image, skipping over the image data */
     public static final int READ_EXCEPT_DATA = 3;
+    /** Read the entire image, skipping over all non-critical chunks except tRNS and gAMA */
+    public static final int READ_EXCEPT_METADATA = 4;
 
     private int readLimit = READ_ALL;
     private float defaultGamma = 0.45455f;
@@ -65,6 +69,7 @@ public class PngConfig
     private int subsamplingYOffset = 0;
     private int minPass = 0;
     private int numPasses = Integer.MAX_VALUE;
+    private Rectangle sourceRegion;
 
     /**
      * Create a new instance with default parameter values.
@@ -87,12 +92,41 @@ public class PngConfig
         this.progressive = copy.progressive;
         this.reduce16 = copy.reduce16;
         this.gammaCorrect = copy.gammaCorrect;
+
         this.sourceXSubsampling = copy.sourceXSubsampling;
         this.sourceYSubsampling = copy.sourceYSubsampling;
         this.subsamplingXOffset = copy.subsamplingXOffset;
         this.subsamplingYOffset = copy.subsamplingYOffset;
         this.minPass = copy.minPass;
         this.numPasses = copy.numPasses;
+    }
+
+    /**
+     * @see javax.imageio.IIOParam#setSourceRegion
+     */
+    public void setSourceRegion(Rectangle sourceRegion)
+    {
+        if (sourceRegion == null) {
+            this.sourceRegion = null;
+        } else {
+            this.sourceRegion = new Rectangle(sourceRegion);
+        }
+    }
+
+    /**
+     * <i>(Documentation copied from {@link javax.imageio.IIOParam#getSourceRegion})</i>
+     * Returns the source region to be used.  The returned value is
+     * that set by the most recent call to
+     * <code>setSourceRegion</code>, and will be <code>null</code> if
+     * there is no region set.
+     * 
+     * @return the source region of interest as a
+     * <code>Rectangle</code>, or <code>null</code>.
+     *
+     * @see #setSourceRegion
+     */
+    public Rectangle getSourceRegion() {
+        return (sourceRegion != null) ? new Rectangle(sourceRegion) : null;
     }
 
     /**
@@ -237,7 +271,8 @@ public class PngConfig
      *    {@link #READ_ALL READ_ALL},<br>
      *    {@link #READ_HEADER READ_HEADER},<br>
      *    {@link #READ_UNTIL_DATA READ_UNTIL_DATA},<br>
-     *    or {@link #READ_EXCEPT_DATA READ_EXCEPT_DATA}
+     *    {@link #READ_EXCEPT_DATA READ_EXCEPT_DATA},<br>
+     *    or {@link #READ_EXCEPT_METADATA READ_EXCEPT_METADATA}
      */
     public void setReadLimit(int readLimit)
     {

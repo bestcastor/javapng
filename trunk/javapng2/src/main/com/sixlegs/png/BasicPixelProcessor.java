@@ -47,14 +47,9 @@ extends PixelProcessor
     
     public BasicPixelProcessor(Destination dst)
     {
-        this(dst, new int[dst.getRaster().getNumBands() * dst.getSourceWidth()]);
-    }
-
-    public BasicPixelProcessor(Destination dst, int[] row)
-    {
         this.dst = dst;
-        this.row = row;
-        samples = dst.getRaster().getNumBands();
+        this.samples = dst.getRaster().getNumBands();
+        this.row = new int[samples * dst.getSourceWidth()];
     }
     
     public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
