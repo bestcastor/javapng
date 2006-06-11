@@ -82,7 +82,7 @@ class ImageFactory
         if (pp == null)
             pp = new BasicPixelProcessor(dst);            
         if (config.getProgressive() && interlaced)
-            pp = new ProgressivePixelProcessor((BasicPixelProcessor)pp, width, height);
+            pp = new ProgressivePixelProcessor(dst, pp, width, height);
         pp = new ProgressUpdater(png, image, pp);
 
         InflaterInputStream inflate = new InflaterInputStream(in, new Inflater(), 0x1000);
@@ -136,7 +136,7 @@ class ImageFactory
             return new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
                                               width, xsub, ysub, xoff, yoff);
         }
-        return new Destination(colorModel.createCompatibleWritableRaster(width, height), width);
+        return new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), width);
     }
 
     private static int calcSubsamplingSize(int len, int sub, int off, char desc)

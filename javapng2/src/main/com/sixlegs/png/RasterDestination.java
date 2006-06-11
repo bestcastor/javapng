@@ -36,11 +36,42 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
+import java.awt.image.WritableRaster;
 
-// not an interface for performance
-abstract class PixelProcessor
+class RasterDestination
+extends Destination
 {
-    // TODO: replace Raster src with int[] once all processors are using src.getPixels(0, 0, width, 1, row)
-    abstract public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width);
+    protected final WritableRaster raster;
+    protected final int sourceWidth;
+    
+    public RasterDestination(WritableRaster raster, int sourceWidth)
+    {
+        this.raster = raster;
+        this.sourceWidth = sourceWidth;
+    }
+
+    public void setPixels(int x, int y, int w, int[] pixels)
+    {
+        raster.setPixels(x, y, w, 1, pixels);
+    }
+
+    public void setPixel(int x, int y, int[] pixel)
+    {
+        raster.setPixel(x, y, pixel);
+    }
+
+    public void getPixel(int x, int y, int[] pixel)
+    {
+        raster.getPixel(x, y, pixel);
+    }
+
+    public WritableRaster getRaster()
+    {
+        return raster;
+    }
+
+    public int getSourceWidth()
+    {
+        return sourceWidth;
+    }
 }

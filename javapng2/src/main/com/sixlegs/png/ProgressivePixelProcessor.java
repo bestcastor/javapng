@@ -40,20 +40,23 @@ import java.awt.image.*;
 import java.util.Arrays;
 
 final class ProgressivePixelProcessor
-extends BasicPixelProcessor
+extends PixelProcessor
 {
-    final private PixelProcessor pp;
-    final private int imgWidth;
-    final private int imgHeight;
-    final private int pixelSize;
+    private final PixelProcessor pp;
+    private final int imgWidth;
+    private final int imgHeight;
+    private final Destination dst;
+    private final int samples;
+    private final int[] row;
     
-    public ProgressivePixelProcessor(BasicPixelProcessor pp, int imgWidth, int imgHeight)
+    public ProgressivePixelProcessor(Destination dst, PixelProcessor pp, int imgWidth, int imgHeight)
     {
-        super(pp.dst, pp.row);
         this.pp = pp;
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
-        this.pixelSize = dst.getRaster().getNumBands();
+        this.dst = dst;
+        this.samples = dst.getRaster().getNumBands();
+        this.row = new int[samples * 8];
     }
     
     public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
@@ -71,8 +74,8 @@ extends BasicPixelProcessor
                 dst.getPixel(dstX, y, row);
                 int xMax = Math.min(dstX + blockWidth, imgWidth);
                 int xPixels = xMax - dstX;
-                for (int i = pixelSize, end = xPixels * pixelSize; i < end; i++)
-                    row[i] = row[i - pixelSize];
+                for (int i = samples, end = xPixels * samples; i < end; i++)
+                    row[i] = row[i - samples];
                 for (int i = y; i < yMax; i++)
                     dst.setPixels(dstX, i, xPixels, row);
                 dstX += xStep;
