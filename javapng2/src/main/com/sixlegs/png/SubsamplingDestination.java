@@ -86,6 +86,6 @@ extends RasterDestination
 
     public void getPixel(int x, int y, int[] pixel)
     {
-        super.getPixel((x - xoff) / xsub, (y - yoff) / ysub, pixel);
+        throw new UnsupportedOperationException("Cannot use progressive + subsampling");
     }
 }
