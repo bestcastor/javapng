@@ -42,7 +42,7 @@ import java.util.*;
 class Chunk_tIME
 extends PngChunk
 {
-    private static TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+0");
+    private static TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
     
     public void read(int type, PngInputStream in, PngImage png)
     throws IOException
