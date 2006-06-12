@@ -209,9 +209,9 @@ abstract public class PngChunk
     }
 
     void checkLength(int length, int correct)
-    throws PngError
+    throws PngException
     {
         if (length != correct)
-            throw new PngError("Bad chunk length: " + length + " (expected " + correct + ")");
+            throw new PngException("Bad chunk length: " + length + " (expected " + correct + ")", true);
     }
 }

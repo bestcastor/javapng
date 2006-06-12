@@ -75,7 +75,7 @@ class PngUtils
         byte[] data = new byte[length];
         in.readFully(data);
         if (data[0] != 0)
-            throw new PngWarning("Unrecognized compression method: " + data[0]);
+            throw new PngException("Unrecognized compression method: " + data[0], false);
         byte[] tmp = new byte[0x1000];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Inflater inf = new Inflater();
@@ -86,7 +86,7 @@ class PngUtils
                 out.write(tmp, 0, inf.inflate(tmp));
             }
         } catch (DataFormatException e) {
-            throw new PngWarning(e.getMessage());
+            throw new PngException(e.getMessage(), false);
         }
         return out.toByteArray();
     }
@@ -102,7 +102,7 @@ class PngUtils
     {
         String keyword = readString(in, ISO_8859_1);
         if (keyword.length() == 0 || keyword.length() > 79)
-            throw new PngWarning("Invalid keyword length: " + keyword.length());
+            throw new PngException("Invalid keyword length: " + keyword.length(), false);
         return keyword;
     }
 

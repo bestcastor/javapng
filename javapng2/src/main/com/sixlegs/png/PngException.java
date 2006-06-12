@@ -41,11 +41,19 @@ import java.io.IOException;
 /**
  * The superclass for all decoding exceptions.
  */
-abstract public class PngException
+public class PngException
 extends IOException
 {
-    public PngException(String message)
+    private final boolean fatal;
+    
+    PngException(String message, boolean fatal)
     {
         super(message);
+        this.fatal = fatal;
+    }
+
+    public boolean isFatal()
+    {
+        return fatal;
     }
 }

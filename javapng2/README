@@ -26,6 +26,17 @@ Getting Started
 
 Revision History
 
+  Changes from v2.0-rc4 -> v2.0-rc5 (2006-06-??)
+
+    * Added PngConfig.READ_EXCEPT_METADATA
+    * Better progressive performance
+    * Support image source region
+    * Reduced number of classes to make jar smaller
+    * Use ProGuard to make jar smaller
+    * Eliminate all use of reflection
+    * Combine ext package into main package
+    * Support new sTER registered chunk
+
   Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-05)
 
     * Java IIO-compatible plugin (thanks to Dimitri Koussa)

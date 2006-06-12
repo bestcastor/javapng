@@ -248,8 +248,8 @@ extends ImageReader
     private class IIOPngImage
     extends PngImage
     {
-        protected void handleWarning(PngWarning e)
-        throws PngWarning
+        protected void handleWarning(PngException e)
+        throws PngException
         {
             processWarningOccurred(e.getMessage());
         }

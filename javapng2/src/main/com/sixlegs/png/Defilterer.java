@@ -150,7 +150,7 @@ class Defilterer
             }
             break;
         default:
-            throw new PngError("Unrecognized filter type " + filterType);
+            throw new PngException("Unrecognized filter type " + filterType, true);
         }
     }
 
