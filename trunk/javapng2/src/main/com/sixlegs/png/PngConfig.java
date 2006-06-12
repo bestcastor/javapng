@@ -58,7 +58,6 @@ public class PngConfig
     private int readLimit = READ_ALL;
     private float defaultGamma = 0.45455f;
     private float displayExponent = 2.2f;
-    private float userExponent = 1.0f;
     private boolean warningsFatal;
     private boolean progressive;
     private boolean reduce16 = true;
@@ -87,7 +86,6 @@ public class PngConfig
         this.readLimit = copy.readLimit;
         this.defaultGamma = copy.defaultGamma;
         this.displayExponent = copy.displayExponent;
-        this.userExponent = copy.userExponent;
         this.warningsFatal = copy.warningsFatal;
         this.progressive = copy.progressive;
         this.reduce16 = copy.reduce16;
@@ -234,26 +232,6 @@ public class PngConfig
         this.displayExponent = displayExponent;
     }
     
-    /**
-     * Returns the current user exponent.
-     * @see #setUserExponent
-     */
-    public float getUserExponent()
-    {
-        return userExponent;
-    }
-
-    /**
-     * Sets the user gamma exponent. The proper setting depends on the user's
-     * particular viewing conditions. Use an exponent greater than 1.0 to darken the mid-level
-     * tones, or less than 1.0 to lighten them. Default is <i>1.0</i>.
-     * @param userExponent the user exponent
-     */
-    public void setUserExponent(float userExponent)
-    {
-        this.userExponent = userExponent;
-    }
-
     /**
      * Returns the current read limit setting.
      * @see #setReadLimit
