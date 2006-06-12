@@ -139,9 +139,19 @@ class ImageFactory
 
     private static Destination createDestination(PngImage png, ColorModel colorModel)
     {
+        PngConfig config = png.getConfig();
         int width = png.getWidth();
         int height = png.getHeight();
-        PngConfig config = png.getConfig();
+        Rectangle sourceRegion = config.getSourceRegion();
+        if (sourceRegion != null) {
+            if (!new Rectangle(width, height).contains(sourceRegion))
+                throw new IllegalStateException("Source region " + sourceRegion + " falls outside of " +
+                                                width + "x" + height + " image");
+            width = sourceRegion.width;
+            height = sourceRegion.height;
+        }
+
+        Destination dst;
         int xsub = config.getSourceXSubsampling();
         int ysub = config.getSourceYSubsampling();
         if (xsub != 1 || ysub != 1) {
@@ -149,18 +159,12 @@ class ImageFactory
             int yoff = config.getSubsamplingYOffset();
             int subw = calcSubsamplingSize(width, xsub, xoff, 'X');
             int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
-            return new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
-                                              width, xsub, ysub, xoff, yoff);
+            dst = new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
+                                             width, xsub, ysub, xoff, yoff);
+        } else {
+            dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), png.getWidth());
         }
-        Rectangle sourceRegion = config.getSourceRegion();
-        if (sourceRegion != null) {
-            if (!new Rectangle(width, height).contains(sourceRegion))
-                throw new IllegalStateException("Source region " + sourceRegion + " falls outside of " +
-                                                width + "x" + height + " image");
-            WritableRaster raster = colorModel.createCompatibleWritableRaster(sourceRegion.width, sourceRegion.height);
-            return new SourceRegionDestination(new RasterDestination(raster, width), sourceRegion);
-        }
-        return new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), width);
+        return (sourceRegion != null) ? new SourceRegionDestination(dst, sourceRegion) : dst;
     }
 
     private static int calcSubsamplingSize(int len, int sub, int off, char desc)
