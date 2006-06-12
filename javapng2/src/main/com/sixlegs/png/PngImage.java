@@ -384,9 +384,9 @@ implements Transparency
 
     /**
      * Returns a gamma table which can be used for custom gamma correction.
-     * The size of the table is 2 to the power of {@link #getBitDepth}, unless
-     * the bit depth is 16 and {@link PngConfig#getReduce16} is true, in which
-     * case the table is 256 entries.
+     * The table is 256 entries unless the bit depth is 16 and
+     * {@link PngConfig#getReduce16} is false, in which
+     * case the table is 65535 entries.
      * <p>
      * The values in the table take into account {@link #getGamma} and
      * {@link PngConfig#getDisplayExponent}.
@@ -525,6 +525,30 @@ implements Transparency
      * <tr><td>{@link PngConstants#SUGGESTED_PALETTES SUGGESTED_PALETTES}</td>
      * <td>{@link java.util.List List}</td>
      * <td>List of {@linkplain SuggestedPalette suggested palettes}</td></tr>
+     * <tr><td>{@link PngConstants#GIF_DISPOSAL_METHOD GIF_DISPOSAL_METHOD}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>GIF disposal method</td></tr>
+     * <tr><td>{@link PngConstants#GIF_USER_INPUT_FLAG GIF_USER_INPUT_FLAG}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>GIF user input flag</td></tr>
+     * <tr><td>{@link PngConstants#GIF_DELAY_TIME GIF_DELAY_TIME}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>GIF delay time (hundredths of a second)</td></tr>
+     * <tr><td>{@link PngConstants#SCALE_UNIT SCALE_UNIT}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Unit for physical scale of image subject</td></tr>
+     * <tr><td>{@link PngConstants#PIXEL_WIDTH PIXEL_WIDTH}</td>
+     * <td>{@link Double Double}</td>
+     * <td>Physical width of pixel</td></tr>
+     * <tr><td>{@link PngConstants#PIXEL_HEIGHT PIXEL_HEIGHT}</td>
+     * <td>{@link Double Double}</td>
+     * <td>Physical height of pixel</td></tr>
+     * <tr><td>{@link PngConstants#POSITION_UNIT POSITION_UNIT}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Unit for image offset</td></tr>
+     * <tr><td>{@link PngConstants#STEREO_MODE STEREO_MODE}</td>
+     * <td>{@link Integer Integer}</td>
+     * <td>Indicator of stereo image</td></tr>
      * </table></center>
      * @param name a property name
      * @return the property value, or null if no such property exists
@@ -603,7 +627,7 @@ implements Transparency
      * <p>
      * By default this method will return a {@code PngChunk} implementation
      * for all of the chunk types defined in Version 1.2 of the PNG Specification
-     * (except {@code IDAT}).
+     * (except {@code IDAT}), and most of the registered extension chunks.
      * @param type the chunk type
      * @return an instance of {@code PngChunk} which will read the following chunk data, or null
      * @throws IllegalArgumentException if the type is IDAT

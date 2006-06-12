@@ -94,6 +94,23 @@ public interface PngConstants
     /** {@link PngChunk#sPLT sPLT}: List of {@linkplain SuggestedPalette suggested palettes} */
     String SUGGESTED_PALETTES = "suggested_palettes";
 
+    /** {@link PngChunk#gIFg gIFg}: GIF disposal method */
+    String GIF_DISPOSAL_METHOD = "gif_disposal_method";
+    /** {@link PngChunk#gIFg gIFg}: GIF user input flag */
+    String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
+    /** {@link PngChunk#gIFg gIFg}: GIF delay time (hundredths of a second) */
+    String GIF_DELAY_TIME = "gif_delay_time";
+    /** {@link PngChunk#sCAL sCAL}: Unit for physical scale of image subject */
+    String SCALE_UNIT = "scale_unit";
+    /** {@link PngChunk#sCAL sCAL}: Physical width of pixel */
+    String PIXEL_WIDTH = "pixel_width";
+    /** {@link PngChunk#sCAL sCAL}: Physical height of pixel */
+    String PIXEL_HEIGHT = "pixel_height";
+    /** {@link PngChunk#oFFs oFFs}: Unit for image offset */
+    String POSITION_UNIT = "position_unit";
+    /** {@link PngChunk#sTER sTER}: Indicator of stereo image */
+    String STEREO_MODE = "stereo_mode";
+
     /** {@link PngChunk#IHDR IHDR}: Grayscale color type */
     int COLOR_TYPE_GRAY = 0;
     /** {@link PngChunk#IHDR IHDR}: Grayscale+alpha color type */
@@ -130,24 +147,22 @@ public interface PngConstants
     /** {@link PngChunk#sRGB sRGB}: Absolute colormetric rendering intent */
     int SRGB_ABSOLUTE_COLORIMETRIC = 3;
 
-    
-    String GIF_DISPOSAL_METHOD = "gif_disposal_method";
-    String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
-    String GIF_DELAY_TIME = "gif_delay_time";
-    String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
-    String POSITION_UNIT = "position_unit";
+    /** {@link PngChunk#oFFs oFFs}: Image X position */
     String POSITION_X = "position_x";
+    /** {@link PngChunk#oFFs oFFs}: Image Y position */
     String POSITION_Y = "position_y";
-    String SCALE_UNIT = "scale_unit";
-    String PIXEL_WIDTH = "pixel_width";
-    String PIXEL_HEIGHT = "pixel_height";
-    String STEREO_MODE = "stereo_mode";
-    
+    /** {@link PngChunk#oFFs oFFs}: Unit is the pixel (true dimensions unspecified) */
     int POSITION_UNIT_PIXEL = 0;
+    /** {@link PngChunk#oFFs oFFs}: Unit is the micrometer (10^-6 meter) */
     int POSITION_UNIT_MICROMETER = 1;
+
+    /** {@link PngChunk#sCAL sCAL}: Unit is the meter */
     int SCALE_UNIT_METER = 1;
+    /** {@link PngChunk#sCAL sCAL}: Unit is the radian */
     int SCALE_UNIT_RADIAN = 2;
 
+    /** {@link PngChunk#sTER sTER}: Cross-fuse layout */
     int STEREO_MODE_CROSS = 0;
+    /** {@link PngChunk#sTER sTER}: Diverging-fuse layout */
     int STEREO_MODE_DIVERGING = 1;
 }
