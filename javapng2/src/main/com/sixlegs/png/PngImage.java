@@ -236,15 +236,13 @@ implements Transparency
      * pass is affected by the value of {@link PngConfig#getProgressive}.
      * <p>
      * Image decoding can be aborted by returning false. The default
-     * implementation returns false if the {@code pass} parameter
-     * is greater than the value of {@link PngConfig#getSourceMaxProgressivePass}.
+     * implementation always returns true.
      * @param image the partially or fully decoded image
      * @param pass the index of the completed pass
      * @return false to abort image decoding
      */
     protected boolean handlePass(BufferedImage image, int pass)
     {
-        // return pass <= config.getSourceMaxProgressivePass();
         return true;
     }
 
@@ -274,7 +272,7 @@ implements Transparency
      * processing), an implementation should re-throw the exception.
      * <p>
      * By default, this method will re-throw the warning if the
-     * {@link PngConfig#setWarningsFatal warningsFatal} property is true.
+     * {@link PngConfig#getWarningsFatal warningsFatal} property is true.
      * @throws PngException if the warning should be treated as fatal
      */
     protected void handleWarning(PngException e)
@@ -390,8 +388,8 @@ implements Transparency
      * the bit depth is 16 and {@link PngConfig#getReduce16} is true, in which
      * case the table is 256 entries.
      * <p>
-     * The values in the table take into account {@link #getGamma},
-     * {@link PngConfig#getDisplayExponent}, and {@link PngConfig#getUserExponent}.
+     * The values in the table take into account {@link #getGamma} and
+     * {@link PngConfig#getDisplayExponent}.
      * @return a table of component values to be used in gamma correction
      * @throws IllegalStateException if an image has not been read
      */

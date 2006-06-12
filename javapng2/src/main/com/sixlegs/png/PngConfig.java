@@ -93,7 +93,7 @@ final public class PngConfig
         int[] subsampling = DEFAULT_SUBSAMPLING;
 
         /**
-         * Create a new builder using default value.
+         * Create a new builder using default values.
          */
         public Builder()
         {
@@ -101,7 +101,7 @@ final public class PngConfig
 
         /**
          * Create a builder using values from the given configuration.
-         * @param the configuration to copy
+         * @param cfg the configuration to copy
          */
         public Builder(PngConfig cfg)
         {
