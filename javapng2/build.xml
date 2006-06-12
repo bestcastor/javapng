@@ -193,7 +193,7 @@
     <target name="jar" depends="compile,compile-iio" description="Create Jar">
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
-        <jar jarfile="dist/${prefix}.jar">
+        <jar jarfile="dist/temp.jar">
             <fileset dir="build/main"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
@@ -202,12 +202,13 @@
         <proguard>
             -dontoptimize
             -dontusemixedcaseclassnames
-            -injars dist/${prefix}.jar
-            -outjars dist/${prefix}-proguard.jar
+            -injars dist/temp.jar
+            -outjars dist/${prefix}.jar
             -libraryjars ${compile.bootclasspath}(java/**.class)
             -libraryjars lib
             -keep public class com.sixlegs.png.* { public *; }
         </proguard>
+        <delete file="dist/temp.jar"/>
 
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
