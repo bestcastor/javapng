@@ -66,20 +66,20 @@ class StateMachine
     }
 
     public void nextState(int type)
-    throws PngError
+    throws PngException
     {
         state = nextState(png, state, this.type = type);
     }
         
     private static int nextState(PngImage png, int state, int type)
-    throws PngError
+    throws PngException
     {
         if (PngChunk.isPrivate(type) && !PngChunk.isAncillary(type))
-            throw new PngError("Private critical chunk encountered: " + PngChunk.getName(type));
+            throw new PngException("Private critical chunk encountered: " + PngChunk.getName(type), true);
         for (int i = 0; i < 4; i++) {
             int c = 0xFF & (type >>> (8 * i));
             if (c < 65 || (c > 90 && c < 97) || c > 122)
-                throw new PngError("Corrupted chunk type: " + PngChunk.getName(type));
+                throw new PngException("Corrupted chunk type: " + PngChunk.getName(type), true);
         }
         switch (state) {
         case STATE_START:
@@ -90,7 +90,7 @@ class StateMachine
             switch (type) {
             case PngChunk.PLTE:
                 if (state == STATE_SAW_IHDR_NO_PLTE)
-                    throw new PngError("IHDR chunk must be first chunk");
+                    throw new PngException("IHDR chunk must be first chunk", true);
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
                 errorIfPaletted(png);
@@ -101,7 +101,7 @@ class StateMachine
                 errorIfPaletted(png);
                 return STATE_SAW_IHDR_NO_PLTE;
             case PngChunk.hIST:
-                throw new PngError("PLTE must precede hIST");
+                throw new PngException("PLTE must precede hIST", true);
             default:
                 return STATE_SAW_IHDR;
             }
@@ -112,11 +112,11 @@ class StateMachine
             case PngChunk.iCCP:
             case PngChunk.sBIT:
             case PngChunk.sRGB:
-                throw new PngError(PngChunk.getName(type) + " cannot appear after PLTE");
+                throw new PngException(PngChunk.getName(type) + " cannot appear after PLTE", true);
             case PngChunk.IDAT:
                 return STATE_IN_IDAT;
             case PngChunk.IEND:
-                throw new PngError("Required data chunk(s) not found");
+                throw new PngException("Required data chunk(s) not found", true);
             default:
                 return STATE_SAW_PLTE;
             }
@@ -137,7 +137,7 @@ class StateMachine
             case PngChunk.pCAL:
             case PngChunk.sCAL:
             case PngChunk.sTER:
-                throw new PngError(PngChunk.getName(type) + " cannot appear after IDAT");
+                throw new PngException(PngChunk.getName(type) + " cannot appear after IDAT", true);
             }
             switch (state) {
             case STATE_IN_IDAT:
@@ -154,7 +154,7 @@ class StateMachine
                 case PngChunk.IEND:
                     return STATE_END;
                 case PngChunk.IDAT:
-                    throw new PngError("IDAT chunks must be consecutive");
+                    throw new PngException("IDAT chunks must be consecutive", true);
                 default:
                     return STATE_AFTER_IDAT;
                 }
@@ -165,9 +165,9 @@ class StateMachine
     }
 
     private static void errorIfPaletted(PngImage png)
-    throws PngError
+    throws PngException
     {
         if (png.getColorType() == PngConstants.COLOR_TYPE_PALETTE)
-            throw new PngError("Required PLTE chunk not found");
+            throw new PngException("Required PLTE chunk not found", true);
     }
 }

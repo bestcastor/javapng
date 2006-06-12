@@ -146,9 +146,9 @@ implements Transparency
             PngInputStream pin = new PngInputStream(in);
             long sig = pin.readLong();
             if (sig != SIGNATURE) {
-                throw new PngError("Improper signature, expected 0x" +
+                throw new PngException("Improper signature, expected 0x" +
                                    Long.toHexString(SIGNATURE).toUpperCase() + ", got 0x" +
-                                   Long.toHexString(sig).toUpperCase());
+                                   Long.toHexString(sig).toUpperCase(), true);
             }
             Set seen = new HashSet();
             while (machine.getState() != StateMachine.STATE_END) {
@@ -166,7 +166,7 @@ implements Transparency
                 PngChunk chunk = getChunk(type);
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
-                        throw new PngError("Critical chunk " + PngChunk.getName(type) + " cannot be skipped");
+                        throw new PngException("Critical chunk " + PngChunk.getName(type) + " cannot be skipped", true);
                     pin.skipBytes(pin.getRemaining());
                 } else {
                     try {
@@ -175,8 +175,8 @@ implements Transparency
                             if (seen.contains(key)) {
                                 String msg = "Multiple " + PngChunk.getName(type) + " chunks are not allowed";
                                 if (PngChunk.isAncillary(type))
-                                    throw new PngWarning(msg);
-                                throw new PngError(msg);
+                                    throw new PngException(msg, false);
+                                throw new PngException(msg, true);
                             } else {
                                 seen.add(key);
                             }
@@ -184,15 +184,17 @@ implements Transparency
                         chunk.read(type, pin, this);
                         if (type == PngChunk.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
                             return null;
-                    } catch (PngWarning warning) {
+                    } catch (PngException exception) {
+                        if (exception.isFatal())
+                            throw exception;
                         pin.skipBytes(pin.getRemaining());
-                        handleWarning(warning);
+                        handleWarning(exception);
                     }
                 }
                 pin.endChunk(type);
             }
             return image;
-        } catch (PngError e) {
+        } catch (PngException e) {
             throw e;
         } finally {
             if (close)
@@ -267,17 +269,17 @@ implements Transparency
 
     /**
      * Callback for customized handling of warnings. Whenever a
-     * non-fatal error is found, an instance of {@link PngWarning} is
+     * non-fatal error is found, an instance of {@link PngException} is
      * created and passed to this method. To signal that the exception
      * should be treated as a fatal exception (and abort image
      * processing), an implementation should re-throw the exception.
      * <p>
      * By default, this method will re-throw the warning if the
      * {@link PngConfig#setWarningsFatal warningsFatal} property is true.
-     * @throws PngWarning if the warning should be treated as fatal
+     * @throws PngException if the warning should be treated as fatal
      */
-    protected void handleWarning(PngWarning e)
-    throws PngWarning
+    protected void handleWarning(PngException e)
+    throws PngException
     {
         if (config.getWarningsFatal())
             throw e;
@@ -585,42 +587,8 @@ implements Transparency
             throw new IllegalStateException("Image has not been read");
     }
 
-    private static final PngChunk IHDR = loadChunk("com.sixlegs.png.Chunk_IHDR");
-    private static final PngChunk PLTE = loadChunk("com.sixlegs.png.Chunk_PLTE");
-    private static final PngChunk IEND = loadChunk("com.sixlegs.png.Chunk_IEND");
-    private static final PngChunk bKGD = loadChunk("com.sixlegs.png.Chunk_bKGD");
-    private static final PngChunk cHRM = loadChunk("com.sixlegs.png.Chunk_cHRM");
-    private static final PngChunk gAMA = loadChunk("com.sixlegs.png.Chunk_gAMA");
-    private static final PngChunk pHYs = loadChunk("com.sixlegs.png.Chunk_pHYs");
-    private static final PngChunk sBIT = loadChunk("com.sixlegs.png.Chunk_sBIT");
-    private static final PngChunk sRGB = loadChunk("com.sixlegs.png.Chunk_sRGB");
-    private static final PngChunk tIME = loadChunk("com.sixlegs.png.Chunk_tIME");
-    private static final PngChunk tRNS = loadChunk("com.sixlegs.png.Chunk_tRNS");
-    private static final PngChunk hIST = loadChunk("com.sixlegs.png.Chunk_hIST");
-    private static final PngChunk iCCP = loadChunk("com.sixlegs.png.Chunk_iCCP");
-    private static final PngChunk sPLT = loadChunk("com.sixlegs.png.Chunk_sPLT");
-    private static final PngChunk text = loadChunk("com.sixlegs.png.TextChunkReader");
-
-    private static final PngChunk gIFg = loadChunk("com.sixlegs.png.Chunk_gIFg");
-    private static final PngChunk gIFx = loadChunk("com.sixlegs.png.Chunk_gIFx");
-    private static final PngChunk oFFs = loadChunk("com.sixlegs.png.Chunk_oFFs");
-    private static final PngChunk pCAL = loadChunk("com.sixlegs.png.Chunk_pCAL");
-    private static final PngChunk sCAL = loadChunk("com.sixlegs.png.Chunk_sCAL");
-    private static final PngChunk sTER = loadChunk("com.sixlegs.png.Chunk_sTER");
-
-    private static PngChunk loadChunk(String className)
-    {
-        try {
-            return (PngChunk)Class.forName(className).newInstance();
-        } catch (ClassNotFoundException e) {
-            return null;
-        } catch (IllegalAccessException e) {
-            throw new Error(e.getMessage());
-        } catch (InstantiationException e) {
-            throw new Error(e.getMessage());
-        }
-    }
-
+    private static final RegisteredChunks registered = new RegisteredChunks();
+    
     /**
      * Returns a {@link PngChunk} implementation for the given chunk type.
      * The returned chunk object will be responsible for reading the
@@ -643,36 +611,37 @@ implements Transparency
     {
         if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngChunk.isAncillary(type)) {
             switch (type) {
-            case PngChunk.gAMA: return gAMA;
-            case PngChunk.tRNS: return tRNS;
+            case PngChunk.gAMA:
+            case PngChunk.tRNS:
+                return registered;
             }
             return null;
         }
         switch (type) {
-        case PngChunk.IHDR: return IHDR;
-        case PngChunk.PLTE: return PLTE;
-        case PngChunk.IEND: return IEND;
-        case PngChunk.bKGD: return bKGD;
-        case PngChunk.cHRM: return cHRM;
-        case PngChunk.gAMA: return gAMA;
-        case PngChunk.pHYs: return pHYs;
-        case PngChunk.sBIT: return sBIT;
-        case PngChunk.sRGB: return sRGB;
-        case PngChunk.tIME: return tIME;
-        case PngChunk.tRNS: return tRNS;
-        case PngChunk.hIST: return hIST;
-        case PngChunk.iCCP: return iCCP;
-        case PngChunk.sPLT: return sPLT;
-        case PngChunk.gIFg: return gIFg;
-        case PngChunk.gIFx: return gIFx;
-        case PngChunk.oFFs: return oFFs;
-        case PngChunk.pCAL: return pCAL;
-        case PngChunk.sCAL: return sCAL;
-        case PngChunk.sTER: return sTER;
+        case PngChunk.IHDR:
+        case PngChunk.PLTE:
+        case PngChunk.bKGD:
+        case PngChunk.IEND:
+        case PngChunk.cHRM:
+        case PngChunk.gAMA:
+        case PngChunk.pHYs:
+        case PngChunk.sBIT:
+        case PngChunk.sRGB:
+        case PngChunk.hIST:
+        case PngChunk.iCCP:
+        case PngChunk.tIME:
+        case PngChunk.tRNS:
+        case PngChunk.sPLT:
         case PngChunk.iTXt:
         case PngChunk.tEXt:
         case PngChunk.zTXt:
-            return text;
+        case PngChunk.gIFg:
+        case PngChunk.oFFs:
+        case PngChunk.sCAL:
+        case PngChunk.sTER:
+            // case PngChunk.gIFx:
+            // case PngChunk.pCAL:
+            return registered;
         case PngChunk.IDAT:
             throw new IllegalArgumentException("Unexpected IDAT chunk");
         }

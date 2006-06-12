@@ -129,4 +129,25 @@ public interface PngConstants
     int SRGB_SATURATION_PRESERVING = 2;
     /** {@link PngChunk#sRGB sRGB}: Absolute colormetric rendering intent */
     int SRGB_ABSOLUTE_COLORIMETRIC = 3;
+
+    
+    String GIF_DISPOSAL_METHOD = "gif_disposal_method";
+    String GIF_USER_INPUT_FLAG = "gif_user_input_flag";
+    String GIF_DELAY_TIME = "gif_delay_time";
+    String GIF_APPLICATION_EXTENSIONS = "gif_application_extensions";
+    String POSITION_UNIT = "position_unit";
+    String POSITION_X = "position_x";
+    String POSITION_Y = "position_y";
+    String SCALE_UNIT = "scale_unit";
+    String PIXEL_WIDTH = "pixel_width";
+    String PIXEL_HEIGHT = "pixel_height";
+    String STEREO_MODE = "stereo_mode";
+    
+    int POSITION_UNIT_PIXEL = 0;
+    int POSITION_UNIT_MICROMETER = 1;
+    int SCALE_UNIT_METER = 1;
+    int SCALE_UNIT_RADIAN = 2;
+
+    int STEREO_MODE_CROSS = 0;
+    int STEREO_MODE_DIVERGING = 1;
 }

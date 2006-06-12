@@ -290,7 +290,7 @@ public class PngConfig
 
     /**
      * Configures whether warnings should be treated as fatal errors.
-     * All {@link PngWarning} exceptions are caught and passed to the {@link PngImage#handleWarning}
+     * All non-fatal {@link PngException} exceptions are caught and passed to the {@link PngImage#handleWarning}
      * method. If warnings are configured as fatal, that method will re-throw the
      * exception, which will abort image processing. Default is <i>false</i>.
      * @param warningsFatal true if warnings should be treated as fatal errors

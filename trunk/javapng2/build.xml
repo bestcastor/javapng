@@ -15,7 +15,7 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="product" value="javapng"/>
-    <property name="version" value="2.0-rc4"/>
+    <property name="version" value="2.0-rc5"/>
     <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
     <property name="suite.file" value="suite.png"/>
@@ -36,16 +36,12 @@
             <path refid="path.lib"/>
             <pathelement path="build/main"/>
         </path>
-        <path id="path.ext">
-            <path refid="path.main"/>
-            <pathelement path="build/ext"/>
-        </path>
         <path id="path.viewer">
-            <path refid="path.ext"/>
+            <path refid="path.main"/>
             <pathelement path="build/viewer"/>
         </path>
         <path id="path.iio">
-            <path refid="path.ext"/>
+            <path refid="path.main"/>
             <pathelement path="build/iio"/>
         </path>
         <path id="path.examples">
@@ -66,15 +62,14 @@
 
     <target name="compile" depends="init" description="Compile">
         <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath}"/>
-        <compile module="ext" refid="path.main" bootclasspath="${compile.bootclasspath}"/>
     </target>
 
     <target name="compile-viewer" depends="compile" description="Compile viewer">
-        <compile module="viewer" refid="path.ext"/>
+        <compile module="viewer" refid="path.main"/>
     </target>
 
     <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
-        <compile module="iio" refid="path.ext" compile.target="1.4"/>
+        <compile module="iio" refid="path.main" compile.target="1.4"/>
     </target>
 
     <target name="compile-examples" depends="compile-iio" description="Compile examples">
@@ -138,7 +133,6 @@
         <mkdir dir="build/emma"/>
         <copy todir="build/emma">
             <fileset dir="build/main"/>
-            <fileset dir="build/ext"/>
             <fileset dir="build/examples"/>
         </copy>
         <emma enabled="true">
@@ -150,7 +144,7 @@
         <mytest refid="path.test.emma" fork="true"/>
         <mkdir dir="reports"/>
         <emma enabled="true">
-            <report sourcepath="src/main,src/ext">
+            <report sourcepath="src/main">
                 <infileset dir="${user.dir}" includes="*.em, *.ec"/>
                 <txt outfile="reports/coverage.txt"/>
                 <html outfile="reports/coverage.html"/>
@@ -191,35 +185,40 @@
         <delete file="${user.dir}/coverage.em"/>
         <delete file="${user.dir}/coverage.ec"/>
         <delete file="${suite.file}"/>
-		<delete>
-			<fileset dir="." includes="TEST*"/>
-		</delete>
+        <delete>
+            <fileset dir="." includes="TEST*"/>
+        </delete>
     </target>
 
     <target name="jar" depends="compile,compile-iio" description="Create Jar">
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
-	<jar jarfile="dist/${prefix}.jar">
-	    <fileset dir="build/main"/>
+        <jar jarfile="dist/${prefix}.jar">
+            <fileset dir="build/main"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
-	</jar>
-	<jar jarfile="dist/${prefix}-ext.jar">
-	    <fileset dir="build/ext"/>
-            <manifest>
-                <attribute name="Implementation-Version" value="${version}"/>
-            </manifest>
-	</jar>
+        </jar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/${prefix}.jar
+            -outjars dist/${prefix}-proguard.jar
+            -libraryjars ${compile.bootclasspath}(java/**.class)
+            -libraryjars lib
+            -keep public class com.sixlegs.png.* { public *; }
+        </proguard>
+
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
-	<jar jarfile="dist/${prefix}-iio.jar">
-	    <fileset dir="build/main"/>
-	    <fileset dir="build/iio"/>
+        <jar jarfile="dist/${prefix}-iio.jar">
+            <fileset dir="build/main"/>
+            <fileset dir="build/iio"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
             <metainf dir="build" includes="services/**"/>
-	</jar>
+        </jar>
     </target>
 
     <target name="pmd" depends="init" description="Find bugs using PMD">
@@ -242,7 +241,7 @@
           access="${javadoc.access}"
           failonerror="true"
           packagenames="com.sixlegs.png.*"
-          classpathref="path.ext"
+          classpathref="path.main"
           Author="true"
           Version="true"
           Use="true"

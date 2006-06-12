@@ -13,7 +13,7 @@ public class PngCheck
         PngConfig config = new PngConfig();
         config.setReadLimit(PngConfig.READ_UNTIL_DATA);
         (new PngImage(config){
-            public void handleWarning(PngWarning e) {
+            public void handleWarning(PngException e) {
                 System.out.println("Warning: " + e.getMessage());
             }
         }).read(new File(args[0]));

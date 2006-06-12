@@ -65,7 +65,7 @@ implements DataInput
     throws IOException
     {
         if (length < 0)
-            throw new PngError("Bad chunk length: " + length);
+            throw new PngException("Bad chunk length: " + length, true);
         crc.reset();
         int type = readInt();
         count = 0;
@@ -77,9 +77,9 @@ implements DataInput
     throws IOException
     {
         if (getRemaining() != 0)
-            throw new PngError(PngChunk.getName(type) + " read " + count + " bytes, expected " + length);
+            throw new PngException(PngChunk.getName(type) + " read " + count + " bytes, expected " + length, true);
         if ((int)crc.getValue() != readInt())
-            throw new PngError("Bad CRC value for " + PngChunk.getName(type) + " chunk");
+            throw new PngException("Bad CRC value for " + PngChunk.getName(type) + " chunk", true);
     }
 
     ////////// count/crc InputStream methods //////////
