@@ -280,6 +280,11 @@
                 <exclude name="test/images/nodist/*.png"/>
             </zipfileset>
             <zipfileset dir="lib" prefix="${prefix}/lib"/>
+            <zipfileset dir="libdev" prefix="${prefix}/libdev">
+                <include name="proguard.jar"/>
+                <include name="jarjar.jar"/>
+                <include name="xml-writer.jar"/>
+            </zipfileset>
             <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,README,benchmark.txt"/>
             <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,${prefix}-iio.jar,api/**"/>
         </jar>
