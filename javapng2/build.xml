@@ -62,7 +62,7 @@
     </target>
 
     <target name="compile" depends="init" description="Compile">
-        <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath.12}"/>
+        <compile module="main" refid="path.lib" source="1.2" target="1.2" bootclasspath="${compile.bootclasspath.12}"/>
     </target>
 
     <target name="compile-viewer" depends="compile" description="Compile viewer">
@@ -70,7 +70,7 @@
     </target>
 
     <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
-        <compile module="iio" refid="path.main" compile.target="1.4" bootclasspath="${compile.bootclasspath.14}"/>
+        <compile module="iio" refid="path.main" source="1.4" target="1.4" bootclasspath="${compile.bootclasspath.14}"/>
     </target>
 
     <target name="compile-examples" depends="compile-iio" description="Compile examples">
@@ -87,15 +87,16 @@
         <attribute name="module"/>
         <attribute name="refid"/>
         <attribute name="bootclasspath" default=""/>
-        <attribute name="compile.target" default="${compile.target}"/>
+        <attribute name="source" default="${compile.target}"/>
+        <attribute name="target" default="${compile.target}"/>
         <sequential>
             <mkdir dir="build/@{module}"/>
             <copy todir="build/@{module}">
                 <fileset dir="src/@{module}" excludes="**/*.java"/>
             </copy>
             <javac srcdir="src/@{module}" destdir="build/@{module}"
-              source="${compile.source}"
-              target="@{compile.target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
+              source="@{source}"
+              target="@{target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
               debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
                  <classpath refid="@{refid}"/>
             </javac>
