@@ -50,7 +50,7 @@ import java.util.*;
 public class PngImageReader
 extends ImageReader
 {
-    private PngImage png = new IIOPngImage();
+    private PngImage png = new IIOPngImage(new PngConfig.Builder().build());
 	private PngHeader pngHeader;
 	private PngImageMetadata pngMetadata;
 	private BufferedImage pngImage;
@@ -223,16 +223,17 @@ extends ImageReader
     {
 		checkIndex(imageIndex);
  		readMetadata();
-        PngConfig config = png.getConfig();
+		readImage();
+        
+        /*
+        PngConfig config = new PngConfig.Builder().build();
         if (param != null) {
-            config.setSourceProgressivePasses(param.getSourceMinProgressivePass(),
-                                              param.getSourceNumProgressivePasses());
             config.setSourceSubsampling(param.getSourceXSubsampling(),
                                         param.getSourceYSubsampling(),
                                         param.getSubsamplingXOffset(),
                                         param.getSubsamplingYOffset());
         }
-		readImage();
+        */
 
 		//FIXME use param to get a destination image. Not exactly sure how to
 		//go about this.
@@ -248,6 +249,11 @@ extends ImageReader
     private class IIOPngImage
     extends PngImage
     {
+        public IIOPngImage(PngConfig cfg)
+        {
+            super(cfg);
+        }
+        
         protected void handleWarning(PngException e)
         throws PngException
         {

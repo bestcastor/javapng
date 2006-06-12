@@ -95,27 +95,26 @@ class ImageFactory
         Defilterer d = new Defilterer(inflate, bitDepth, samples, width, pp);
         
         // TODO: if not progressive, initialize to fully transparent?
-        int minPass = config.getSourceMinProgressivePass();
         boolean complete;
         if (interlaced) {
             complete =
-                d.defilter(0 < minPass, 0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8) &&
-                (0 < minPass || png.handlePass(image, 0)) &&
-                d.defilter(1 < minPass, 4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8) &&
-                (1 < minPass || png.handlePass(image, 1)) &&
-                d.defilter(2 < minPass, 0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8) &&
-                (2 < minPass || png.handlePass(image, 2)) &&
-                d.defilter(3 < minPass, 2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4) &&
-                (3 < minPass || png.handlePass(image, 3)) && 
-                d.defilter(4 < minPass, 0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4) &&
-                (4 < minPass || png.handlePass(image, 4)) &&
-                d.defilter(5 < minPass, 1, 0, 2, 2, width / 2, (height + 1) / 2) &&
-                (5 < minPass || png.handlePass(image, 5)) &&
-                d.defilter(6 < minPass, 0, 1, 1, 2, width, height / 2) &&
-                (6 < minPass || png.handlePass(image, 6));
+                d.defilter(0, 0, 8, 8, (width + 7) / 8, (height + 7) / 8) &&
+                png.handlePass(image, 0) &&
+                d.defilter(4, 0, 8, 8, (width + 3) / 8, (height + 7) / 8) &&
+                png.handlePass(image, 1) &&
+                d.defilter(0, 4, 4, 8, (width + 3) / 4, (height + 3) / 8) &&
+                png.handlePass(image, 2) &&
+                d.defilter(2, 0, 4, 4, (width + 1) / 4, (height + 3) / 4) &&
+                png.handlePass(image, 3) && 
+                d.defilter(0, 2, 2, 4, (width + 1) / 2, (height + 1) / 4) &&
+                png.handlePass(image, 4) &&
+                d.defilter(1, 0, 2, 2, width / 2, (height + 1) / 2) &&
+                png.handlePass(image, 5) &&
+                d.defilter(0, 1, 1, 2, width, height / 2) &&
+                png.handlePass(image, 6);
         } else {
             complete =
-                d.defilter(false, 0, 0, 1, 1, width, height) &&
+                d.defilter(0, 0, 1, 1, width, height) &&
                 png.handlePass(image, 0);
         }
         // TODO: handle complete?
@@ -136,11 +135,6 @@ class ImageFactory
                 return GAMMA_TABLE_100000;
         }
         return png.getGammaTable();
-    }
-
-    private static boolean skipPass(PngConfig config, int pass)
-    {
-        return pass < config.getSourceMinProgressivePass();
     }
 
     private static Destination createDestination(PngImage png, ColorModel colorModel)

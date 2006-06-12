@@ -57,18 +57,19 @@ import java.util.*;
 public class PngImage
 implements Transparency
 {
-    private PngConfig config;
-    private Map props = new HashMap();
-    private boolean read = false;
-
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
+    private static final PngConfig DEFAULT_CONFIG =
+        new PngConfig.Builder().build();
+      
+    private final PngConfig config;
+    private Map props;
 
     /**
-     * Constructor which uses a new instance of {@link PngConfig}.
+     * Constructor which uses a default instance of {@link PngConfig}.
      */
     public PngImage()
     {
-        this(new PngConfig());
+        this(DEFAULT_CONFIG);
     }
 
     /**
@@ -87,7 +88,7 @@ implements Transparency
     {
         return config;
     }
-    
+ 
     /**
      * Reads a PNG image from the specified file. Image metadata will
      * be stored in the property map of this {@code PngImage} instance,
@@ -125,7 +126,7 @@ implements Transparency
      * then this method will return null instead of the decoded image.
      * <p>
      * Multiple images can be read using the same {@code PngImage} instance.
-     * The property map is cleared each time this method is called.
+     * A new property map is created each time this method is called.
      * This method is not thread-safe.
      * @param in the input stream to read
      * @param close whether to close the input stream after reading
@@ -141,8 +142,7 @@ implements Transparency
         BufferedImage image = null;
         StateMachine machine = new StateMachine(this);
         try {
-            read = true;
-            props.clear();
+            props = new HashMap();
             PngInputStream pin = new PngInputStream(in);
             long sig = pin.readLong();
             if (sig != SIGNATURE) {
@@ -244,7 +244,8 @@ implements Transparency
      */
     protected boolean handlePass(BufferedImage image, int pass)
     {
-        return pass <= config.getSourceMaxProgressivePass();
+        // return pass <= config.getSourceMaxProgressivePass();
+        return true;
     }
 
     /**
@@ -585,7 +586,7 @@ implements Transparency
 
     private void assertRead()
     {
-        if (!read)
+        if (props == null)
             throw new IllegalStateException("Image has not been read");
     }
 

@@ -56,34 +56,8 @@ extends PixelProcessor
         this.png = png;
         this.image = image;
         this.pp = pp;
-        total = calcTotalPixels(png);
+        total = png.getWidth() * png.getHeight();
         step = Math.max(1, total * STEP_PERCENT / 100);
-    }
-
-    private static int calcTotalPixels(PngImage png)
-    {
-        int w = png.getWidth();
-        int h = png.getHeight();
-        if (png.isInterlaced()) {
-            int minPass = png.getConfig().getSourceMinProgressivePass();
-            int maxPass = png.getConfig().getSourceMaxProgressivePass();
-            if (minPass > 0 && maxPass < 6) {
-                int total = 0;
-                for (int i = minPass; i <= maxPass; i++) {
-                    switch (i) {
-                    case 0: total += ((w + 7) / 8) * ((h + 7) / 8); break;
-                    case 1: total += ((w + 3) / 8) * ((h + 7) / 8); break;
-                    case 2: total += ((w + 3) / 4) * ((h + 3) / 8); break;
-                    case 3: total += ((w + 1) / 4) * ((h + 3) / 4); break;
-                    case 4: total += ((w + 1) / 2) * ((h + 1) / 4); break;
-                    case 5: total += (w / 2) * ((h + 1) / 2); break;
-                    case 6: total += w * (h / 2); break;
-                    }
-                }
-                return total;
-            }
-        }
-        return w * h;
     }
 
     public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
