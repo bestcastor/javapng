@@ -52,6 +52,10 @@ extends IOException
         this.fatal = fatal;
     }
 
+    /**
+     * Returns true if this exception represents a fatal decoding error.
+     * Most errors in non-ancillary chunks are fatal.
+     */
     public boolean isFatal()
     {
         return fatal;

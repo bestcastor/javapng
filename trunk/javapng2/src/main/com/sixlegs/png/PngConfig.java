@@ -39,8 +39,9 @@ package com.sixlegs.png;
 import java.awt.Rectangle;
 
 /**
- * Customizable parameters
- * used by {@link PngImage} when decoding an image.
+ * Customizable parameters used by {@link PngImage} when decoding an image.
+ * Instances of this class are immutable and can only be constructed
+ * using the {@link Builder} inner-class.
  */
 final public class PngConfig
 {
@@ -78,6 +79,17 @@ final public class PngConfig
         this.subsampling = builder.subsampling;
     }
 
+    /**
+     * Builder class used to construct {@link PngConfig PngConfig} instances.
+     * Each "setter" method returns an reference to the instance to enable
+     * chaining multiple calls.
+     * Call {@link #build} to construct a new {@code PngConfig} instance
+     * using the current {@code Builder} settings. Example:
+     * <pre>PngConfig config = new PngConfig.Builder()
+     *        .readLimit(PngConfig.READ_EXCEPT_METADATA)
+     *        .warningsFatal(true)
+     *        .build();</pre>
+     */
     final public static class Builder
     {
         private static final int[] DEFAULT_SUBSAMPLING = { 1, 1, 0, 0 };
@@ -220,7 +232,9 @@ final public class PngConfig
         }
 
         /**
-         * @see javax.imageio.IIOParam#setSourceRegion
+         * Decode only a particular region of the source image. See the equivalent
+         * {@linkplain javax.imageio.IIOParam#setSourceRegion ImageIO method}
+         * for full documentation.
          */
         public Builder sourceRegion(Rectangle sourceRegion)
         {
@@ -238,7 +252,10 @@ final public class PngConfig
         }
 
         /**
-         * @see javax.imageio.IIOParam#setSourceSubsampling
+         * Reduce the size of the decoded image (or source region) by only using
+         * periodic rows and/or columns of the image. See the equivalent
+         * {@linkplain javax.imageio.IIOParam#setSourceSubsampling ImageIO method}
+         * for full documentation.
          */
         public Builder sourceSubsampling(int xsub, int ysub, int xoff, int yoff)
         {
@@ -298,6 +315,12 @@ final public class PngConfig
     
     /**
      * Returns the current read limit setting.
+     * @return one of
+     *    {@link #READ_ALL READ_ALL},<br>
+     *    {@link #READ_HEADER READ_HEADER},<br>
+     *    {@link #READ_UNTIL_DATA READ_UNTIL_DATA},<br>
+     *    {@link #READ_EXCEPT_DATA READ_EXCEPT_DATA},<br>
+     *    or {@link #READ_EXCEPT_METADATA READ_EXCEPT_METADATA}
      * @see Builder#readLimit
      */
     public int getReadLimit()
@@ -315,7 +338,8 @@ final public class PngConfig
     }
 
     /**
-     * @see javax.imageio.IIOParam#getSourceRegion
+     * TODO
+     * @see Builder#sourceRegion
      */
     public Rectangle getSourceRegion()
     {
@@ -323,7 +347,8 @@ final public class PngConfig
     }
 
     /**
-     * @see javax.imageio.IIOParam#getSourceXSubsampling
+     * TODO
+     * @see Builder#sourceSubsampling
      */
     public int getSourceXSubsampling()
     {
@@ -331,7 +356,8 @@ final public class PngConfig
     }
 
     /**
-     * @see javax.imageio.IIOParam#getSourceYSubsampling
+     * TODO
+     * @see Builder#sourceSubsampling
      */
     public int getSourceYSubsampling()
     {
@@ -339,7 +365,8 @@ final public class PngConfig
     }
 
     /**
-     * @see javax.imageio.IIOParam#getSubsamplingXOffset
+     * TODO
+     * @see Builder#sourceSubsampling
      */
     public int getSubsamplingXOffset()
     {
@@ -347,7 +374,8 @@ final public class PngConfig
     }
 
     /**
-     * @see javax.imageio.IIOParam#getSubsamplingYOffset
+     * TODO
+     * @see Builder#sourceSubsampling
      */
     public int getSubsamplingYOffset()
     {
