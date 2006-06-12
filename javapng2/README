@@ -1,7 +1,7 @@
 Copyright (C) 1998-2006 Chris Nokleberg
 All rights reserved.
 
-README - Sixlegs PNG v2.0-rc4
+README - Sixlegs PNG v2.0-rc5
 
 Features
 
@@ -26,7 +26,7 @@ Getting Started
 
 Revision History
 
-  Changes from v2.0-rc4 -> v2.0-rc5 (2006-06-??)
+  Changes from v2.0-rc4 -> v2.0-rc5 (2006-06-12)
 
     * Added PngConfig.READ_EXCEPT_METADATA
     * Better progressive performance
@@ -38,7 +38,7 @@ Revision History
     * Support new sTER registered chunk
     * Performance improvements
     * Removed get/setUserExponent from config
-    * Removed support for limiting progressive passes
+    * Removed support for limiting pass decoding
     * Use Builder pattern for PngConfig to make config immutable
 
   Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-05)
