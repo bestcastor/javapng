@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<project name="Sixlegs PNG" default="jar">
+<project name="Sixlegs PNG" default="jar-iio">
     <property file="${user.home}/build.properties" />
     <property file="build.properties" />
 
@@ -191,7 +191,7 @@
         </delete>
     </target>
 
-    <target name="jar" depends="compile,compile-iio" description="Create Jar">
+    <target name="jar" depends="compile" description="Create jar">
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
         <delete file="dist/temp.jar"/>
@@ -209,19 +209,24 @@
             -libraryjars ${compile.bootclasspath.12}(java/**.class)
             -libraryjars lib
             -keep public class com.sixlegs.png.* { public *; }
+            -keep public class com.sixlegs.png.* { protected &lt;methods&gt;; }
         </proguard>
         <delete file="dist/temp.jar"/>
+    </target>
 
+    <target name="jar-iio" depends="compile-iio, jar" description="Create ImageIO plugin jar">
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="path.libdev"/>
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
-        <jar jarfile="dist/temp.jar">
-            <fileset dir="build/main"/>
+        <jarjar jarfile="dist/temp.jar">
+            <zipfileset src="dist/${prefix}.jar" excludes="*,META-INF/*"/>
+            <rule pattern="com.sixlegs.png.*" result="com.sixlegs.png.iio.impl.@1"/>
             <fileset dir="build/iio"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
             <metainf dir="build" includes="services/**"/>
-        </jar>
+        </jarjar>
         <proguard>
             -dontoptimize
             -dontusemixedcaseclassnames
@@ -229,7 +234,6 @@
             -outjars dist/${prefix}-iio.jar
             -libraryjars ${compile.bootclasspath.14}(java/**.class,javax/**.class)
             -libraryjars lib
-            -keep public class com.sixlegs.png.* { public *; }
             -keep public class com.sixlegs.png.iio.* { public *; }
         </proguard>
         <delete file="dist/temp.jar"/>
