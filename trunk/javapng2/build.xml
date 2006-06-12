@@ -7,7 +7,8 @@
 
     <property name="compile.source" value="1.2"/>
     <property name="compile.target" value="1.2"/>
-    <property name="compile.bootclasspath" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.bootclasspath.12" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.bootclasspath.14" value="${java.home}/lib/rt.jar"/>
     <property name="compile.extdirs" value=""/>
 
     <property name="compile.debug" value="true"/>
@@ -61,7 +62,7 @@
     </target>
 
     <target name="compile" depends="init" description="Compile">
-        <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath}"/>
+        <compile module="main" refid="path.lib" bootclasspath="${compile.bootclasspath.12}"/>
     </target>
 
     <target name="compile-viewer" depends="compile" description="Compile viewer">
@@ -69,7 +70,7 @@
     </target>
 
     <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
-        <compile module="iio" refid="path.main" compile.target="1.4"/>
+        <compile module="iio" refid="path.main" compile.target="1.4" bootclasspath="${compile.bootclasspath.14}"/>
     </target>
 
     <target name="compile-examples" depends="compile-iio" description="Compile examples">
@@ -193,6 +194,7 @@
     <target name="jar" depends="compile,compile-iio" description="Create Jar">
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
+        <delete file="dist/temp.jar"/>
         <jar jarfile="dist/temp.jar">
             <fileset dir="build/main"/>
             <manifest>
@@ -204,7 +206,7 @@
             -dontusemixedcaseclassnames
             -injars dist/temp.jar
             -outjars dist/${prefix}.jar
-            -libraryjars ${compile.bootclasspath}(java/**.class)
+            -libraryjars ${compile.bootclasspath.12}(java/**.class)
             -libraryjars lib
             -keep public class com.sixlegs.png.* { public *; }
         </proguard>
@@ -212,7 +214,7 @@
 
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
-        <jar jarfile="dist/${prefix}-iio.jar">
+        <jar jarfile="dist/temp.jar">
             <fileset dir="build/main"/>
             <fileset dir="build/iio"/>
             <manifest>
@@ -220,6 +222,17 @@
             </manifest>
             <metainf dir="build" includes="services/**"/>
         </jar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/temp.jar
+            -outjars dist/${prefix}-iio.jar
+            -libraryjars ${compile.bootclasspath.14}(java/**.class,javax/**.class)
+            -libraryjars lib
+            -keep public class com.sixlegs.png.* { public *; }
+            -keep public class com.sixlegs.png.iio.* { public *; }
+        </proguard>
+        <delete file="dist/temp.jar"/>
     </target>
 
     <target name="pmd" depends="init" description="Find bugs using PMD">
