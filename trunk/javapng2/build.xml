@@ -211,6 +211,7 @@
             -libraryjars lib
             -keep public class com.sixlegs.png.* { public *; }
             -keep public class com.sixlegs.png.* { protected &lt;methods&gt;; }
+            -keepattributes InnerClasses
         </proguard>
         <delete file="dist/temp.jar"/>
     </target>
@@ -236,6 +237,7 @@
             -libraryjars ${compile.bootclasspath.14}(java/**.class,javax/**.class)
             -libraryjars lib
             -keep public class com.sixlegs.png.iio.* { public *; }
+            -keepattributes InnerClasses
         </proguard>
         <delete file="dist/temp.jar"/>
     </target>
