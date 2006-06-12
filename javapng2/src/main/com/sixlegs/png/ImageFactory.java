@@ -160,7 +160,7 @@ class ImageFactory
             int subw = calcSubsamplingSize(width, xsub, xoff, 'X');
             int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
             dst = new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
-                                             width, xsub, ysub, xoff, yoff);
+                                             png.getWidth(), xsub, ysub, xoff, yoff);
         } else {
             dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), png.getWidth());
         }
