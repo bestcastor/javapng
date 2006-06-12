@@ -47,8 +47,10 @@ import java.util.zip.InflaterInputStream;
 
 class ImageFactory
 {
-    private static short[] CACHED_GAMMA_TABLE =
+    private static short[] GAMMA_TABLE_45455 =
         PngImage.createGammaTable(0.45455f, 2.2f, false);
+    private static short[] GAMMA_TABLE_100000 =
+        PngImage.createGammaTable(1f, 2.2f, false);
 
     public static BufferedImage createImage(PngImage png, InputStream in)
     throws IOException
@@ -63,16 +65,7 @@ class ImageFactory
         int samples   = png.getSamples();
 
         boolean interlaced = png.isInterlaced();
-        short[] gammaTable = null;
-        if (config.getGammaCorrect()) {
-            if (png.getGamma() == 0.45455f &&
-                config.getDisplayExponent() == 2.2f &&
-                (bitDepth != 16 || config.getReduce16())) {
-                gammaTable = CACHED_GAMMA_TABLE;
-            } else {
-                gammaTable = png.getGammaTable();
-            }
-        }
+        short[] gammaTable = getGammaTable(png);
         ColorModel colorModel = createColorModel(png, gammaTable);
         Destination dst = createDestination(png, colorModel);
         BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);
@@ -127,6 +120,22 @@ class ImageFactory
         }
         // TODO: handle complete?
         return image;
+    }
+
+    private static short[] getGammaTable(PngImage png)
+    {
+        PngConfig config = png.getConfig();
+        if (!config.getGammaCorrect())
+            return null;
+        if ((png.getBitDepth() != 16 || config.getReduce16()) &&
+            config.getDisplayExponent() == 2.2f) {
+            float gamma = png.getGamma();
+            if (gamma == 0.45455f)
+                return GAMMA_TABLE_45455;
+            if (gamma == 1f)
+                return GAMMA_TABLE_100000;
+        }
+        return png.getGammaTable();
     }
 
     private static boolean skipPass(PngConfig config, int pass)
