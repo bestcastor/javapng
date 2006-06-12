@@ -37,7 +37,6 @@ exception statement from your version.
 package com.sixlegs.png;
 
 import java.awt.image.*;
-import java.util.Arrays;
 
 final class ProgressivePixelProcessor
 extends PixelProcessor
