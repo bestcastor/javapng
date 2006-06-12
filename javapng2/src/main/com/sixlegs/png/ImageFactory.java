@@ -47,6 +47,9 @@ import java.util.zip.InflaterInputStream;
 
 class ImageFactory
 {
+    private static short[] CACHED_GAMMA_TABLE =
+        PngImage.createGammaTable(0.45455f, 2.2f, false);
+
     public static BufferedImage createImage(PngImage png, InputStream in)
     throws IOException
     {
@@ -60,7 +63,16 @@ class ImageFactory
         int samples   = png.getSamples();
 
         boolean interlaced = png.isInterlaced();
-        short[] gammaTable = config.getGammaCorrect() ? png.getGammaTable() : null;
+        short[] gammaTable = null;
+        if (config.getGammaCorrect()) {
+            if (png.getGamma() == 0.45455f &&
+                config.getDisplayExponent() == 2.2f &&
+                (bitDepth != 16 || config.getReduce16())) {
+                gammaTable = CACHED_GAMMA_TABLE;
+            } else {
+                gammaTable = png.getGammaTable();
+            }
+        }
         ColorModel colorModel = createColorModel(png, gammaTable);
         Destination dst = createDestination(png, colorModel);
         BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);

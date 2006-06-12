@@ -399,12 +399,16 @@ implements Transparency
     public short[] getGammaTable()
     {
         assertRead();
-        double gamma = getGamma();
-        int bitDepth = getBitDepth();
-        int size = 1 << ((bitDepth == 16 && !config.getReduce16()) ? 16 : 8);
+        return createGammaTable(getGamma(),
+                                config.getDisplayExponent(),
+                                getBitDepth() == 16 && !config.getReduce16());
+    }
+
+    static short[] createGammaTable(float gamma, float displayExponent, boolean large)
+    {
+        int size = 1 << (large ? 16 : 8);
         short[] gammaTable = new short[size];
-        double decodingExponent =
-            (double)config.getUserExponent() / (gamma * (double)config.getDisplayExponent());
+        double decodingExponent = 1d / ((double)gamma * (double)displayExponent);
         for (int i = 0; i < size; i++)
             gammaTable[i] = (short)(Math.pow((double)i / (size - 1), decodingExponent) * (size - 1));
         return gammaTable;
