@@ -37,6 +37,9 @@ Revision History
     * Combine ext package into main package
     * Support new sTER registered chunk
     * Performance improvements
+    * Removed get/setUserExponent from config
+    * Removed support for limiting progressive passes
+    * Use Builder pattern for PngConfig to make config immutable
 
   Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-05)
 

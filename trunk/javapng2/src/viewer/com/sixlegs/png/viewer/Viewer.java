@@ -48,7 +48,7 @@ import javax.swing.*;
 
 public class Viewer
 {
-    private PngConfig config = new PngConfig();
+    private PngConfig config = new PngConfig.Builder().progressive(true).build();
     private int progressiveDelay = 0; // TODO
     private ImagePanel imagePanel;
     private Paint checker;
@@ -65,8 +65,6 @@ public class Viewer
 
     private Viewer(String[] args)
     {
-        config.setProgressive(true);
-        
         BufferedImage image = readPngResource("checker.png");
         Rectangle rect = new Rectangle(0, 0, image.getWidth(), image.getHeight());
         checker = new TexturePaint(image, rect);
@@ -119,9 +117,7 @@ public class Viewer
     private static PngImage readHeader(File file)
     throws IOException
     {
-        PngConfig config = new PngConfig();
-        config.setReadLimit(PngConfig.READ_HEADER);
-        PngImage png = new PngImage(config);
+        PngImage png = new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_HEADER).build());
         png.read(file);
         return png;
     }

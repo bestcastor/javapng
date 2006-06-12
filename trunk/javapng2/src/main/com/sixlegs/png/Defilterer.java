@@ -59,8 +59,7 @@ class Defilterer
         bpp = Math.max(1, (bitDepth * samples) >> 3);
     }
 
-    public boolean defilter(boolean skip,
-                            int xOffset, int yOffset,
+    public boolean defilter(int xOffset, int yOffset,
                             int xStep, int yStep,
                             int passWidth, int passHeight)
     throws IOException
@@ -69,11 +68,6 @@ class Defilterer
             return true;
 
         int bytesPerRow = (bitDepth * samples * passWidth + 7) / 8;
-        if (skip) {
-            PngUtils.skipFully(in, (bytesPerRow + 1) * passHeight);
-            return true;
-        }
-        
         boolean isShort = bitDepth == 16;
         WritableRaster passRow = createInputRaster(bitDepth, samples, width);
         DataBuffer dbuf = passRow.getDataBuffer();

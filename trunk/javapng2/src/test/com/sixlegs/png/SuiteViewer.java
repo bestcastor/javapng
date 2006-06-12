@@ -46,12 +46,8 @@ public class SuiteViewer
     private static final int ACROSS = 15;
     private static final int DOWN = 16;
 
-    private static final PngConfig config = new PngConfig();
-
-    static
-    {
-        config.setReadLimit(PngConfig.READ_EXCEPT_METADATA);
-    }
+    private static final PngConfig config =
+        new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_METADATA).build();
     
     public static void main(String[] args)
     throws Exception

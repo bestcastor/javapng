@@ -18,10 +18,8 @@ public class SourceRegion
         int y = Integer.parseInt(args[3]);
         int w = Integer.parseInt(args[4]);
         int h = Integer.parseInt(args[5]);
-
-        PngConfig config = new PngConfig();
-        config.setSourceRegion(new Rectangle(x, y, w, h));
-        PngImage png = new PngImage(config);
+        Rectangle sourceRegion = new Rectangle(x, y, w, h);
+        PngImage png = new PngImage(new PngConfig.Builder().build()); // TODO
         BufferedImage image = png.read(in);
         Graphics2D g = image.createGraphics();
         g.setComposite(AlphaComposite.DstOver);

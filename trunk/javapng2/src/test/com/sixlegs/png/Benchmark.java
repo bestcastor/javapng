@@ -14,8 +14,7 @@ public class Benchmark
     }
 
     private static PngReader SIXLEGS2 = new PngReader(){
-        private PngConfig config = new PngConfig();
-        // { config.setGammaCorrect(false); }
+        private PngConfig config = new PngConfig.Builder().build();;
         public void read(File file) throws IOException {
             new PngImage(config).read(file);
         }

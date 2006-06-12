@@ -10,9 +10,7 @@ public class PngCheck
     public static void main(String[] args)
     throws IOException
     {
-        PngConfig config = new PngConfig();
-        config.setReadLimit(PngConfig.READ_UNTIL_DATA);
-        (new PngImage(config){
+        (new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_UNTIL_DATA).build()){
             public void handleWarning(PngException e) {
                 System.out.println("Warning: " + e.getMessage());
             }
