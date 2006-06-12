@@ -18,7 +18,7 @@ public class Subsample
         int ysub = Integer.parseInt(args[3]);
         int xoff = Integer.parseInt(args[4]);
         int yoff = Integer.parseInt(args[5]);
-        PngImage png = new PngImage(new PngConfig.Builder().build()); // TODO
+        PngImage png = new PngImage(new PngConfig.Builder().sourceSubsampling(xsub, ysub, xoff, yoff).build());
         BufferedImage image = png.read(in);
         Graphics2D g = image.createGraphics();
         g.setComposite(AlphaComposite.DstOver);

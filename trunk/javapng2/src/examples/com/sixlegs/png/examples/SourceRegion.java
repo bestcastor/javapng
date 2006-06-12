@@ -19,7 +19,7 @@ public class SourceRegion
         int w = Integer.parseInt(args[4]);
         int h = Integer.parseInt(args[5]);
         Rectangle sourceRegion = new Rectangle(x, y, w, h);
-        PngImage png = new PngImage(new PngConfig.Builder().build()); // TODO
+        PngImage png = new PngImage(new PngConfig.Builder().sourceRegion(sourceRegion).build());
         BufferedImage image = png.read(in);
         Graphics2D g = image.createGraphics();
         g.setComposite(AlphaComposite.DstOver);
