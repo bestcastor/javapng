@@ -194,8 +194,6 @@ implements Transparency
                 pin.endChunk(type);
             }
             return image;
-        } catch (PngException e) {
-            throw e;
         } finally {
             if (close)
                 in.close();
