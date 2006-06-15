@@ -83,14 +83,13 @@ class StateMachine
         }
         switch (state) {
         case STATE_START:
-            if (type != PngChunk.IHDR)
+            if (type == PngChunk.IHDR)
                 return STATE_SAW_IHDR;
+            throw new PngException("IHDR chunk must be first chunk", true);
         case STATE_SAW_IHDR:
         case STATE_SAW_IHDR_NO_PLTE:
             switch (type) {
             case PngChunk.PLTE:
-                if (state == STATE_SAW_IHDR_NO_PLTE)
-                    throw new PngException("IHDR chunk must be first chunk", true);
                 return STATE_SAW_PLTE;
             case PngChunk.IDAT:
                 errorIfPaletted(png);
@@ -102,9 +101,8 @@ class StateMachine
                 return STATE_SAW_IHDR_NO_PLTE;
             case PngChunk.hIST:
                 throw new PngException("PLTE must precede hIST", true);
-            default:
-                return STATE_SAW_IHDR;
             }
+            return state;
         case STATE_SAW_PLTE:
             switch (type) {
             case PngChunk.cHRM:
@@ -117,10 +115,10 @@ class StateMachine
                 return STATE_IN_IDAT;
             case PngChunk.IEND:
                 throw new PngException("Required data chunk(s) not found", true);
-            default:
-                return STATE_SAW_PLTE;
             }
-        default:
+            return STATE_SAW_PLTE;
+        case STATE_IN_IDAT:
+        case STATE_AFTER_IDAT:
             switch (type) {
             case PngChunk.PLTE:
             case PngChunk.cHRM:
@@ -138,27 +136,14 @@ class StateMachine
             case PngChunk.sCAL:
             case PngChunk.sTER:
                 throw new PngException(PngChunk.getName(type) + " cannot appear after IDAT", true);
-            }
-            switch (state) {
-            case STATE_IN_IDAT:
-                switch (type) {
-                case PngChunk.IEND:
-                    return STATE_END;
-                case PngChunk.IDAT:
+            case PngChunk.IEND:
+                return STATE_END;
+            case PngChunk.IDAT:
+                if (state == STATE_IN_IDAT)
                     return STATE_IN_IDAT;
-                default:
-                    return STATE_AFTER_IDAT;
-                }
-            case STATE_AFTER_IDAT:
-                switch (type) {
-                case PngChunk.IEND:
-                    return STATE_END;
-                case PngChunk.IDAT:
-                    throw new PngException("IDAT chunks must be consecutive", true);
-                default:
-                    return STATE_AFTER_IDAT;
-                }
+                throw new PngException("IDAT chunks must be consecutive", true);
             }
+            return STATE_AFTER_IDAT;
         }
         // impossible
         throw new Error();
