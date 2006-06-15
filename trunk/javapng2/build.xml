@@ -56,7 +56,9 @@
             <pathelement path="build/test"/>
         </path>
         <path id="path.test.emma">
-            <path refid="path.test"/>
+            <path refid="path.lib"/>
+            <path refid="path.libdev"/>
+            <pathelement path="build/test"/>
             <pathelement path="build/emma"/>
         </path>
     </target>
@@ -143,7 +145,7 @@
               mode="overwrite"
             />
         </emma>
-        <mytest refid="path.test.emma" fork="true"/>
+        <mytest refid="path.test.emma" includes="com/sixlegs/png/Test*.java" fork="true"/>
         <mkdir dir="reports"/>
         <emma enabled="true">
             <report sourcepath="src/main">
@@ -157,7 +159,7 @@
     <macrodef name="viewerImpl">
         <attribute name="file"/>
         <sequential>
-            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.viewer" fork="yes">
+            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.viewer" fork="true">
                 <arg value="@{file}"/>
             </java>
         </sequential>

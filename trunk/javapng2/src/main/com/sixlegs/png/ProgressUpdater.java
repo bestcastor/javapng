@@ -62,15 +62,13 @@ extends PixelProcessor
 
     public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
     {
-        if (!pp.process(row, xOffset, xStep, yStep, y, width))
-            return false;
+        boolean result = pp.process(row, xOffset, xStep, yStep, y, width);
         mod += width;
         count += width;
         if (mod > step) {
             mod %= step;
-            return png.handleProgress(image, 100f * count / total);
-        } else {
-            return true;
+            result = result && png.handleProgress(image, 100f * count / total);
         }
+        return result;
     }
 }

@@ -54,8 +54,6 @@ extends BasicPixelProcessor
         this.shift = shift;
         max = gammaTable.length - 1;
         samplesNoAlpha = samples - 1;
-        if (samplesNoAlpha % 2 == 0)
-            throw new IllegalStateException("Expecting alpha channel");
         temp = new int[samples * dst.getSourceWidth()];
     }
     
