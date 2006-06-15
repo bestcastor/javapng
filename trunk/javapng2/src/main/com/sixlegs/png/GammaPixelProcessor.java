@@ -36,8 +36,6 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
-
 final class GammaPixelProcessor
 extends BasicPixelProcessor
 {
@@ -57,9 +55,8 @@ extends BasicPixelProcessor
         shiftAlpha = hasAlpha && shift > 0;
     }
     
-    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
     {
-        src.getPixels(0, 0, width, 1, row);
         int total = samples * width;
         for (int i = 0; i < samplesNoAlpha; i++)
             for (int index = i; index < total; index += samples)
@@ -67,7 +64,6 @@ extends BasicPixelProcessor
         if (shiftAlpha)
             for (int index = samplesNoAlpha; index < total; index += samples)
                 row[index] >>= shift;
-        transfer(xOffset, xStep, y, width);
-        return true;
+        return super.process(row, xOffset, xStep, yStep, y, width);
     }
 }

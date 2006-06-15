@@ -36,7 +36,7 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 
 final class ProgressUpdater
 extends PixelProcessor
@@ -60,9 +60,9 @@ extends PixelProcessor
         step = Math.max(1, total * STEP_PERCENT / 100);
     }
 
-    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
+    public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
     {
-        if (!pp.process(src, xOffset, xStep, yStep, y, width))
+        if (!pp.process(row, xOffset, xStep, yStep, y, width))
             return false;
         mod += width;
         count += width;
