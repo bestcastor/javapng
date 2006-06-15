@@ -36,11 +36,8 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
-
 // not an interface for performance
 abstract class PixelProcessor
 {
-    // TODO: replace Raster src with int[] once all processors are using src.getPixels(0, 0, width, 1, row)
-    abstract public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width);
+    abstract public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width);
 }

@@ -48,6 +48,7 @@ class Defilterer
     private final int samples;
     private final PixelProcessor pp;
     private final int bpp;
+    private final int[] row;
 
     public Defilterer(InputStream in, int bitDepth, int samples, int width, PixelProcessor pp)
     {
@@ -57,6 +58,7 @@ class Defilterer
         this.width = width;
         this.pp = pp;
         bpp = Math.max(1, (bitDepth * samples) >> 3);
+        row = new int[samples * width];
     }
 
     public boolean defilter(int xOffset, int yOffset,
@@ -90,7 +92,8 @@ class Defilterer
             } else {
                 System.arraycopy(cur, bpp, byteData, 0, bytesPerRow);
             }
-            if (!pp.process(passRow, xOffset, xStep, yStep, dstY, passWidth))
+            passRow.getPixels(0, 0, passWidth, 1, row);
+            if (!pp.process(row, xOffset, xStep, yStep, dstY, passWidth))
                 return false;
             byte[] tmp = cur;
             cur = prev;

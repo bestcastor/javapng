@@ -36,30 +36,19 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-import java.awt.image.*;
-
 class BasicPixelProcessor
 extends PixelProcessor
 {
     protected final Destination dst;
-    protected final int[] row;
     protected final int samples;
     
     public BasicPixelProcessor(Destination dst)
     {
         this.dst = dst;
         this.samples = dst.getRaster().getNumBands();
-        this.row = new int[samples * dst.getSourceWidth()];
     }
     
-    public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
-    {
-        src.getPixels(0, 0, width, 1, row);
-        transfer(xOffset, xStep, y, width);
-        return true;
-    }
-
-    protected void transfer(int xOffset, int xStep, int y, int width)
+    public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
     {
         if (xStep == 1) {
             dst.setPixels(xOffset, y, width, row);
@@ -72,5 +61,6 @@ extends PixelProcessor
                 dstX += xStep;
             }
         }
+        return true;
     }
 }
