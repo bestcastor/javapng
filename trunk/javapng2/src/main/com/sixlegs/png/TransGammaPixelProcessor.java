@@ -46,6 +46,7 @@ extends BasicPixelProcessor
     final private int shift;
     final private int max;
     final private int samplesNoAlpha;
+    final private int[] temp;
     
     public TransGammaPixelProcessor(Destination dst, short[] gammaTable, int[] trans, int shift)
     {
@@ -57,27 +58,24 @@ extends BasicPixelProcessor
         samplesNoAlpha = samples - 1;
         if (samplesNoAlpha % 2 == 0)
             throw new IllegalStateException("Expecting alpha channel");
+        temp = (int[])row.clone();
     }
     
     public boolean process(Raster src, int xOffset, int xStep, int yStep, int y, int width)
     {
-        for (int srcX = 0, dstX = xOffset; srcX < width; srcX++) {
-            src.getPixel(srcX, 0, row);
-            int transCount = 0;
-            for (;;) {
-                if (row[transCount] != trans[transCount]) {
-                    row[samplesNoAlpha] = max;
-                    break;
-                } else if (++transCount == samplesNoAlpha) {
-                    row[samplesNoAlpha] = 0;
-                    break;
-                }
+        src.getPixels(0, 0, width, 1, row);
+        System.arraycopy(row, 0, temp, 0, row.length);
+        int total = width * samplesNoAlpha;
+        for (int i1 = 0, i2 = 0; i1 < total; i1 += samplesNoAlpha, i2 += samples) {
+            boolean opaque = false;
+            for (int j = 0; j < samplesNoAlpha; j++) {
+                int sample = temp[i1 + j];
+                opaque = opaque || (sample != trans[j]);
+                row[i2 + j] = 0xFFFF & gammaTable[sample >> shift];
             }
-            for (int i = 0; i < samplesNoAlpha; i++)
-                row[i] = 0xFFFF & gammaTable[row[i] >> shift];
-            dst.setPixel(dstX, y, row);
-            dstX += xStep;
+            row[i2 + samplesNoAlpha] = opaque ? max : 0;
         }
+        transfer(xOffset, xStep, y, width);
         return true;
     }
 }
