@@ -61,7 +61,7 @@ extends PngChunk
     {
         Map props = png.getProperties();
         switch (type) {
-        case PngChunk.IHDR: read_IHDR(in, props);
+        case PngChunk.IHDR: read_IHDR(in, props); break;
         case PngChunk.IEND: checkLength(in.getRemaining(), 0); break;
         case PngChunk.PLTE: read_PLTE(in, props, png); break;
         case PngChunk.bKGD: read_bKGD(in, props, png); break;

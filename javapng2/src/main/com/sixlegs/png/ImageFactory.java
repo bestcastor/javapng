@@ -60,12 +60,11 @@ class ImageFactory
         
         int width     = png.getWidth();
         int height    = png.getHeight();
-        int colorType = png.getColorType();
         int bitDepth  = png.getBitDepth();
         int samples   = png.getSamples();
 
         boolean interlaced = png.isInterlaced();
-        short[] gammaTable = getGammaTable(png);
+        short[] gammaTable = config.getGammaCorrect() ? getGammaTable(png) : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
         Destination dst = createDestination(png, colorModel);
         BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);
@@ -124,8 +123,6 @@ class ImageFactory
     private static short[] getGammaTable(PngImage png)
     {
         PngConfig config = png.getConfig();
-        if (!config.getGammaCorrect())
-            return null;
         if ((png.getBitDepth() != 16 || config.getReduce16()) &&
             config.getDisplayExponent() == 2.2f) {
             float gamma = png.getGamma();

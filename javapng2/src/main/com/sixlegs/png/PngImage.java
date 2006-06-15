@@ -160,14 +160,14 @@ implements Transparency
                     ImageDataInputStream data = new ImageDataInputStream(pin, machine);
                     image = createImage(data);
                     if (data.read() != -1)
-                        new DataInputStream(data).skipBytes(pin.getRemaining());
+                        PngUtils.skipFully(data, pin.getRemaining());
                     type = machine.getType();
                 }
                 PngChunk chunk = getChunk(type);
                 if (chunk == null) {
                     if (!PngChunk.isAncillary(type))
                         throw new PngException("Critical chunk " + PngChunk.getName(type) + " cannot be skipped", true);
-                    pin.skipBytes(pin.getRemaining());
+                    PngUtils.skipFully(pin, pin.getRemaining());
                 } else {
                     try {
                         Integer key = Integers.valueOf(type);
@@ -187,7 +187,7 @@ implements Transparency
                     } catch (PngException exception) {
                         if (exception.isFatal())
                             throw exception;
-                        pin.skipBytes(pin.getRemaining());
+                        PngUtils.skipFully(pin, pin.getRemaining());
                         handleWarning(exception);
                     }
                 }
