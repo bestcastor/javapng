@@ -73,7 +73,6 @@ class Defilterer
         DataBuffer dbuf = passRow.getDataBuffer();
         byte[] byteData = isShort ? null : ((DataBufferByte)dbuf).getData();
         short[] shortData = isShort ? ((DataBufferUShort)dbuf).getData() : null;
-        int[] pixel = new int[4];
         
         int rowSize = bytesPerRow + bpp;
         byte[] prev = new byte[rowSize];
