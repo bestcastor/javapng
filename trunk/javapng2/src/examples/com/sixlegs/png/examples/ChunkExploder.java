@@ -10,7 +10,13 @@ public class ChunkExploder
     public static void main(String[] args)
     throws IOException
     {
-        final File dir = new File(args[1]);
+        explode(new File(args[0]), new File(args[1]));
+    }
+
+    public static List explode(File src, final File dir)
+    throws IOException
+    {
+        final List files = new ArrayList();
         (new PngImage(new PngConfig.Builder().warningsFatal(true).build()){
             int index = 0;
             protected PngChunk getChunk(int type) {
@@ -23,7 +29,7 @@ public class ChunkExploder
                         byte[] bytes = new byte[length];
                         in.readFully(bytes);
                         File dst = new File(dir, getFileName(type, index++));
-                        System.err.println("Writing " + dst.getAbsolutePath());
+                        files.add(dst);
                         OutputStream out = new FileOutputStream(dst);
                         try {
                             out.write(bytes);
@@ -38,7 +44,7 @@ public class ChunkExploder
             protected BufferedImage createImage(InputStream in) throws IOException {
                 byte[] buf = new byte[0x2000];
                 File dst = new File(dir, getFileName(PngChunk.IDAT, index++));
-                System.err.println("Writing " + dst.getAbsolutePath());
+                files.add(dst);
                 OutputStream out = new FileOutputStream(dst);
                 try {
                     pipe(in, out, buf);
@@ -47,14 +53,15 @@ public class ChunkExploder
                 }
                 return null;
             }
-        }).read(new File(args[0]));
+        }).read(src);
+        return files;
     }
 
-    private static String getFileName(int type, int index)
+    static String getFileName(int type, int index)
     {
         StringBuffer sb = new StringBuffer();
         String num = String.valueOf(index);
-        for (int i = num.length(); i < 6; i++)
+        for (int i = num.length(); i < 4; i++)
             sb.append('0');
         sb.append(num);
         sb.append('-');
@@ -62,7 +69,7 @@ public class ChunkExploder
         return sb.toString();
     }
      
-    private static void pipe(InputStream in, OutputStream out, byte[] buf)
+    static void pipe(InputStream in, OutputStream out, byte[] buf)
     throws IOException
     {
         for (;;) {
