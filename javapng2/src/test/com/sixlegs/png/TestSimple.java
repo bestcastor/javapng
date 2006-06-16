@@ -126,6 +126,27 @@ extends PngTestCase
         errorHelper("/images/suite/x00n0g01.png");
         errorHelper("/images/suite/xcrn0g04.png");
         errorHelper("/images/suite/xlfn0g04.png");
+        
+        errorHelper("/images/broken/header_not_first.png");
+        errorHelper("/images/broken/gamma_after_palette.png");
+        errorHelper("/images/broken/palette_after_data.png");
+        errorHelper("/images/broken/missing_data.png");
+        errorHelper("/images/broken/missing_palette.png");
+        errorHelper("/images/broken/private_critical.png");
+        errorHelper("/images/broken/corrupt_type.png");
+        errorHelper("/images/broken/nonconsecutive_data.png");
+        errorHelper("/images/broken/corrupt_crc.png");
+        errorHelper("/images/broken/negative_length.png");
+        errorHelper("/images/broken/multiple_gamma.png");
+        errorHelper("/images/broken/multiple_palette.png");
+        errorHelper("/images/broken/multiple_header.png");
+        errorHelper("/images/broken/hist_before_palette.png");
+        errorHelper("/images/broken/missing_palette_trans.png");
+        errorHelper("/images/broken/chrom_after_palette.png");
+        errorHelper("/images/broken/sigbits_after_palette.png");
+        errorHelper("/images/broken/gamma_after_data.png");
+        errorHelper("/images/broken/stereo_after_data.png");
+        errorHelper("/images/broken/trans_bad_color_type.png");
     }
 
     public void errorHelper(String path)
@@ -139,10 +160,13 @@ extends PngTestCase
         }
     }
 
+    private static final PngConfig WARNINGS_FATAL =
+        new PngConfig.Builder().warningsFatal(true).build();
+
     private PngImage readResource(String path)
     throws IOException
     {
-        return readResource(path, new PngImage());
+        return readResource(path, new PngImage(WARNINGS_FATAL));
     }
 
     private PngImage readResource(String path, PngImage png)

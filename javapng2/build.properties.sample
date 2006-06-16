@@ -1,5 +1,4 @@
 compile.bootclasspath.12 = /opt/sun-jre-1.2.2.17/lib/rt.jar
 compile.bootclasspath.14 = /opt/sun-jdk-1.4.2.10/jre/lib/rt.jar
-compile.debug = false
 compile.optimize = true
 compile.deprecation = false

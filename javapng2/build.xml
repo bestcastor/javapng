@@ -5,8 +5,6 @@
 
     <property name="javadoc.access" value="protected"/>
 
-    <property name="compile.source" value="1.2"/>
-    <property name="compile.target" value="1.2"/>
     <property name="compile.bootclasspath.12" value="${java.home}/lib/rt.jar"/>
     <property name="compile.bootclasspath.14" value="${java.home}/lib/rt.jar"/>
     <property name="compile.extdirs" value=""/>
@@ -89,8 +87,8 @@
         <attribute name="module"/>
         <attribute name="refid"/>
         <attribute name="bootclasspath" default=""/>
-        <attribute name="source" default="${compile.target}"/>
-        <attribute name="target" default="${compile.target}"/>
+        <attribute name="source" default="1.5"/>
+        <attribute name="target" default="1.5"/>
         <sequential>
             <mkdir dir="build/@{module}"/>
             <copy todir="build/@{module}">
@@ -180,6 +178,10 @@
         <java classname="com.sixlegs.png.Benchmark" classpathref="path.test" input="${benchmark.file}">
             <arg value="${benchmark.loop}"/>
         </java>
+    </target>
+
+    <target name="broken" depends="compile-test" description="Regenerate broken images">
+        <java classname="BrokenGenerator" classpathref="path.test" fork="true" dir="src/test/images"/>
     </target>
 
     <target name="clean" description="Clean">
