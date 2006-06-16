@@ -11,15 +11,17 @@ public class ChunkExploder
     throws IOException
     {
         final File dir = new File(args[1]);
-        (new PngImage(){
+        (new PngImage(new PngConfig.Builder().warningsFatal(true).build()){
             int index = 0;
             protected PngChunk getChunk(int type) {
                 final PngChunk sup = super.getChunk(type);
                 return new PngChunk(){
+                    public boolean isMultipleOK(int type) {
+                        return sup.isMultipleOK(type);
+                    }
                     public void read(int type, DataInput in, int length, PngImage png) throws IOException {
                         byte[] bytes = new byte[length];
                         in.readFully(bytes);
-                        sup.read(type, new DataInputStream(new ByteArrayInputStream(bytes)), length, png);                    
                         File dst = new File(dir, getFileName(type, index++));
                         System.err.println("Writing " + dst.getAbsolutePath());
                         OutputStream out = new FileOutputStream(dst);
@@ -28,6 +30,8 @@ public class ChunkExploder
                         } finally {
                             out.close();
                         }
+                        if (!PngChunk.isAncillary(type))
+                            sup.read(type, new DataInputStream(new ByteArrayInputStream(bytes)), length, png);                    
                     }
                 };                    
             }
