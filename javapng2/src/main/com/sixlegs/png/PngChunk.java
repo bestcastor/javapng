@@ -101,16 +101,15 @@ abstract public class PngChunk
     
 
     /**
-     * Read the chunk data from the image input stream, storing properties
-     * into the {@code PngImage} instance.
-     * Subclasses are required to read or skip the exact length of the chunk
-     * data. {@link PngInputStream#getRemaining} will return how much chunk data
-     * remains to be read.
+     * Read the chunk data from the image data stream, storing properties
+     * into the {@code PngImage} instance. Subclasses are required to read
+     * or skip the exact length of the chunk data.
      * @param type the chunk type
-     * @param in the input stream to read the chunk data from
+     * @param in the chunk data
+     * @param length the length of the chunk in bytes
      * @param png the image into which to store chunk-specific properties
      */
-    abstract public void read(int type, PngInputStream in, PngImage png) throws IOException;
+    abstract public void read(int type, DataInput in, int length, PngImage png) throws IOException;
 
     /**
      * Returns {@code true} if the given chunk type is

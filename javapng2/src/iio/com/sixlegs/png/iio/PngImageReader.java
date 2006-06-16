@@ -44,6 +44,7 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
+import java.io.DataInput;
 import java.io.IOException;
 import java.util.*;
 
@@ -304,10 +305,10 @@ extends ImageReader
     private class UnknownChunk
     extends PngChunk
     {
-        public void read(int type, PngInputStream in, PngImage png)
+        public void read(int type, DataInput in, int length, PngImage png)
         throws IOException
         {
-            byte[] bytes = new byte[in.getRemaining()];
+            byte[] bytes = new byte[length];
             in.readFully(bytes);
             unknownChunks.put(new Integer(type), bytes);
         }
