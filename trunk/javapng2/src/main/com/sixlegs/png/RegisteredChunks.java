@@ -56,40 +56,42 @@ extends PngChunk
         return false;
     }
 
-    public void read(int type, PngInputStream in, PngImage png)
+    public void read(int type, DataInput in, int length, PngImage png)
     throws IOException
     {
         Map props = png.getProperties();
         switch (type) {
-        case PngChunk.IHDR: read_IHDR(in, props); break;
-        case PngChunk.IEND: checkLength(in.getRemaining(), 0); break;
-        case PngChunk.PLTE: read_PLTE(in, props, png); break;
-        case PngChunk.bKGD: read_bKGD(in, props, png); break;
-        case PngChunk.tRNS: read_tRNS(in, props, png); break;
-        case PngChunk.sBIT: read_sBIT(in, props, png); break;
-        case PngChunk.cHRM: read_cHRM(in, props); break;
-        case PngChunk.gAMA: read_gAMA(in, props); break;
-        case PngChunk.hIST: read_hIST(in, props); break;
-        case PngChunk.iCCP: read_iCCP(in, props); break;
-        case PngChunk.pHYs: read_pHYs(in, props); break;
-        case PngChunk.sRGB: read_sRGB(in, props); break;
-        case PngChunk.tIME: read_tIME(in, props); break;
-        case PngChunk.sPLT: read_sPLT(in, props); break;
-        case PngChunk.iTXt: readText(PngChunk.iTXt, in, props); break;
-        case PngChunk.tEXt: readText(PngChunk.tEXt, in, props); break;
-        case PngChunk.zTXt: readText(PngChunk.zTXt, in, props); break;
-        case PngChunk.gIFg: read_gIFg(in, props); break;
-        case PngChunk.oFFs: read_oFFs(in, props); break;
-        case PngChunk.sCAL: read_sCAL(in, props); break;
-        case PngChunk.sTER: read_sTER(in, props); break;
-            // case PngChunk.gIFx: read_gIFx(in, props); break;
+        case PngChunk.IHDR: read_IHDR(in, length, props); break;
+        case PngChunk.IEND: checkLength(length, 0); break;
+        case PngChunk.PLTE: read_PLTE(in, length, props, png); break;
+        case PngChunk.bKGD: read_bKGD(in, length, props, png); break;
+        case PngChunk.tRNS: read_tRNS(in, length, props, png); break;
+        case PngChunk.sBIT: read_sBIT(in, length, props, png); break;
+        case PngChunk.cHRM: read_cHRM(in, length, props); break;
+        case PngChunk.gAMA: read_gAMA(in, length, props); break;
+        case PngChunk.hIST: read_hIST(in, length, props); break;
+        case PngChunk.iCCP: read_iCCP(in, length, props); break;
+        case PngChunk.pHYs: read_pHYs(in, length, props); break;
+        case PngChunk.sRGB: read_sRGB(in, length, props); break;
+        case PngChunk.tIME: read_tIME(in, length, props); break;
+        case PngChunk.sPLT: read_sPLT(in, length, props); break;
+        case PngChunk.gIFg: read_gIFg(in, length, props); break;
+        case PngChunk.oFFs: read_oFFs(in, length, props); break;
+        case PngChunk.sCAL: read_sCAL(in, length, props); break;
+        case PngChunk.sTER: read_sTER(in, length, props); break;
+            // case PngChunk.gIFx: read_gIFx(in, length, props); break;
+        case PngChunk.iTXt:
+        case PngChunk.tEXt:
+        case PngChunk.zTXt:
+            readText(type, in, length, props);
+            break;
         }
     }
 
-    private void read_IHDR(PngInputStream in, Map props)
+    private void read_IHDR(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 13);
+        checkLength(length, 13);
         int width = in.readInt();
         int height = in.readInt();
         if (width <= 0 || height <= 0)
@@ -146,10 +148,9 @@ extends PngChunk
         props.put(PngConstants.COLOR_TYPE, Integers.valueOf(colorType));
     }
 
-    private void read_PLTE(PngInputStream in, Map props, PngImage png)
+    private void read_PLTE(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
-        int length = in.getRemaining();
         if (length % 3 != 0)
             throw new PngException("PLTE chunk length indivisible by 3", true);
         switch (png.getColorType()) {
@@ -167,10 +168,9 @@ extends PngChunk
         props.put(PngConstants.PALETTE, palette);
     }
 
-    private void read_tRNS(PngInputStream in, Map props, PngImage png)
+    private void read_tRNS(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
-        int length = in.getRemaining();
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_GRAY:
             checkLength(length, 2);
@@ -197,10 +197,9 @@ extends PngChunk
         }
     }
 
-    private void read_bKGD(PngInputStream in, Map props, PngImage png)
+    private void read_bKGD(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
-        int length = in.getRemaining();
         int[] background;
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_PALETTE:
@@ -224,10 +223,10 @@ extends PngChunk
         props.put(PngConstants.BACKGROUND, background);
     }
 
-    private void read_cHRM(PngInputStream in, Map props)
+    private void read_cHRM(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 32);
+        checkLength(length, 32);
         float[] array = new float[8];
         for (int i = 0; i < 8; i++)
             array[i] = in.readInt() / 100000f;
@@ -235,10 +234,10 @@ extends PngChunk
             props.put(PngConstants.CHROMATICITY, array);
     }
 
-    private void read_gAMA(PngInputStream in, Map props)
+    private void read_gAMA(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 4);
+        checkLength(length, 4);
         int gamma = in.readInt();
         if (gamma == 0)
             throw new PngException("Meaningless zero gAMA chunk value", false);
@@ -246,30 +245,30 @@ extends PngChunk
             props.put(PngConstants.GAMMA, new Float(gamma / 100000f));
     }
 
-    private void read_hIST(PngInputStream in, Map props)
+    private void read_hIST(DataInput in, int length, Map props)
     throws IOException
     {
         int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
-        checkLength(in.getRemaining(), paletteSize * 2);
+        checkLength(length, paletteSize * 2);
         int[] array = new int[paletteSize];
         for (int i = 0; i < paletteSize; i++)
             array[i] = in.readUnsignedShort();
         props.put(PngConstants.HISTOGRAM, array);
     }
 
-    private void read_iCCP(PngInputStream in, Map props)
+    private void read_iCCP(DataInput in, int length, Map props)
     throws IOException
     {
-        String name = PngUtils.readKeyword(in);
-        byte[] data = PngUtils.readCompressed(in, in.getRemaining());
+        String name = PngUtils.readKeyword(in, length);
+        byte[] data = PngUtils.readCompressed(in, length - name.length() - 1);
         props.put(PngConstants.ICC_PROFILE_NAME, name);
         props.put(PngConstants.ICC_PROFILE, data);
     }
 
-    private void read_pHYs(PngInputStream in, Map props)
+    private void read_pHYs(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 9);
+        checkLength(length, 9);
         int pixelsPerUnitX = in.readInt();
         int pixelsPerUnitY = in.readInt();
         int unit = in.readUnsignedByte();
@@ -280,12 +279,12 @@ extends PngChunk
         props.put(PngConstants.UNIT, Integers.valueOf(unit));
     }
 
-    private void read_sBIT(PngInputStream in, Map props, PngImage png)
+    private void read_sBIT(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         boolean paletted = png.getColorType() == PngConstants.COLOR_TYPE_PALETTE;
         int count = paletted ? 3 : png.getSamples();
-        checkLength(in.getRemaining(), count);
+        checkLength(length, count);
         int depth = paletted ? 8 : png.getBitDepth();
         byte[] array = new byte[count];
         for (int i = 0; i < count; i++) {
@@ -297,10 +296,10 @@ extends PngChunk
         props.put(PngConstants.SIGNIFICANT_BITS, array);
     }
 
-    private void read_sRGB(PngInputStream in, Map props)
+    private void read_sRGB(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 1);
+        checkLength(length, 1);
         int intent = in.readByte();
         props.put(PngConstants.RENDERING_INTENT, Integers.valueOf(intent));
         props.put(PngConstants.GAMMA, new Float(0.45455));
@@ -309,10 +308,10 @@ extends PngChunk
         });
     }
 
-    private void read_tIME(PngInputStream in, Map props)
+    private void read_tIME(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 7);
+        checkLength(length, 7);
         Calendar cal = Calendar.getInstance(TIME_ZONE);
         cal.set(in.readUnsignedShort(),
                 check(in.readUnsignedByte(), 1, 12) - 1,
@@ -331,18 +330,18 @@ extends PngChunk
         return value;
     }
 
-    private void read_sPLT(PngInputStream in, Map props)
+    private void read_sPLT(DataInput in, int length, Map props)
     throws IOException
     {
-        String name = PngUtils.readKeyword(in);
+        String name = PngUtils.readKeyword(in, length);
         int sampleDepth = in.readByte();
         if (sampleDepth != 8 && sampleDepth != 16)
             throw new PngException("Sample depth must be 8 or 16", false);
         
-        int remaining = in.getRemaining();
-        if ((remaining % ((sampleDepth == 8) ? 6 : 10)) != 0)
+        length -= (name.length() + 2);
+        if ((length % ((sampleDepth == 8) ? 6 : 10)) != 0)
             throw new PngException("Incorrect sPLT data length for given sample depth", false);
-        byte[] bytes = new byte[remaining];
+        byte[] bytes = new byte[length];
         in.readFully(bytes);
 
         List palettes = (List)props.get(PngConstants.SUGGESTED_PALETTES);
@@ -355,10 +354,14 @@ extends PngChunk
         palettes.add(new SuggestedPaletteImpl(name, sampleDepth, bytes));
     }
 
-    private void readText(int type, PngInputStream in, Map props)
+    private void readText(int type, DataInput in, int length, Map props)
     throws IOException
     {
-        String keyword = PngUtils.readKeyword(in);
+        byte[] bytes = new byte[length];
+        in.readFully(bytes);
+        DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
+
+        String keyword = PngUtils.readKeyword(data, length);
         String enc = PngUtils.ISO_8859_1;
         boolean compressed = false;
         String language = null;
@@ -371,8 +374,8 @@ extends PngChunk
             break;
         case iTXt:
             enc = PngUtils.UTF_8;
-            int flag = in.readByte();
-            int method = in.readByte();
+            int flag = data.readByte();
+            int method = data.readByte();
             if (flag == 1) {
                 compressed = true;
                 if (method != 0)
@@ -380,28 +383,26 @@ extends PngChunk
             } else if (flag != 0) {
                 throw new PngException("Illegal " + this + " compression flag: " + flag, false);
             }
-            language = PngUtils.readString(in, PngUtils.US_ASCII);
-            translated = PngUtils.readString(in, PngUtils.UTF_8);
+            language = PngUtils.readString(data, data.available(), PngUtils.US_ASCII);
+            translated = PngUtils.readString(data, data.available(), PngUtils.UTF_8);
         }
 
-        byte[] data;
+        String text;
         if (compressed) {
-            data = PngUtils.readCompressed(in, in.getRemaining());
+            text = new String(PngUtils.readCompressed(data, data.available()), enc);
         } else {
-            data = new byte[in.getRemaining()];
-            in.readFully(data);
+            text = new String(bytes, bytes.length - data.available(), data.available(), enc);
         }
-        String text = new String(data, enc);
         List chunks = (List)props.get(PngConstants.TEXT_CHUNKS);
         if (chunks == null)
             props.put(PngConstants.TEXT_CHUNKS, chunks = new ArrayList());
         chunks.add(new TextChunkImpl(keyword, text, language, translated, type));
     }
 
-    private void read_gIFg(PngInputStream in, Map props)
+    private void read_gIFg(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 4);
+        checkLength(length, 4);
         int disposalMethod = in.readUnsignedByte();
         int userInputFlag = in.readUnsignedByte();
         int delayTime = in.readUnsignedShort();
@@ -410,10 +411,10 @@ extends PngChunk
         props.put(PngConstants.GIF_DELAY_TIME, Integers.valueOf(delayTime));
     }
 
-    private void read_oFFs(PngInputStream in, Map props)
+    private void read_oFFs(DataInput in, int length, Map props)
     throws IOException
     {
-        checkLength(in.getRemaining(), 9);
+        checkLength(length, 9);
         int x = in.readInt();
         int y = in.readInt();
         int unit = in.readByte();
@@ -425,18 +426,22 @@ extends PngChunk
         props.put(PngConstants.POSITION_UNIT, Integers.valueOf(unit));
     }
 
-    private void read_sCAL(PngInputStream in, Map props)
+    private void read_sCAL(DataInput in, int length, Map props)
     throws IOException
     {
-        int unit = in.readByte();
-        double width = PngUtils.readFloatingPoint(in);
-        double height = PngUtils.readFloatingPoint(in);
+        byte[] bytes = new byte[length];
+        in.readFully(bytes);
+        DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
+        
+        int unit = data.readByte();
+        double width = PngUtils.readFloatingPoint(data, data.available());
+        double height = PngUtils.readFloatingPoint(data, data.available());
         props.put(PngConstants.SCALE_UNIT, Integers.valueOf(unit));
         props.put(PngConstants.PIXEL_WIDTH, new Double(width));
         props.put(PngConstants.PIXEL_HEIGHT, new Double(height));
     }
 
-    private void read_sTER(PngInputStream in, Map props)
+    private void read_sTER(DataInput in, int length, Map props)
     throws IOException
     {
         int mode = in.readByte();

@@ -44,7 +44,7 @@ import java.util.zip.*;
  * @see PngChunk#read
  * @see #getRemaining
  */
-public class PngInputStream
+final class PngInputStream
 extends InputStream
 implements DataInput
 {
@@ -54,7 +54,7 @@ implements DataInput
     private byte[] tmp = new byte[0x1000];
     private long count;
     private int length;
-    
+
     PngInputStream(InputStream in)
     {
         this.in = in;

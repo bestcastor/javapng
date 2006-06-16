@@ -69,7 +69,7 @@ class PngUtils
             total += in.skip(skip - total);
     }
 
-    public static byte[] readCompressed(PngInputStream in, int length)
+    public static byte[] readCompressed(DataInput in, int length)
     throws IOException
     {
         byte[] data = new byte[length];
@@ -91,27 +91,27 @@ class PngUtils
         return out.toByteArray();
     }
 
-    public static String readString(PngInputStream in, String enc)
+    public static String readString(DataInput in, int limit, String enc)
     throws IOException
     {
-        return new String(readToNull(in), enc);
+        return new String(readToNull(in, limit), enc);
     }
 
-    public static String readKeyword(PngInputStream in)
+    public static String readKeyword(DataInput in, int limit)
     throws IOException
     {
-        String keyword = readString(in, ISO_8859_1);
+        String keyword = readString(in, limit, ISO_8859_1);
         if (keyword.length() == 0 || keyword.length() > 79)
             throw new PngException("Invalid keyword length: " + keyword.length(), false);
         return keyword;
     }
 
-    private static byte[] readToNull(PngInputStream in)
+    // TODO: performance
+    private static byte[] readToNull(DataInput in, int limit)
     throws IOException
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int remaining = in.getRemaining();
-        for (int i = 0; i < remaining; i++) {
+        for (int i = 0; i < limit; i++) {
             int c = in.readUnsignedByte();
             if (c == 0)
                 return out.toByteArray();
@@ -120,10 +120,10 @@ class PngUtils
         return out.toByteArray();
     }
 
-    public static double readFloatingPoint(PngInputStream in)
+    public static double readFloatingPoint(DataInput in, int limit)
     throws IOException
     {
-        String s = readString(in, "US-ASCII");
+        String s = readString(in, limit, "US-ASCII");
         int e = Math.max(s.indexOf('e'), s.indexOf('E'));
         double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
         if (e > 0)

@@ -181,7 +181,7 @@ implements Transparency
                                 seen.add(key);
                             }
                         }
-                        chunk.read(type, pin, this);
+                        chunk.read(type, pin, pin.getRemaining(), this);
                         if (type == PngChunk.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
                             return null;
                     } catch (PngException exception) {

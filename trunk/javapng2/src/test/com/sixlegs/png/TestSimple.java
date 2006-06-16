@@ -42,8 +42,8 @@ extends PngTestCase
             protected PngChunk getChunk(int type) {
                 if (type == msOG_type) {
                     return new PngChunk(){
-                        public void read(int type, PngInputStream in, PngImage png) throws IOException {
-                            byte[] bytes = new byte[in.getRemaining()];
+                        public void read(int type, DataInput in, int length, PngImage png) throws IOException {
+                            byte[] bytes = new byte[length];
                             in.readFully(bytes);
                             png.getProperties().put(ORIGINAL_GIF, bytes);
                         }
