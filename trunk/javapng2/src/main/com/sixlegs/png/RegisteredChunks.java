@@ -450,7 +450,8 @@ extends PngChunk
         case PngConstants.STEREO_MODE_DIVERGING:
             props.put(PngConstants.STEREO_MODE, Integers.valueOf(mode));
             break;
+        default:
+            throw new PngException("Unknown sTER mode: " + mode, false);
         }
-        throw new PngException("Unknown sTER mode: " + mode, false);
     }
 }
