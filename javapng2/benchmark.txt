@@ -155,3 +155,4 @@ src/test/images/misc/manhat.png
 src/test/images/misc/penguin.png
 src/test/images/misc/ps2n2c16.png
 src/test/images/misc/u_horn.111.png
+src/test/images/misc/pngtest.png
