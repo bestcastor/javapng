@@ -65,7 +65,7 @@ implements DataInput
     throws IOException
     {
         if (length < 0)
-            throw new PngException("Bad chunk length: " + length, true);
+            throw new PngException("Bad chunk length: " + (0xFFFFFFFFL & length), true);
         crc.reset();
         int type = readInt();
         count = 0;
