@@ -1,6 +1,9 @@
 # /images/misc/AlphaSnakes8.png   2FC0BA77AF8C34B032524CB0D51654C1
 # /images/misc/goldhill.png       FCEDA12F78ED26361F38291E5682FF27
 # /images/misc/pass-1.png         171B7ACB142DC06414E1E73B1F9433A0
+/images/misc/andorbug.png       45FB58737E4893F7A8080785090C4B1B
+/images/misc/crashint.png       A54F0041A9E15B050F25C463F1DB7449
+/images/misc/crashnon.png       A54F0041A9E15B050F25C463F1DB7449
 /images/misc/pngtest.png        3A2A52817A771EE863E75E7BE7B57EF4
 /images/misc/anigif.png         FDB221239EDFB34F8DB0A08AB10EF6F9
 /images/misc/cc1.png            8D25B4666CA708008944CE2BD4342561
