@@ -147,6 +147,7 @@ extends PngTestCase
         errorHelper("/images/broken/gamma_after_data.png");
         errorHelper("/images/broken/stereo_after_data.png");
         errorHelper("/images/broken/trans_bad_color_type.png");
+        errorHelper("/images/broken/err_buff.png");
     }
 
     public void errorHelper(String path)
