@@ -2,6 +2,68 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
+/*
+need corrupted images:
+x Private critical chunk encountered
+x Corrupted chunk type
+x IHDR chunk must be first chunk
+x PLTE must precede hIST
+x Required PLTE chunk not found
+x   IDAT
+x   tRNS
+  Cannot appear after PLTE
+x   cHRM
+x   gAMA
+    iCCP
+x   sBIT
+    sRGB
+x Required data chunk(s) not found (IEND after PLTE w/o IDAT)
+  Cannot appear after IDAT
+x   PLTE
+    cHRM
+x   gAMA
+    iCCP
+    sBIT
+    sRGB
+    bKGD
+    hIST
+    tRNS
+    pHYs
+    sPLT
+    oFFs
+    pCAL
+    sCAL
+x   sTER
+x IDAT chunks must be consecutive (IDAT, non-IDAT, IDAT)
+  Multiple chunks are not allowed (all except sPLT, iTXt, tEXt, zTXt)
+x   IHDR
+x   PLTE
+x   gAMA
+    ...
+  Unrecognized filter type (Defilterer)
+x Bad chunk length (negative length)
+x Bad CRC value for chunk
+  Unrecognized compression method (iCCP, zTXt, iTXt)
+  Invalid keyword length
+  Bad bit depth
+  Bad bit depth for color type
+  Bad color type
+  Unrecognized compression method (IHDR)
+  Unrecognized filter method (IHDR)
+  Unrecognized interlace method (IHDR)
+  PLTE chunk length indivisible by 3
+  Too many palette entries
+  PLTE chunk found in grayscale image
+  Too many transparency palette entries
+x tRNS prohibited for color type
+  Meaningless zero gAMA chunk value
+  Illegal pHYs chunk unit specifier
+  Illegal sBIT sample depth
+  ...
+
+need chunks: 
+  oFFs, sCAL, sTER, iTXt, iCCP, sRGB
+*/  
 public class BrokenGenerator
 {
     private static final int IHDR = 0x49484452;
