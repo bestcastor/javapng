@@ -74,13 +74,13 @@ class StateMachine
     private static int nextState(PngImage png, int state, int type)
     throws PngException
     {
-        if (PngChunk.isPrivate(type) && !PngChunk.isAncillary(type))
-            throw new PngException("Private critical chunk encountered: " + PngChunk.getName(type), true);
         for (int i = 0; i < 4; i++) {
             int c = 0xFF & (type >>> (8 * i));
             if (c < 65 || (c > 90 && c < 97) || c > 122)
-                throw new PngException("Corrupted chunk type: " + PngChunk.getName(type), true);
+                throw new PngException("Corrupted chunk type: 0x" + Integer.toHexString(type).toUpperCase(), true);
         }
+        if (PngChunk.isPrivate(type) && !PngChunk.isAncillary(type))
+            throw new PngException("Private critical chunk encountered: " + PngChunk.getName(type), true);
         switch (state) {
         case STATE_START:
             if (type == PngChunk.IHDR)
