@@ -136,6 +136,7 @@ extends PngTestCase
         errorHelper("/images/broken/chunk_type.png");
         errorHelper("/images/broken/gama_after_idat.png");
         errorHelper("/images/broken/gama_after_plte.png");
+        errorHelper("/images/broken/gama_zero.png");
         errorHelper("/images/broken/hist_after_idat.png");
         errorHelper("/images/broken/hist_before_plte.png");
         errorHelper("/images/broken/iccp_after_idat.png");
@@ -187,6 +188,7 @@ extends PngTestCase
         errorHelper("/images/broken/ster_after_idat.png");
         errorHelper("/images/broken/trns_after_idat.png");
         errorHelper("/images/broken/trns_bad_color_type.png");
+        errorHelper("/images/broken/trns_too_many_entries.png");
     }
 
     public void errorHelper(String path)
