@@ -119,10 +119,6 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/multiple_plte.png", duplicate(PLTE));
         gen("suite/basn3p08.png", "broken/multiple_ihdr.png", duplicate(IHDR));
 
-        Chunk trans = extract("suite/tbbn1g04.png", tRNS);
-        gen("suite/basn4a08.png", "broken/trns_bad_color_type.png",
-            addAfter(find(gAMA), custom(trans)));
-        
         gen("suite/ch1n3p04.png", "broken/hist_before_plte.png", swap(hIST, PLTE));
         gen("suite/ccwn3p08.png", "broken/chrm_after_plte.png", swap(cHRM, PLTE));
         gen("suite/basn3p02.png", "broken/sbit_after_plte.png", swap(sBIT, PLTE));
@@ -152,9 +148,43 @@ public class BrokenGenerator
             remove(find(gAMA)), addAfter(find(IDAT), custom(iccp)));
         gen("suite/basn4a08.png", "broken/srgb_after_idat.png",
             remove(find(gAMA)), addAfter(find(IDAT), custom(srgb)));
-            
 
-}
+        gen("suite/basn3p08.png", "broken/ihdr_image_size.png",
+            replaceHeader(-32, -32, 8, 3, 0, 0, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_bit_depth.png",
+            replaceHeader(32, -32, 7, 3, 0, 0, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_16bit_palette.png",
+            replaceHeader(32, 32, 16, 3, 0, 0, 0));
+        gen("suite/basn4a08.png", "broken/ihdr_1bit_alpha.png",
+            replaceHeader(32, 32, 1, 6, 1, 0, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_compression_method.png",
+            replaceHeader(32, 32, 8, 3, 1, 0, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_filter_method.png",
+            replaceHeader(32, 32, 8, 3, 0, 1, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_interlace_method.png",
+            replaceHeader(32, 32, 8, 3, 0, 0, 2));
+
+        gen("suite/basn3p08.png", "broken/plte_length_mod_three.png",
+            replace(find(PLTE), custom(new Chunk(PLTE, new byte[2]))));
+        gen("suite/basn3p04.png", "broken/plte_too_many_entries.png",
+            replace(find(PLTE), custom(new Chunk(PLTE, new byte[129 * 3]))));
+        gen("suite/basn0g08.png", "broken/plte_in_grayscale.png",
+            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[0]))));
+
+        Chunk trans = extract("suite/tbbn1g04.png", tRNS);
+        gen("suite/basn4a08.png", "broken/trns_bad_color_type.png",
+            addAfter(find(gAMA), custom(trans)));
+    }
+
+
+    private static Processor replaceHeader(int width, int height, int bitDepth, int colorType,
+                                           int compression, int filter, int interlace)
+    throws IOException
+    {
+        return replace(find(IHDR),
+                       custom(createHeader(width, height, bitDepth, colorType,
+                                           compression, filter, interlace)));
+    }
 
     private static Chunk extract(String src, int type)
     throws IOException
@@ -179,6 +209,15 @@ public class BrokenGenerator
     private static Processor duplicate(int type)
     {
         return addAfter(find(type), find(type));
+    }
+
+    private static Processor replace(final Query oldChunk, final Query newChunk)
+    {
+        return new Processor(){
+            public void process(List<Chunk> chunks) {
+                chunks.set(chunks.indexOf(oldChunk.query(chunks)), newChunk.query(chunks));
+            }
+        };
     }
 
     private static Processor addAfter(final Query after, final Query chunk)
@@ -363,5 +402,21 @@ public class BrokenGenerator
         public void write(int b) { }
         public void write(byte[] b) { }
         public void write(byte[] b, int off, int len) { }
+    }
+
+    private static Chunk createHeader(int width, int height, int bitDepth, int colorType,
+                                      int compression, int filter, int interlace)
+    throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(baos);
+        data.writeInt(width);
+        data.writeInt(height);
+        data.writeByte((byte)bitDepth);
+        data.writeByte((byte)colorType);
+        data.writeByte((byte)compression);
+        data.writeByte((byte)filter);
+        data.writeByte((byte)interlace);
+        return new Chunk(IHDR, baos.toByteArray());
     }
 }
