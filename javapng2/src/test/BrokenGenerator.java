@@ -140,9 +140,14 @@ public class BrokenGenerator
         gen("suite/basn0g08.png", "broken/plte_in_grayscale.png",
             addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[3]))));
 
-        Chunk trans = extract("suite/tbbn1g04.png", tRNS);
+        Chunk trns = extract("suite/tbbn1g04.png", tRNS);
         gen("suite/basn6a08.png", "broken/trns_bad_color_type.png",
-            addAfter(find(gAMA), custom(trans)));
+            addAfter(find(gAMA), custom(trns)));
+        gen("suite/tp1n3p08.png", "broken/trns_too_many_entries.png",
+            replace(find(tRNS), custom(new Chunk(tRNS, new byte[200]))));
+
+        gen("suite/f01n2c08.png", "broken/gama_zero.png",
+            addAfter(find(IHDR), custom(new Chunk(gAMA, new byte[4]))));
     }
 
 
