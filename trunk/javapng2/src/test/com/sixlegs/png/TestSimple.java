@@ -156,10 +156,17 @@ extends PngTestCase
         errorHelper("/images/broken/multiple_chrm.png");
         errorHelper("/images/broken/multiple_gama.png");
         errorHelper("/images/broken/multiple_hist.png");
+        errorHelper("/images/broken/multiple_iccp.png");
         errorHelper("/images/broken/multiple_ihdr.png");
+        errorHelper("/images/broken/multiple_offs.png");
+        // errorHelper("/images/broken/multiple_pcal.png");
         errorHelper("/images/broken/multiple_phys.png");
         errorHelper("/images/broken/multiple_plte.png");
         errorHelper("/images/broken/multiple_sbit.png");
+        errorHelper("/images/broken/multiple_scal.png");
+        errorHelper("/images/broken/multiple_srgb.png");
+        errorHelper("/images/broken/multiple_ster.png");
+        errorHelper("/images/broken/multiple_time.png");
         errorHelper("/images/broken/multiple_trns.png");
         errorHelper("/images/broken/nonconsecutive_idat.png");
         errorHelper("/images/broken/offs_after_idat.png");
