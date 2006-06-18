@@ -14,28 +14,28 @@ x   tRNS
   Cannot appear after PLTE
 x   cHRM
 x   gAMA
-    iCCP
+x   iCCP
 x   sBIT
-    sRGB
+x   sRGB
 x Required data chunk(s) not found (IEND after PLTE w/o IDAT)
   Cannot appear after IDAT
 x   PLTE
-    cHRM
+x   cHRM
 x   gAMA
-    iCCP
-    sBIT
-    sRGB
-    bKGD
-    hIST
-    tRNS
-    pHYs
-    sPLT
-    oFFs
-    pCAL
-    sCAL
+x   iCCP
+x   sBIT
+x   sRGB
+x   bKGD
+x   hIST
+x   tRNS
+x   pHYs
+x   sPLT
+x   oFFs
+x   pCAL
+x   sCAL
 x   sTER
 x IDAT chunks must be consecutive (IDAT, non-IDAT, IDAT)
-  Multiple chunks are not allowed (all except sPLT, iTXt, tEXt, zTXt)
+  Multiple chunks are not allowed (all except sPLT, iTXt, tEXt, zTXt, IDAT)
 x   IHDR
 x   PLTE
 x   gAMA
@@ -101,32 +101,60 @@ public class BrokenGenerator
     public static void main(String[] args)
     throws Exception
     {
-        gen("suite/basn3p08.png", "broken/header_not_first.png", swap(IHDR, gAMA));
-        gen("suite/basn3p08.png", "broken/gamma_after_palette.png", swap(PLTE, gAMA));
-        gen("suite/basn3p08.png", "broken/palette_after_data.png", swap(PLTE, IDAT));
-        gen("suite/basn3p08.png", "broken/missing_data.png", remove(find(IDAT)));
-        gen("suite/basn3p08.png", "broken/missing_palette.png", remove(find(PLTE)));
-        gen("suite/basn3p08.png", "broken/private_critical.png", setType(find(gAMA), GaMA));
-        gen("suite/basn3p08.png", "broken/corrupt_type.png", setType(find(gAMA), gAM_));
-        gen("suite/basn3p08.png", "broken/nonconsecutive_data.png",
+        gen("suite/basn3p08.png", "broken/missing_ihdr.png", swap(IHDR, gAMA));
+        gen("suite/basn3p08.png", "broken/missing_idat.png", remove(find(IDAT)));
+        gen("suite/basn3p08.png", "broken/missing_plte.png", remove(find(PLTE)));
+        gen("suite/tbbn3p08.png", "broken/missing_plte_2.png", remove(find(PLTE)));
+
+        gen("suite/basn3p08.png", "broken/chunk_private_critical.png", setType(find(gAMA), GaMA));
+        gen("suite/basn3p08.png", "broken/chunk_type.png", setType(find(gAMA), gAM_));
+        gen("suite/basn3p08.png", "broken/chunk_crc.png", setCRC(find(IHDR), 0x12345678));
+        gen("suite/basn3p08.png", "broken/chunk_length.png", setLength(find(gAMA), -20));
+
+        gen("suite/basn3p08.png", "broken/nonconsecutive_idat.png",
             addAfter(find(IDAT), custom(heRB, new byte[0])),
             addAfter(find(heRB), find(IDAT)));
-        gen("suite/basn3p08.png", "broken/corrupt_crc.png", setCRC(find(IHDR), 0x12345678));
-        gen("suite/basn3p08.png", "broken/negative_length.png", setLength(find(gAMA), -20));
-        gen("suite/basn3p08.png", "broken/multiple_gamma.png", duplicate(gAMA));
-        gen("suite/basn3p08.png", "broken/multiple_palette.png", duplicate(PLTE));
-        gen("suite/basn3p08.png", "broken/multiple_header.png", duplicate(IHDR));
-        gen("suite/ch1n3p04.png", "broken/hist_before_palette.png", swap(PLTE, hIST));
-        gen("suite/tbbn3p08.png", "broken/missing_palette_trans.png", remove(find(PLTE)));
-        gen("suite/ccwn3p08.png", "broken/chrom_after_palette.png", swap(PLTE, cHRM));
-        gen("suite/basn3p02.png", "broken/sigbits_after_palette.png", swap(PLTE, sBIT));
-        gen("suite/basn0g01.png", "broken/gamma_after_data.png", swap(IDAT, gAMA));
-        gen("suite/basn3p08.png", "broken/stereo_after_data.png",
-            addAfter(find(IDAT), custom(sTER, new byte[]{ 0 })));
+
+        gen("suite/basn3p08.png", "broken/multiple_gama.png", duplicate(gAMA));
+        gen("suite/basn3p08.png", "broken/multiple_plte.png", duplicate(PLTE));
+        gen("suite/basn3p08.png", "broken/multiple_ihdr.png", duplicate(IHDR));
+
         Chunk trans = extract("suite/tbbn1g04.png", tRNS);
-        gen("suite/basn4a08.png", "broken/trans_bad_color_type.png",
+        gen("suite/basn4a08.png", "broken/trns_bad_color_type.png",
             addAfter(find(gAMA), custom(trans)));
-    }
+        
+        gen("suite/ch1n3p04.png", "broken/hist_before_plte.png", swap(hIST, PLTE));
+        gen("suite/ccwn3p08.png", "broken/chrm_after_plte.png", swap(cHRM, PLTE));
+        gen("suite/basn3p02.png", "broken/sbit_after_plte.png", swap(sBIT, PLTE));
+        gen("suite/basn3p08.png", "broken/gama_after_plte.png", swap(gAMA, PLTE));
+        gen("misc/srgb-cc99ff.png", "broken/srgb_after_plte.png", swap(sRGB, PLTE));
+        gen("misc/iccp-cc99ff.png", "broken/iccp_after_plte.png", swap(iCCP, PLTE));
+
+        gen("suite/basn3p08.png", "broken/plte_after_idat.png", swap(PLTE, IDAT));
+        gen("suite/basn0g01.png", "broken/gama_after_idat.png", swap(gAMA, IDAT));
+        gen("suite/basn3p08.png", "broken/ster_after_idat.png",
+            addAfter(find(IDAT), custom(sTER, new byte[]{ 0 })));
+        gen("suite/ccwn2c08.png", "broken/chrm_after_idat.png", swap(cHRM, IDAT));
+        gen("suite/cs5n2c08.png", "broken/sbit_after_idat.png", swap(sBIT, IDAT));
+        gen("suite/bgbn4a08.png", "broken/bkgd_after_idat.png", swap(bKGD, IDAT));
+        gen("suite/ch1n3p04.png", "broken/hist_after_idat.png", swap(hIST, IDAT));
+        gen("suite/tbbn1g04.png", "broken/trns_after_idat.png", swap(tRNS, IDAT));
+        gen("suite/cdun2c08.png", "broken/phys_after_idat.png", swap(pHYs, IDAT));
+        gen("misc/ps2n2c16.png", "broken/splt_after_idat.png", swap(sPLT, IDAT));
+
+        gen("misc/pngtest.png", "broken/offs_after_idat.png", swap(oFFs, IDAT));
+        gen("misc/pngtest.png", "broken/pcal_after_idat.png", swap(pCAL, IDAT));
+        gen("misc/pngtest.png", "broken/scal_after_idat.png", swap(sCAL, IDAT));
+
+        Chunk iccp = extract("misc/ntsciccp.png", iCCP);
+        Chunk srgb = extract("misc/srgbsrgb.png", sRGB);
+        gen("suite/basn4a08.png", "broken/iccp_after_idat.png",
+            remove(find(gAMA)), addAfter(find(IDAT), custom(iccp)));
+        gen("suite/basn4a08.png", "broken/srgb_after_idat.png",
+            remove(find(gAMA)), addAfter(find(IDAT), custom(srgb)));
+            
+
+}
 
     private static Chunk extract(String src, int type)
     throws IOException
