@@ -152,9 +152,15 @@ extends PngTestCase
         errorHelper("/images/broken/missing_ihdr.png");
         errorHelper("/images/broken/missing_plte.png");
         errorHelper("/images/broken/missing_plte_2.png");
+        errorHelper("/images/broken/multiple_bkgd.png");
+        errorHelper("/images/broken/multiple_chrm.png");
         errorHelper("/images/broken/multiple_gama.png");
+        errorHelper("/images/broken/multiple_hist.png");
         errorHelper("/images/broken/multiple_ihdr.png");
+        errorHelper("/images/broken/multiple_phys.png");
         errorHelper("/images/broken/multiple_plte.png");
+        errorHelper("/images/broken/multiple_sbit.png");
+        errorHelper("/images/broken/multiple_trns.png");
         errorHelper("/images/broken/nonconsecutive_idat.png");
         errorHelper("/images/broken/offs_after_idat.png");
         errorHelper("/images/broken/pcal_after_idat.png");
@@ -183,7 +189,7 @@ extends PngTestCase
             readResource(path);
             fail("Expected exception");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println(new File(path).getName() + ": " + e.getMessage());
         }
     }
 
