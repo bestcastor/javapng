@@ -38,10 +38,6 @@ package com.sixlegs.png;
 
 class Integers
 {
-    private Integers()
-    {
-    }
-    
     public static Integer valueOf(int i)
     {
         switch (i) {
