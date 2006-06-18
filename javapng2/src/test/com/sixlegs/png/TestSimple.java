@@ -159,9 +159,11 @@ extends PngTestCase
         errorHelper("/images/broken/pcal_after_idat.png");
         errorHelper("/images/broken/phys_after_idat.png");
         errorHelper("/images/broken/plte_after_idat.png");
+        errorHelper("/images/broken/plte_empty.png");
         errorHelper("/images/broken/plte_in_grayscale.png");
         errorHelper("/images/broken/plte_length_mod_three.png");
         errorHelper("/images/broken/plte_too_many_entries.png");
+        errorHelper("/images/broken/plte_too_many_entries_2.png");
         errorHelper("/images/broken/sbit_after_idat.png");
         errorHelper("/images/broken/sbit_after_plte.png");
         errorHelper("/images/broken/scal_after_idat.png");

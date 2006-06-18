@@ -144,9 +144,9 @@ public class BrokenGenerator
 
         Chunk iccp = extract("misc/ntsciccp.png", iCCP);
         Chunk srgb = extract("misc/srgbsrgb.png", sRGB);
-        gen("suite/basn4a08.png", "broken/iccp_after_idat.png",
+        gen("suite/basn2c08.png", "broken/iccp_after_idat.png",
             remove(find(gAMA)), addAfter(find(IDAT), custom(iccp)));
-        gen("suite/basn4a08.png", "broken/srgb_after_idat.png",
+        gen("suite/basn2c08.png", "broken/srgb_after_idat.png",
             remove(find(gAMA)), addAfter(find(IDAT), custom(srgb)));
 
         gen("suite/basn3p08.png", "broken/ihdr_image_size.png",
@@ -155,7 +155,7 @@ public class BrokenGenerator
             replaceHeader(32, -32, 7, 3, 0, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_16bit_palette.png",
             replaceHeader(32, 32, 16, 3, 0, 0, 0));
-        gen("suite/basn4a08.png", "broken/ihdr_1bit_alpha.png",
+        gen("suite/basn6a08.png", "broken/ihdr_1bit_alpha.png",
             replaceHeader(32, 32, 1, 6, 1, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_compression_method.png",
             replaceHeader(32, 32, 8, 3, 1, 0, 0));
@@ -166,13 +166,17 @@ public class BrokenGenerator
 
         gen("suite/basn3p08.png", "broken/plte_length_mod_three.png",
             replace(find(PLTE), custom(new Chunk(PLTE, new byte[2]))));
+        gen("suite/basn3p08.png", "broken/plte_empty.png",
+            replace(find(PLTE), custom(new Chunk(PLTE, new byte[0]))));
         gen("suite/basn3p04.png", "broken/plte_too_many_entries.png",
-            replace(find(PLTE), custom(new Chunk(PLTE, new byte[129 * 3]))));
+            replace(find(PLTE), custom(new Chunk(PLTE, new byte[17 * 3]))));
+        gen("suite/basn2c08.png", "broken/plte_too_many_entries_2.png",
+            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[257 * 3]))));
         gen("suite/basn0g08.png", "broken/plte_in_grayscale.png",
-            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[0]))));
+            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[3]))));
 
         Chunk trans = extract("suite/tbbn1g04.png", tRNS);
-        gen("suite/basn4a08.png", "broken/trns_bad_color_type.png",
+        gen("suite/basn2c08.png", "broken/trns_bad_color_type.png",
             addAfter(find(gAMA), custom(trans)));
     }
 
