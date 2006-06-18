@@ -7,7 +7,6 @@ need corrupted images:
   Unrecognized filter type (Defilterer)
   Unrecognized compression method (iCCP, zTXt, iTXt)
   Invalid keyword length
-  Meaningless zero gAMA chunk value
   Illegal pHYs chunk unit specifier
   Illegal sBIT sample depth
   ...
@@ -148,6 +147,16 @@ public class BrokenGenerator
 
         gen("suite/f01n2c08.png", "broken/gama_zero.png",
             addAfter(find(IHDR), custom(new Chunk(gAMA, new byte[4]))));
+
+        // we don't even have any valid examples of iTXt
+        gen("suite/f01n2c08.png", "misc/itxt_valid.png",
+            addAfter(find(IHDR), custom(createIntlText("Vegetable", 0, 0, "en-us", "", "Cucumber"))));
+        gen("suite/f01n2c08.png", "misc/itxt_compressed.png",
+            addAfter(find(IHDR), custom(createIntlText("Author", 1, 0, "sv-sw", "f\u00f6rfattare", "Christopher J. N\u00f6kleberg"))));
+        gen("suite/f01n2c08.png", "broken/itxt_compression_flag.png",
+            addAfter(find(IHDR), custom(createIntlText("Vegetable", 2, 0, "en-us", "", "Cucumber"))));
+        gen("suite/f01n2c08.png", "broken/itxt_compression_method.png",
+            addAfter(find(IHDR), custom(createIntlText("Vegetable", 1, 1, "en-us", "", "Cucumber"))));
     }
 
 
@@ -391,6 +400,32 @@ public class BrokenGenerator
         data.writeByte((byte)compression);
         data.writeByte((byte)filter);
         data.writeByte((byte)interlace);
+        data.flush();
         return new Chunk(IHDR, baos.toByteArray());
+    }
+
+    private static Chunk createIntlText(String keyword, int compressionFlag, int compressionMethod,
+                                        String languageTag, String translatedKeyword, String text)
+    throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(baos);
+        data.write(keyword.getBytes("ISO-8859-1"));
+        data.writeByte(0);
+        data.writeByte(compressionFlag);
+        data.writeByte(compressionMethod);
+        data.write(languageTag.getBytes("US-ASCII"));
+        data.writeByte(0);
+        data.write(translatedKeyword.getBytes("UTF-8"));
+        data.writeByte(0);
+        if (compressionFlag == 1) {
+            DeflaterOutputStream deflater = new DeflaterOutputStream(data);
+            deflater.write(text.getBytes("UTF-8"));
+            deflater.finish();
+        } else {
+            data.write(text.getBytes("UTF-8"));
+        }
+        data.flush();
+        return new Chunk(iTXt, baos.toByteArray());
     }
 }

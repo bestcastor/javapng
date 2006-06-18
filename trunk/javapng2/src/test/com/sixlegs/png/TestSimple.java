@@ -149,6 +149,8 @@ extends PngTestCase
         errorHelper("/images/broken/ihdr_filter_method.png");
         errorHelper("/images/broken/ihdr_image_size.png");
         errorHelper("/images/broken/ihdr_interlace_method.png");
+        errorHelper("/images/broken/itxt_compression_flag.png");
+        errorHelper("/images/broken/itxt_compression_method.png");
         errorHelper("/images/broken/missing_idat.png");
         errorHelper("/images/broken/missing_ihdr.png");
         errorHelper("/images/broken/missing_plte.png");
