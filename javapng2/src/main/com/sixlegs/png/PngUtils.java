@@ -69,18 +69,22 @@ class PngUtils
             total += in.skip(skip - total);
     }
 
-    public static byte[] readCompressed(DataInput in, int length)
+    public static byte[] readCompressed(DataInput in, int length, boolean readMethod)
     throws IOException
     {
+        if (readMethod) {
+            int method = in.readByte();
+            if (method != 0)
+                throw new PngException("Unrecognized compression method: " + method, false);
+            length--;
+        }
         byte[] data = new byte[length];
         in.readFully(data);
-        if (data[0] != 0)
-            throw new PngException("Unrecognized compression method: " + data[0], false);
         byte[] tmp = new byte[0x1000];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Inflater inf = new Inflater();
         inf.reset();
-        inf.setInput(data, 1, length - 1);
+        inf.setInput(data, 0, length);
         try {
             while (!inf.needsInput()) {
                 out.write(tmp, 0, inf.inflate(tmp));
