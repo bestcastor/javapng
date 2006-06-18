@@ -4,26 +4,6 @@ import java.util.zip.*;
 
 /*
 need corrupted images:
-  Multiple chunks are not allowed (all except sPLT, iTXt, tEXt, zTXt, IDAT)
-x   IHDR
-x   PLTE
-x   gAMA
-x   bKGD
-x   cHRM
-x   hIST
-    iCCP
-x   pHYs
-x   sBIT
-    sRGB
-    tIME
-x   tRNS
-    oFFs
-    pCAL
-    sCAL
-    gIFg
-    gIFx
-    sTER
-    
   Unrecognized filter type (Defilterer)
   Unrecognized compression method (iCCP, zTXt, iTXt)
   Invalid keyword length
@@ -93,7 +73,15 @@ public class BrokenGenerator
         gen("suite/ch1n3p04.png", "broken/multiple_hist.png", duplicate(hIST));
         gen("suite/tbbn1g04.png", "broken/multiple_trns.png", duplicate(tRNS));
         gen("suite/cdun2c08.png", "broken/multiple_phys.png", duplicate(pHYs));
-
+        gen("suite/cm0n0g04.png", "broken/multiple_time.png", duplicate(tIME));
+        gen("misc/iccp-cc99ff.png", "broken/multiple_iccp.png", duplicate(iCCP));
+        gen("misc/srgb-cc99ff.png", "broken/multiple_srgb.png", duplicate(sRGB));
+        gen("misc/pngtest.png", "broken/multiple_offs.png", duplicate(oFFs));
+        gen("misc/pngtest.png", "broken/multiple_pcal.png", duplicate(pCAL));
+        gen("misc/pngtest.png", "broken/multiple_scal.png", duplicate(sCAL));
+        gen("suite/basn3p08.png", "broken/multiple_ster.png",
+            addAfter(find(IHDR), custom(sTER, new byte[]{ 0 })), duplicate(sTER));
+    
         gen("suite/ch1n3p04.png", "broken/hist_before_plte.png", swap(hIST, PLTE));
         gen("suite/ccwn3p08.png", "broken/chrm_after_plte.png", swap(cHRM, PLTE));
         gen("suite/basn3p02.png", "broken/sbit_after_plte.png", swap(sBIT, PLTE));
