@@ -117,8 +117,7 @@ class StateMachine
                 throw new PngException("Required data chunk(s) not found", true);
             }
             return STATE_SAW_PLTE;
-        case STATE_IN_IDAT:
-        case STATE_AFTER_IDAT:
+        default: // STATE_IN_IDAT, STATE_AFTER_IDAT
             switch (type) {
             case PngChunk.PLTE:
             case PngChunk.cHRM:
@@ -145,8 +144,6 @@ class StateMachine
             }
             return STATE_AFTER_IDAT;
         }
-        // impossible
-        throw new Error();
     }
 
     private static void errorIfPaletted(PngImage png)
