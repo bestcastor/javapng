@@ -1,6 +1,8 @@
 # /images/misc/AlphaSnakes8.png   2FC0BA77AF8C34B032524CB0D51654C1
 # /images/misc/goldhill.png       FCEDA12F78ED26361F38291E5682FF27
 # /images/misc/pass-1.png         171B7ACB142DC06414E1E73B1F9433A0
+/images/misc/itxt_valid.png     7452A9BD9890241C65FBA60677BC6916
+/images/misc/itxt_compress.png  7452A9BD9890241C65FBA60677BC6916
 /images/misc/iccp-cc99ff.png    53E35F0701D7259500314770FD5B5B04
 /images/misc/srgb-cc99ff.png    5E4672014AD496539C281551111863A1
 /images/misc/ntsciccp.png       FB231A8780E7C28317476305E2C4F8D9
