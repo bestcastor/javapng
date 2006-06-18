@@ -206,11 +206,4 @@ abstract public class PngChunk
                 (((int)name.charAt(2) & 0xFF) <<  8) | 
                 (((int)name.charAt(3) & 0xFF)      ));
     }
-
-    void checkLength(int length, int correct)
-    throws PngException
-    {
-        if (length != correct)
-            throw new PngException("Bad chunk length: " + length + " (expected " + correct + ")", true);
-    }
 }

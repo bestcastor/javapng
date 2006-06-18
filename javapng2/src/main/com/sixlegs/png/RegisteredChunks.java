@@ -151,13 +151,17 @@ extends PngChunk
     private void read_PLTE(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
+        if (length == 0)
+            throw new PngException("PLTE chunk cannot be empty", true);
         if (length % 3 != 0)
-            throw new PngException("PLTE chunk length indivisible by 3", true);
+            throw new PngException("PLTE chunk length indivisible by 3: " + length, true);
+        int size = length / 3;
+        if (size > 256)
+            throw new PngException("Too many palette entries: " + size, true);
         switch (png.getColorType()) {
         case PngConstants.COLOR_TYPE_PALETTE:
-            int size = length / 3;
-            if (size > (2 << png.getBitDepth()) || size > 256)
-                throw new PngException("Too many palette entries", true);
+            if (size > (2 << (png.getBitDepth() - 1)))
+                throw new PngException("Too many palette entries: " + size, true);
             break;
         case PngConstants.COLOR_TYPE_GRAY:
         case PngConstants.COLOR_TYPE_GRAY_ALPHA:
@@ -453,5 +457,12 @@ extends PngChunk
         default:
             throw new PngException("Unknown sTER mode: " + mode, false);
         }
+    }
+
+    private static void checkLength(int length, int correct)
+    throws PngException
+    {
+        if (length != correct)
+            throw new PngException("Bad chunk length: " + length + " (expected " + correct + ")", true);
     }
 }
