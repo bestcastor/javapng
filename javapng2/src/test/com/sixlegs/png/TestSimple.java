@@ -143,6 +143,7 @@ extends PngTestCase
         errorHelper("/images/broken/ihdr_16bit_palette.png");
         errorHelper("/images/broken/ihdr_1bit_alpha.png");
         errorHelper("/images/broken/ihdr_bit_depth.png");
+        errorHelper("/images/broken/ihdr_color_type.png");
         errorHelper("/images/broken/ihdr_compression_method.png");
         errorHelper("/images/broken/ihdr_filter_method.png");
         errorHelper("/images/broken/ihdr_image_size.png");
