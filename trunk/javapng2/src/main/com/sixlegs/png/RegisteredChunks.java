@@ -264,7 +264,7 @@ extends PngChunk
     throws IOException
     {
         String name = PngUtils.readKeyword(in, length);
-        byte[] data = PngUtils.readCompressed(in, length - name.length() - 1);
+        byte[] data = PngUtils.readCompressed(in, length - name.length() - 1, true);
         props.put(PngConstants.ICC_PROFILE_NAME, name);
         props.put(PngConstants.ICC_PROFILE, data);
     }
@@ -368,6 +368,7 @@ extends PngChunk
         String keyword = PngUtils.readKeyword(data, length);
         String enc = PngUtils.ISO_8859_1;
         boolean compressed = false;
+        boolean readMethod = true;
         String language = null;
         String translated = null;
         switch (type) {
@@ -382,18 +383,21 @@ extends PngChunk
             int method = data.readByte();
             if (flag == 1) {
                 compressed = true;
+                readMethod = false;
                 if (method != 0)
-                    throw new PngException("Unrecognized " + this + " compression method: " + method, false);
+                    throw new PngException("Unrecognized " + PngChunk.getName(type) + " compression method: " + method, false);
             } else if (flag != 0) {
-                throw new PngException("Illegal " + this + " compression flag: " + flag, false);
+                throw new PngException("Illegal " + PngChunk.getName(type) + " compression flag: " + flag, false);
             }
             language = PngUtils.readString(data, data.available(), PngUtils.US_ASCII);
+            // TODO: split language on hyphens, check that each component is 1-8 caharacters
             translated = PngUtils.readString(data, data.available(), PngUtils.UTF_8);
+            // TODO: check for line breaks?
         }
 
         String text;
         if (compressed) {
-            text = new String(PngUtils.readCompressed(data, data.available()), enc);
+            text = new String(PngUtils.readCompressed(data, data.available(), readMethod), enc);
         } else {
             text = new String(bytes, bytes.length - data.available(), data.available(), enc);
         }
