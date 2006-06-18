@@ -8,7 +8,22 @@ need corrupted images:
 x   IHDR
 x   PLTE
 x   gAMA
-    ...
+x   bKGD
+x   cHRM
+x   hIST
+    iCCP
+x   pHYs
+x   sBIT
+    sRGB
+    tIME
+x   tRNS
+    oFFs
+    pCAL
+    sCAL
+    gIFg
+    gIFx
+    sTER
+    
   Unrecognized filter type (Defilterer)
   Unrecognized compression method (iCCP, zTXt, iTXt)
   Invalid keyword length
@@ -72,6 +87,12 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/multiple_gama.png", duplicate(gAMA));
         gen("suite/basn3p08.png", "broken/multiple_plte.png", duplicate(PLTE));
         gen("suite/basn3p08.png", "broken/multiple_ihdr.png", duplicate(IHDR));
+        gen("suite/ccwn2c08.png", "broken/multiple_chrm.png", duplicate(cHRM));
+        gen("suite/cs5n2c08.png", "broken/multiple_sbit.png", duplicate(sBIT));
+        gen("suite/bggn4a16.png", "broken/multiple_bkgd.png", duplicate(bKGD));
+        gen("suite/ch1n3p04.png", "broken/multiple_hist.png", duplicate(hIST));
+        gen("suite/tbbn1g04.png", "broken/multiple_trns.png", duplicate(tRNS));
+        gen("suite/cdun2c08.png", "broken/multiple_phys.png", duplicate(pHYs));
 
         gen("suite/ch1n3p04.png", "broken/hist_before_plte.png", swap(hIST, PLTE));
         gen("suite/ccwn3p08.png", "broken/chrm_after_plte.png", swap(cHRM, PLTE));
@@ -86,9 +107,9 @@ public class BrokenGenerator
             addAfter(find(IDAT), custom(sTER, new byte[]{ 0 })));
         gen("suite/ccwn2c08.png", "broken/chrm_after_idat.png", swap(cHRM, IDAT));
         gen("suite/cs5n2c08.png", "broken/sbit_after_idat.png", swap(sBIT, IDAT));
-        gen("suite/bgbn4a08.png", "broken/bkgd_after_idat.png", swap(bKGD, IDAT));
+        gen("suite/bggn4a16.png", "broken/bkgd_after_idat.png", swap(bKGD, IDAT));
         gen("suite/ch1n3p04.png", "broken/hist_after_idat.png", swap(hIST, IDAT));
-        gen("suite/tbbn1g04.png", "broken/trns_after_idat.png", swap(tRNS, IDAT));
+        gen("suite/tbbn1g04.png", "broken/trns_after_idat.png", swap(tRNS, bKGD), swap(tRNS, IDAT));
         gen("suite/cdun2c08.png", "broken/phys_after_idat.png", swap(pHYs, IDAT));
         gen("misc/ps2n2c16.png", "broken/splt_after_idat.png", swap(sPLT, IDAT));
 
@@ -106,7 +127,9 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/ihdr_image_size.png",
             replaceHeader(-32, -32, 8, 3, 0, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_bit_depth.png",
-            replaceHeader(32, -32, 7, 3, 0, 0, 0));
+            replaceHeader(32, 32, 7, 3, 0, 0, 0));
+        gen("suite/basn3p08.png", "broken/ihdr_color_type.png",
+            replaceHeader(32, 32, 8, 1, 0, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_16bit_palette.png",
             replaceHeader(32, 32, 16, 3, 0, 0, 0));
         gen("suite/basn6a08.png", "broken/ihdr_1bit_alpha.png",
@@ -130,7 +153,7 @@ public class BrokenGenerator
             addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[3]))));
 
         Chunk trans = extract("suite/tbbn1g04.png", tRNS);
-        gen("suite/basn2c08.png", "broken/trns_bad_color_type.png",
+        gen("suite/basn6a08.png", "broken/trns_bad_color_type.png",
             addAfter(find(gAMA), custom(trans)));
     }
 
