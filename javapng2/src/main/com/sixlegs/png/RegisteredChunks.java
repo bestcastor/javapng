@@ -189,6 +189,7 @@ extends PngChunk
             });
             break;
         case PngConstants.COLOR_TYPE_PALETTE:
+            // TODO: ensure it is divisible by three
             int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
             if (length > paletteSize)
                 throw new PngException("Too many transparency palette entries (" + length + " > " + paletteSize + ")", true);
@@ -252,6 +253,7 @@ extends PngChunk
     private void read_hIST(DataInput in, int length, Map props)
     throws IOException
     {
+        // TODO: ensure it is divisible by three
         int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
         checkLength(length, paletteSize * 2);
         int[] array = new int[paletteSize];
@@ -452,6 +454,7 @@ extends PngChunk
     private void read_sTER(DataInput in, int length, Map props)
     throws IOException
     {
+        checkLength(length, 1);
         int mode = in.readByte();
         switch (mode) {
         case PngConstants.STEREO_MODE_CROSS:

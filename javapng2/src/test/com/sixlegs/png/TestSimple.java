@@ -191,6 +191,15 @@ extends PngTestCase
         errorHelper("/images/broken/trns_after_idat.png");
         errorHelper("/images/broken/trns_bad_color_type.png");
         errorHelper("/images/broken/trns_too_many_entries.png");
+        errorHelper("/images/broken/phys_unit_specifier.png");
+        errorHelper("/images/broken/offs_unit_specifier.png");
+        errorHelper("/images/broken/sbit_sample_depth.png");
+        errorHelper("/images/broken/sbit_sample_depth_2.png");
+        errorHelper("/images/broken/ster_mode.png");
+        errorHelper("/images/broken/splt_sample_depth.png");
+        errorHelper("/images/broken/splt_length_mod_6.png");
+        errorHelper("/images/broken/splt_length_mod_10.png");
+        errorHelper("/images/broken/splt_duplicate_name.png");
     }
 
     public void errorHelper(String path)

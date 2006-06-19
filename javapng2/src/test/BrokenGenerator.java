@@ -3,14 +3,27 @@ import java.util.*;
 import java.util.zip.*;
 
 /*
-need corrupted images:
+TODO
   Unrecognized filter type (Defilterer)
   Unrecognized compression method (iCCP, zTXt, iTXt)
   Invalid keyword length
-  Illegal pHYs chunk unit specifier
-  Illegal sBIT sample depth
-  ...
-need iTXt
+  tIME
+
+  check lengths: 
+  IHDR: 13
+  tRNS: 2, 6, N*3
+  bKGD: 1, 2, 6
+  hIST: N * 3
+  sBIT: 1, 2, 3, 4
+  cHRM: 32
+  gAMA: 4
+  pHYs: 9
+  sRGB: 1
+  tIME: 7
+  gIFg: 4
+  oFFs: 9
+  sTER: 1
+  IEND: 0
 */  
 public class BrokenGenerator
 {
@@ -60,7 +73,7 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/chunk_length.png", setLength(find(gAMA), -20));
 
         gen("suite/basn3p08.png", "broken/nonconsecutive_idat.png",
-            addAfter(find(IDAT), custom(heRB, new byte[0])),
+            addAfter(find(IDAT), new Chunk(heRB, new byte[0])),
             addAfter(find(heRB), find(IDAT)));
 
         gen("suite/basn3p08.png", "broken/multiple_gama.png", duplicate(gAMA));
@@ -79,7 +92,7 @@ public class BrokenGenerator
         gen("misc/pngtest.png", "broken/multiple_pcal.png", duplicate(pCAL));
         gen("misc/pngtest.png", "broken/multiple_scal.png", duplicate(sCAL));
         gen("suite/basn3p08.png", "broken/multiple_ster.png",
-            addAfter(find(IHDR), custom(sTER, new byte[]{ 0 })), duplicate(sTER));
+            addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 0 })), duplicate(sTER));
     
         gen("suite/ch1n3p04.png", "broken/hist_before_plte.png", swap(hIST, PLTE));
         gen("suite/ccwn3p08.png", "broken/chrm_after_plte.png", swap(cHRM, PLTE));
@@ -91,7 +104,7 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/plte_after_idat.png", swap(PLTE, IDAT));
         gen("suite/basn0g01.png", "broken/gama_after_idat.png", swap(gAMA, IDAT));
         gen("suite/basn3p08.png", "broken/ster_after_idat.png",
-            addAfter(find(IDAT), custom(sTER, new byte[]{ 0 })));
+            addAfter(find(IDAT), new Chunk(sTER, new byte[]{ 0 })));
         gen("suite/ccwn2c08.png", "broken/chrm_after_idat.png", swap(cHRM, IDAT));
         gen("suite/cs5n2c08.png", "broken/sbit_after_idat.png", swap(sBIT, IDAT));
         gen("suite/bggn4a16.png", "broken/bkgd_after_idat.png", swap(bKGD, IDAT));
@@ -107,9 +120,9 @@ public class BrokenGenerator
         Chunk iccp = extract("misc/ntsciccp.png", iCCP);
         Chunk srgb = extract("misc/srgbsrgb.png", sRGB);
         gen("suite/basn2c08.png", "broken/iccp_after_idat.png",
-            remove(find(gAMA)), addAfter(find(IDAT), custom(iccp)));
+            remove(find(gAMA)), addAfter(find(IDAT), iccp));
         gen("suite/basn2c08.png", "broken/srgb_after_idat.png",
-            remove(find(gAMA)), addAfter(find(IDAT), custom(srgb)));
+            remove(find(gAMA)), addAfter(find(IDAT), srgb));
 
         gen("suite/basn3p08.png", "broken/ihdr_image_size.png",
             replaceHeader(-32, -32, 8, 3, 0, 0, 0));
@@ -129,44 +142,72 @@ public class BrokenGenerator
             replaceHeader(32, 32, 8, 3, 0, 0, 2));
 
         gen("suite/basn3p08.png", "broken/plte_length_mod_three.png",
-            replace(find(PLTE), custom(new Chunk(PLTE, new byte[2]))));
+            replace(find(PLTE), new Chunk(PLTE, new byte[2])));
         gen("suite/basn3p08.png", "broken/plte_empty.png",
-            replace(find(PLTE), custom(new Chunk(PLTE, new byte[0]))));
+            replace(find(PLTE), new Chunk(PLTE, new byte[0])));
         gen("suite/basn3p04.png", "broken/plte_too_many_entries.png",
-            replace(find(PLTE), custom(new Chunk(PLTE, new byte[17 * 3]))));
+            replace(find(PLTE), new Chunk(PLTE, new byte[17 * 3])));
         gen("suite/basn2c08.png", "broken/plte_too_many_entries_2.png",
-            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[257 * 3]))));
+            addAfter(find(gAMA), new Chunk(PLTE, new byte[257 * 3])));
         gen("suite/basn0g08.png", "broken/plte_in_grayscale.png",
-            addAfter(find(gAMA), custom(new Chunk(PLTE, new byte[3]))));
+            addAfter(find(gAMA), new Chunk(PLTE, new byte[3])));
 
         Chunk trns = extract("suite/tbbn1g04.png", tRNS);
         gen("suite/basn6a08.png", "broken/trns_bad_color_type.png",
-            addAfter(find(gAMA), custom(trns)));
+            addAfter(find(gAMA), trns));
         gen("suite/tp1n3p08.png", "broken/trns_too_many_entries.png",
-            replace(find(tRNS), custom(new Chunk(tRNS, new byte[200]))));
+            replace(find(tRNS), new Chunk(tRNS, new byte[200])));
 
         gen("suite/f01n2c08.png", "broken/gama_zero.png",
-            addAfter(find(IHDR), custom(new Chunk(gAMA, new byte[4]))));
+            addAfter(find(IHDR), new Chunk(gAMA, new byte[4])));
 
         // we don't even have any valid examples of iTXt
         gen("suite/f01n2c08.png", "misc/itxt_valid.png",
-            addAfter(find(IHDR), custom(createIntlText("Vegetable", 0, 0, "en-us", "", "Cucumber"))));
+            addAfter(find(IHDR), createIntlText("Vegetable", 0, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "misc/itxt_compressed.png",
-            addAfter(find(IHDR), custom(createIntlText("Author", 1, 0, "sv-sw", "f\u00f6rfattare", "Christopher J. N\u00f6kleberg"))));
+            addAfter(find(IHDR), createIntlText("Author", 1, 0, "sv-sw", "f\u00f6rfattare", "Christopher J. N\u00f6kleberg")));
         gen("suite/f01n2c08.png", "broken/itxt_compression_flag.png",
-            addAfter(find(IHDR), custom(createIntlText("Vegetable", 2, 0, "en-us", "", "Cucumber"))));
+            addAfter(find(IHDR), createIntlText("Vegetable", 2, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "broken/itxt_compression_method.png",
-            addAfter(find(IHDR), custom(createIntlText("Vegetable", 1, 1, "en-us", "", "Cucumber"))));
+            addAfter(find(IHDR), createIntlText("Vegetable", 1, 1, "en-us", "", "Cucumber")));
+
+        gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png",
+            replace(find(pHYs), changeByte(extract("suite/cdun2c08.png", pHYs), 8, 2)));
+        gen("misc/pngtest.png", "broken/offs_unit_specifier.png",
+            replace(find(oFFs), changeByte(extract("misc/pngtest.png", oFFs), 8, 2)));
+
+        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth.png",
+            replace(find(sBIT), changeByte(extract("suite/cs5n2c08.png", sBIT), 0, -1)));
+        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth_2.png",
+            replace(find(sBIT), changeByte(extract("suite/cs5n2c08.png", sBIT), 0, 9)));
+        gen("suite/basn3p08.png", "broken/ster_mode.png",
+            addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 2 })));
+
+        gen("suite/basn3p08.png", "broken/splt_sample_depth.png",
+            addAfter(find(IHDR), createSuggestedPalette("Bad suggestion", 4, new byte[0])));
+        gen("suite/basn3p08.png", "broken/splt_length_mod_6.png",
+            addAfter(find(IHDR), createSuggestedPalette("Bad suggestion", 8, new byte[10])));
+        gen("suite/basn3p08.png", "broken/splt_length_mod_10.png",
+            addAfter(find(IHDR), createSuggestedPalette("Bad suggestion", 16, new byte[6])));
+        Chunk suggested = createSuggestedPalette("Lemonade", 8, new byte[0]);
+        gen("suite/basn3p08.png", "broken/splt_duplicate_name.png",
+            addAfter(find(IHDR), suggested),
+            addAfter(find(IHDR), suggested));
     }
 
+    private static Chunk changeByte(Chunk chunk, int offset, int value)
+    {
+        chunk.data[offset] = (byte)value;
+        return chunk;
+    }
 
     private static Processor replaceHeader(int width, int height, int bitDepth, int colorType,
                                            int compression, int filter, int interlace)
     throws IOException
     {
         return replace(find(IHDR),
-                       custom(createHeader(width, height, bitDepth, colorType,
-                                           compression, filter, interlace)));
+                       createHeader(width, height, bitDepth, colorType,
+                                    compression, filter, interlace));
     }
 
     private static Chunk extract(String src, int type)
@@ -208,22 +249,6 @@ public class BrokenGenerator
         return new Processor(){
             public void process(List<Chunk> chunks) {
                 chunks.add(chunks.indexOf(after.query(chunks)) + 1, chunk.query(chunks));
-            }
-        };
-    }
-
-    private static Query custom(int type, byte[] data)
-    throws IOException
-    {
-        return custom(new Chunk(type, data));
-    }
-
-    private static Query custom(final Chunk chunk)
-    throws IOException
-    {
-        return new Query(){
-            public Chunk query(List<Chunk> chunks) {
-                return chunk;
             }
         };
     }
@@ -307,6 +332,7 @@ public class BrokenGenerator
     }
 
     private static class Chunk
+    implements Query
     {
         public int type;
         public byte[] data;
@@ -325,6 +351,11 @@ public class BrokenGenerator
             this.data = data;
             this.crc = crc;
             this.length = data.length;
+        }
+
+        public Chunk query(List<Chunk> chunks)
+        {
+            return this;
         }
     }
 
@@ -427,5 +458,18 @@ public class BrokenGenerator
         }
         data.flush();
         return new Chunk(iTXt, baos.toByteArray());
+    }
+
+    private static Chunk createSuggestedPalette(String keyword, int sampleDepth, byte[] bytes)
+    throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(baos);
+        data.write(keyword.getBytes("ISO-8859-1"));
+        data.writeByte(0);
+        data.writeByte((byte)sampleDepth);
+        data.write(bytes);
+        data.flush();
+        return new Chunk(sPLT, baos.toByteArray());
     }
 }
