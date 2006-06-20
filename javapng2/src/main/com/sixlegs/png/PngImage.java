@@ -50,6 +50,9 @@ import java.util.*;
  * image metadata. For customized PNG decoding, a {@link PngConfig} object
  * may be passed to the {@linkplain #PngImage(PngConfig) constructor}.
  * <p>
+ * <b>This class is not thread-safe.</b> Do not share a {@code PngImage} instance
+ * among multiple threads without proper synchronization.
+ * <p>
  * For more information visit <a href="http://www.sixlegs.com/">http://www.sixlegs.com/</a>
  * @author Chris Nokleberg <a href="mailto:chris@sixlegs.com">&lt;chris@sixlegs.com&gt;</a>
  * @see PngConfig
@@ -101,7 +104,6 @@ implements Transparency
      * <p>
      * Multiple images can be read using the same {@code PngImage} instance.
      * The property map is cleared each time this method is called.
-     * This method is not thread-safe.
      * @param file the file to read
      * @return the decoded image, or null if no image was decoded
      * @throws IOException if any error occurred while reading the image
@@ -127,7 +129,6 @@ implements Transparency
      * <p>
      * Multiple images can be read using the same {@code PngImage} instance.
      * A new property map is created each time this method is called.
-     * This method is not thread-safe.
      * @param in the input stream to read
      * @param close whether to close the input stream after reading
      * @return the decoded image, or null if no image was decoded
@@ -147,8 +148,8 @@ implements Transparency
             long sig = pin.readLong();
             if (sig != SIGNATURE) {
                 throw new PngException("Improper signature, expected 0x" +
-                                   Long.toHexString(SIGNATURE).toUpperCase() + ", got 0x" +
-                                   Long.toHexString(sig).toUpperCase(), true);
+                                       Long.toHexString(SIGNATURE) + ", got 0x" +
+                                       Long.toHexString(sig), true);
             }
             Set seen = new HashSet();
             while (machine.getState() != StateMachine.STATE_END) {
@@ -209,8 +210,8 @@ implements Transparency
      * The default implementation is to decode the image into a {@link java.awt.image.BufferedImage}
      * as long as {@link PngConfig#getReadLimit} does not equal {@link PngConfig#READ_EXCEPT_DATA}.
      * <p>
-     * Unlike {@link PngConstants} implementations, subclasses do not have to read exactly
-     * the correct amount from this stream.
+     * Unlike {@link #readChunk} implementations, subclasses may read less than the correct
+     * amount from this stream; the remainder will be skipped.
      * @param in the input stream of raw, compressed image data
      * @return the decoded image, or null
      * @throws IOException if any error occurred while processing the image data
@@ -562,8 +563,6 @@ implements Transparency
      * Returns the map which stores all of this image's property values.
      * The map is mutable, and storing a value with the wrong type may
      * result in other methods in this class throwing a {@code ClassCastException}.
-     * This method is primarily meant for {@link PngConstants} implementations
-     * to store the properties they are responsible for reading.
      * @return the mutable map of image properties
      * @throws IllegalStateException if an image has not been read
      */
@@ -611,22 +610,22 @@ implements Transparency
     }
 
     /**
-     * Returns a {@link PngConstants} implementation for the given chunk type.
-     * The returned chunk object will be responsible for reading the
-     * binary chunk data and populating the property map of this {@code PngImage}
-     * as appropriate. If {@code null} is returned, the chunk is skipped.
-     * Note that skipping certain critical chunks will guarantee an eventual
-     * exception.
+     * Read the chunk data from the image input stream, storing
+     * properties into this {@code PngImage} instance. Subclasses may
+     * either skip the chunk by returning {@code false}, or must
+     * read the exact length of the chunk data and return {@code true}.
+     * Critical chunks cannot be skipped.
      * <p>
      * {@code IDAT} chunks are not processed by this method. See {@link #createImage}
      * for custom handling of the raw image data.
      * <p>
-     * By default this method will return a {@code PngConstants} implementation
-     * for all of the chunk types defined in Version 1.2 of the PNG Specification
-     * (except {@code IDAT}), and most of the registered extension chunks.
+     * By default this method will handle all of the chunk types defined
+     * in Version 1.2 of the PNG Specification, and most of the
+     * registered extension chunks.
      * @param type the chunk type
-     * @return an instance of {@code PngConstants} which will read the following chunk data, or null
-     * @throws IllegalArgumentException if the type is IDAT
+     * @param in the input stream to read the chunk data from
+     * @param length the length of the chunk data
+     * @return whether the chunk data has been read from the stream
      */
     protected boolean readChunk(int type, DataInput in, int length)
     throws IOException
@@ -644,7 +643,13 @@ implements Transparency
     }
 
     /**
-     * TODO
+     * Returns whether a chunk is allowed to occur multiple times.
+     * <p>
+     * By default this method returns {@code true} only for {@link PngConstants#sPLT sPLT},
+     * {@link PngConstants#iTXt iTXt}, {@link PngConstants#tEXt tEXt}, and
+     * {@link PngConstants#zTXt zTXt}.
+     * @param type the chunk type
+     * @return whether multiple chunks of the given type are allowed
      */
     protected boolean isMultipleOK(int type)
     {

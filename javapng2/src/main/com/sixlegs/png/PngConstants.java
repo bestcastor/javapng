@@ -51,7 +51,7 @@ abstract public class PngConstants
      * (the first letter is lowercase).
      * An ancillary chunk is once which is not strictly necessary
      * in order to meaningfully display the contents of the file.
-     * @param type the chunk type
+     * @param chunkType the chunk type
      * @return whether the chunk type ancillary bit is set
      */
     public static boolean isAncillary(int chunkType)
@@ -117,7 +117,7 @@ abstract public class PngConstants
     /**
      * Returns the chunk type corresponding to the given four-character
      * ASCII chunk name.
-     * @param name the four-character ASCII chunk name
+     * @param chunkName the four-character ASCII chunk name
      * @return the chunk type
      * @throws NullPointerException if {@code name} is null
      * @throws IndexOutOfBoundsException if {@code name} has less than four characters

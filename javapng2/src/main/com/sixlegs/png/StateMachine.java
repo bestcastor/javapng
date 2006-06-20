@@ -77,7 +77,7 @@ class StateMachine
         for (int i = 0; i < 4; i++) {
             int c = 0xFF & (type >>> (8 * i));
             if (c < 65 || (c > 90 && c < 97) || c > 122)
-                throw new PngException("Corrupted chunk type: 0x" + Integer.toHexString(type).toUpperCase(), true);
+                throw new PngException("Corrupted chunk type: 0x" + Integer.toHexString(type), true);
         }
         if (PngConstants.isPrivate(type) && !PngConstants.isAncillary(type))
             throw new PngException("Private critical chunk encountered: " + PngConstants.getChunkName(type), true);
