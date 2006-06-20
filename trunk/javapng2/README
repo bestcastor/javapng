@@ -29,8 +29,9 @@ Revision History
   Changes from v2.0-rc5 -> v2.0-rc6 (2006-??-??)
 
     * Fix bugs found by FindBugs
-    * Change PngChunk to use DataInput instead of PngInputStream
+    * Change chunk read method to use DataInput instead of PngInputStream
     * Fix stereo chunk parsing
+    * Remove PngChunk, fold constants into PngConstants
 
   Changes from v2.0-rc4 -> v2.0-rc5 (2006-06-12)
 

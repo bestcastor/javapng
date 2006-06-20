@@ -154,7 +154,7 @@ implements Transparency
             while (machine.getState() != StateMachine.STATE_END) {
                 int type = pin.startChunk(pin.readInt());
                 machine.nextState(type);
-                if (type == PngChunk.IDAT) {
+                if (type == PngConstants.IDAT) {
                     if (config.getReadLimit() == PngConfig.READ_UNTIL_DATA)
                         return null;
                     ImageDataInputStream data = new ImageDataInputStream(pin, machine);
@@ -163,33 +163,31 @@ implements Transparency
                         PngUtils.skipFully(data, pin.getRemaining());
                     type = machine.getType();
                 }
-                PngChunk chunk = getChunk(type);
-                if (chunk == null) {
-                    if (!PngChunk.isAncillary(type))
-                        throw new PngException("Critical chunk " + PngChunk.getName(type) + " cannot be skipped", true);
-                    PngUtils.skipFully(pin, pin.getRemaining());
-                } else {
-                    try {
-                        Integer key = Integers.valueOf(type);
-                        if (!chunk.isMultipleOK(type)) {
-                            if (seen.contains(key)) {
-                                String msg = "Multiple " + PngChunk.getName(type) + " chunks are not allowed";
-                                if (PngChunk.isAncillary(type))
-                                    throw new PngException(msg, false);
-                                throw new PngException(msg, true);
-                            } else {
-                                seen.add(key);
-                            }
+                try {
+                    Integer key = Integers.valueOf(type);
+                    if (!isMultipleOK(type)) {
+                        if (seen.contains(key)) {
+                            String msg = "Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed";
+                            if (PngConstants.isAncillary(type))
+                                throw new PngException(msg, false);
+                            throw new PngException(msg, true);
+                        } else {
+                            seen.add(key);
                         }
-                        chunk.read(type, pin, pin.getRemaining(), this);
-                        if (type == PngChunk.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
-                            return null;
-                    } catch (PngException exception) {
-                        if (exception.isFatal())
-                            throw exception;
-                        PngUtils.skipFully(pin, pin.getRemaining());
-                        handleWarning(exception);
                     }
+                    if (readChunk(type, pin, pin.getRemaining())) {
+                        if (type == PngConstants.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
+                            return null;
+                    } else {
+                        if (!PngConstants.isAncillary(type))
+                            throw new PngException("Critical chunk " + PngConstants.getChunkName(type) + " cannot be skipped", true);
+                        PngUtils.skipFully(pin, pin.getRemaining());
+                    }
+                } catch (PngException exception) {
+                    if (exception.isFatal())
+                        throw exception;
+                    PngUtils.skipFully(pin, pin.getRemaining());
+                    handleWarning(exception);
                 }
                 pin.endChunk(type);
             }
@@ -211,7 +209,7 @@ implements Transparency
      * The default implementation is to decode the image into a {@link java.awt.image.BufferedImage}
      * as long as {@link PngConfig#getReadLimit} does not equal {@link PngConfig#READ_EXCEPT_DATA}.
      * <p>
-     * Unlike {@link PngChunk} implementations, subclasses do not have to read exactly
+     * Unlike {@link PngConstants} implementations, subclasses do not have to read exactly
      * the correct amount from this stream.
      * @param in the input stream of raw, compressed image data
      * @return the decoded image, or null
@@ -564,7 +562,7 @@ implements Transparency
      * Returns the map which stores all of this image's property values.
      * The map is mutable, and storing a value with the wrong type may
      * result in other methods in this class throwing a {@code ClassCastException}.
-     * This method is primarily meant for {@link PngChunk} implementations
+     * This method is primarily meant for {@link PngConstants} implementations
      * to store the properties they are responsible for reading.
      * @return the mutable map of image properties
      * @throws IllegalStateException if an image has not been read
@@ -612,10 +610,8 @@ implements Transparency
             throw new IllegalStateException("Image has not been read");
     }
 
-    private static final RegisteredChunks registered = new RegisteredChunks();
-    
     /**
-     * Returns a {@link PngChunk} implementation for the given chunk type.
+     * Returns a {@link PngConstants} implementation for the given chunk type.
      * The returned chunk object will be responsible for reading the
      * binary chunk data and populating the property map of this {@code PngImage}
      * as appropriate. If {@code null} is returned, the chunk is skipped.
@@ -625,51 +621,40 @@ implements Transparency
      * {@code IDAT} chunks are not processed by this method. See {@link #createImage}
      * for custom handling of the raw image data.
      * <p>
-     * By default this method will return a {@code PngChunk} implementation
+     * By default this method will return a {@code PngConstants} implementation
      * for all of the chunk types defined in Version 1.2 of the PNG Specification
      * (except {@code IDAT}), and most of the registered extension chunks.
      * @param type the chunk type
-     * @return an instance of {@code PngChunk} which will read the following chunk data, or null
+     * @return an instance of {@code PngConstants} which will read the following chunk data, or null
      * @throws IllegalArgumentException if the type is IDAT
      */
-    protected PngChunk getChunk(int type)
+    protected boolean readChunk(int type, DataInput in, int length)
+    throws IOException
     {
-        if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngChunk.isAncillary(type)) {
+        if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngConstants.isAncillary(type)) {
             switch (type) {
-            case PngChunk.gAMA:
-            case PngChunk.tRNS:
-                return registered;
+            case PngConstants.gAMA:
+            case PngConstants.tRNS:
+                break;
+            default:
+                return false;
             }
-            return null;
         }
+        return RegisteredChunks.read(type, in, length, this);
+    }
+
+    /**
+     * TODO
+     */
+    protected boolean isMultipleOK(int type)
+    {
         switch (type) {
-        case PngChunk.IHDR:
-        case PngChunk.PLTE:
-        case PngChunk.bKGD:
-        case PngChunk.IEND:
-        case PngChunk.cHRM:
-        case PngChunk.gAMA:
-        case PngChunk.pHYs:
-        case PngChunk.sBIT:
-        case PngChunk.sRGB:
-        case PngChunk.hIST:
-        case PngChunk.iCCP:
-        case PngChunk.tIME:
-        case PngChunk.tRNS:
-        case PngChunk.sPLT:
-        case PngChunk.iTXt:
-        case PngChunk.tEXt:
-        case PngChunk.zTXt:
-        case PngChunk.gIFg:
-        case PngChunk.oFFs:
-        case PngChunk.sCAL:
-        case PngChunk.sTER:
-            // case PngChunk.gIFx:
-            // case PngChunk.pCAL:
-            return registered;
-        case PngChunk.IDAT:
-            throw new IllegalArgumentException("Unexpected IDAT chunk");
+        case PngConstants.sPLT:
+        case PngConstants.iTXt:
+        case PngConstants.tEXt:
+        case PngConstants.zTXt:
+            return true;
         }
-        return null;
+        return false;
     }
 }

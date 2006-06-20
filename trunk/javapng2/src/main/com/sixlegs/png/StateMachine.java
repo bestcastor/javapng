@@ -79,65 +79,65 @@ class StateMachine
             if (c < 65 || (c > 90 && c < 97) || c > 122)
                 throw new PngException("Corrupted chunk type: 0x" + Integer.toHexString(type).toUpperCase(), true);
         }
-        if (PngChunk.isPrivate(type) && !PngChunk.isAncillary(type))
-            throw new PngException("Private critical chunk encountered: " + PngChunk.getName(type), true);
+        if (PngConstants.isPrivate(type) && !PngConstants.isAncillary(type))
+            throw new PngException("Private critical chunk encountered: " + PngConstants.getChunkName(type), true);
         switch (state) {
         case STATE_START:
-            if (type == PngChunk.IHDR)
+            if (type == PngConstants.IHDR)
                 return STATE_SAW_IHDR;
             throw new PngException("IHDR chunk must be first chunk", true);
         case STATE_SAW_IHDR:
         case STATE_SAW_IHDR_NO_PLTE:
             switch (type) {
-            case PngChunk.PLTE:
+            case PngConstants.PLTE:
                 return STATE_SAW_PLTE;
-            case PngChunk.IDAT:
+            case PngConstants.IDAT:
                 errorIfPaletted(png);
                 return STATE_IN_IDAT;
-            case PngChunk.bKGD:
+            case PngConstants.bKGD:
                 return STATE_SAW_IHDR_NO_PLTE;
-            case PngChunk.tRNS:
+            case PngConstants.tRNS:
                 errorIfPaletted(png);
                 return STATE_SAW_IHDR_NO_PLTE;
-            case PngChunk.hIST:
+            case PngConstants.hIST:
                 throw new PngException("PLTE must precede hIST", true);
             }
             return state;
         case STATE_SAW_PLTE:
             switch (type) {
-            case PngChunk.cHRM:
-            case PngChunk.gAMA:
-            case PngChunk.iCCP:
-            case PngChunk.sBIT:
-            case PngChunk.sRGB:
-                throw new PngException(PngChunk.getName(type) + " cannot appear after PLTE", true);
-            case PngChunk.IDAT:
+            case PngConstants.cHRM:
+            case PngConstants.gAMA:
+            case PngConstants.iCCP:
+            case PngConstants.sBIT:
+            case PngConstants.sRGB:
+                throw new PngException(PngConstants.getChunkName(type) + " cannot appear after PLTE", true);
+            case PngConstants.IDAT:
                 return STATE_IN_IDAT;
-            case PngChunk.IEND:
+            case PngConstants.IEND:
                 throw new PngException("Required data chunk(s) not found", true);
             }
             return STATE_SAW_PLTE;
         default: // STATE_IN_IDAT, STATE_AFTER_IDAT
             switch (type) {
-            case PngChunk.PLTE:
-            case PngChunk.cHRM:
-            case PngChunk.gAMA:
-            case PngChunk.iCCP:
-            case PngChunk.sBIT:
-            case PngChunk.sRGB:
-            case PngChunk.bKGD:
-            case PngChunk.hIST:
-            case PngChunk.tRNS:
-            case PngChunk.pHYs:
-            case PngChunk.sPLT:
-            case PngChunk.oFFs:
-            case PngChunk.pCAL:
-            case PngChunk.sCAL:
-            case PngChunk.sTER:
-                throw new PngException(PngChunk.getName(type) + " cannot appear after IDAT", true);
-            case PngChunk.IEND:
+            case PngConstants.PLTE:
+            case PngConstants.cHRM:
+            case PngConstants.gAMA:
+            case PngConstants.iCCP:
+            case PngConstants.sBIT:
+            case PngConstants.sRGB:
+            case PngConstants.bKGD:
+            case PngConstants.hIST:
+            case PngConstants.tRNS:
+            case PngConstants.pHYs:
+            case PngConstants.sPLT:
+            case PngConstants.oFFs:
+            case PngConstants.pCAL:
+            case PngConstants.sCAL:
+            case PngConstants.sTER:
+                throw new PngException(PngConstants.getChunkName(type) + " cannot appear after IDAT", true);
+            case PngConstants.IEND:
                 return STATE_END;
-            case PngChunk.IDAT:
+            case PngConstants.IDAT:
                 if (state == STATE_IN_IDAT)
                     return STATE_IN_IDAT;
                 throw new PngException("IDAT chunks must be consecutive", true);

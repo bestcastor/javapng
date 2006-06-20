@@ -55,7 +55,6 @@ extends ImageReader
 	private PngHeader pngHeader;
 	private PngImageMetadata pngMetadata;
 	private BufferedImage pngImage;
-    private PngChunk unknownReader = new UnknownChunk();
     private Map unknownChunks = new HashMap();
     
     public PngImageReader(PngImageReaderSpi provider)
@@ -283,34 +282,27 @@ extends ImageReader
             return true;
         }
 
-        protected PngChunk getChunk(int type)
+        protected boolean readChunk(int type, DataInput in, int length)
+        throws IOException
         {
             if (ignoreMetadata) {
                 switch (type) {
-                case PngChunk.IHDR:
-                case PngChunk.PLTE:
-                case PngChunk.tRNS:
-                case PngChunk.IEND:
-                case PngChunk.gAMA:
+                case PngConstants.IHDR:
+                case PngConstants.PLTE:
+                case PngConstants.tRNS:
+                case PngConstants.IEND:
+                case PngConstants.gAMA:
                     break;
                 default:
-                    return null;
+                    return false;
                 }
             }
-            PngChunk chunk = super.getChunk(type);
-            return (chunk != null) ? chunk : unknownReader;
-        }
-    }
-
-    private class UnknownChunk
-    extends PngChunk
-    {
-        public void read(int type, DataInput in, int length, PngImage png)
-        throws IOException
-        {
-            byte[] bytes = new byte[length];
-            in.readFully(bytes);
-            unknownChunks.put(new Integer(type), bytes);
+            if (!super.readChunk(type, in, length)) {
+                byte[] bytes = new byte[length];
+                in.readFully(bytes);
+                unknownChunks.put(new Integer(type), bytes);
+            }
+            return true;
         }
     }
 
