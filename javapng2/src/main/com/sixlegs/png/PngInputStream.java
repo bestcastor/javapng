@@ -41,7 +41,7 @@ import java.util.zip.*;
 
 /**
  * An input stream used to read PNG chunk data.
- * @see PngChunk#read
+ * @see PngConstants#read
  * @see #getRemaining
  */
 final class PngInputStream
@@ -77,9 +77,9 @@ implements DataInput
     throws IOException
     {
         if (getRemaining() != 0)
-            throw new PngException(PngChunk.getName(type) + " read " + count + " bytes, expected " + length, true);
+            throw new PngException(PngConstants.getChunkName(type) + " read " + count + " bytes, expected " + length, true);
         if ((int)crc.getValue() != readInt())
-            throw new PngException("Bad CRC value for " + PngChunk.getName(type) + " chunk", true);
+            throw new PngException("Bad CRC value for " + PngConstants.getChunkName(type) + " chunk", true);
     }
 
     ////////// count/crc InputStream methods //////////
@@ -230,7 +230,7 @@ implements DataInput
 
     /**
      * Returns the number of bytes of chunk data that the
-     * {@link PngChunk#read} method implementation is required to read.
+     * {@link PngConstants#read} method implementation is required to read.
      * Use {@link #skipBytes} to skip the data.
      * @return the number of bytes in the chunk remaining to be read
      */

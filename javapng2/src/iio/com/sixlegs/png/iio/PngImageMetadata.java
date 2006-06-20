@@ -280,11 +280,11 @@ extends IIOMetadata
             child.setAttribute("keyword", chunk.getKeyword());
             child.setAttribute("value", chunk.getText());
 
-            if (chunk.getType() == PngChunk.tEXt)
+            if (chunk.getType() == PngConstants.tEXt)
                 child.setAttribute("encoding", "ISO-8859-1");
                 
             //FIXME what about compressed iTXt?
-            if (chunk.getType() == PngChunk.zTXt) {
+            if (chunk.getType() == PngConstants.zTXt) {
                 child.setAttribute("compression", "deflate");
             } else {
                 child.setAttribute("compression", "none");
@@ -654,7 +654,7 @@ extends IIOMetadata
         for (Iterator it = unknownChunks.keySet().iterator(); it.hasNext();) {
             Integer type = (Integer)it.next();
             IIOMetadataNode child = new IIOMetadataNode("UnknownChunk");
-            child.setAttribute("type", PngChunk.getName(type.intValue()));
+            child.setAttribute("type", PngConstants.getChunkName(type.intValue()));
             child.setUserObject(unknownChunks.get(type));
             node.appendChild(child);
         }
@@ -689,22 +689,22 @@ extends IIOMetadata
         nodes.put("iTXt", new IIOMetadataNode("iTXt"));
         for (Iterator it = textChunks.iterator(); it.hasNext();) {
             TextChunk chunk = (TextChunk)it.next();
-            String name = PngChunk.getName(chunk.getType());
+            String name = PngConstants.getChunkName(chunk.getType());
             IIOMetadataNode child = new IIOMetadataNode(name + "Entry");
             child.setAttribute("keyword", chunk.getKeyword());
             switch (chunk.getType()) {
-            case PngChunk.zTXt:
+            case PngConstants.zTXt:
                 child.setAttribute("compressionMethod", "deflate");
                 child.setAttribute("text", chunk.getText());
                 break;
-            case PngChunk.iTXt:
+            case PngConstants.iTXt:
                 child.setAttribute("compressionMethod", "deflate");
                 child.setAttribute("value", chunk.getText());
                 child.setAttribute("languageTag", chunk.getLanguage());
                 child.setAttribute("translatedKeyword", chunk.getTranslatedKeyword());
                 child.setAttribute("compressionFlag", "FALSE"); // TODO
                 break;
-            case PngChunk.tEXt:
+            case PngConstants.tEXt:
                 child.setAttribute("value", chunk.getText());
             }
             IIOMetadataNode parent = (IIOMetadataNode)nodes.get(name);

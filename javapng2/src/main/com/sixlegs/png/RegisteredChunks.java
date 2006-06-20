@@ -40,55 +40,46 @@ import java.io.*;
 import java.util.*;
 
 class RegisteredChunks
-extends PngChunk
 {
     private static TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    public boolean isMultipleOK(int type)
-    {
-        switch (type) {
-        case PngChunk.sPLT:
-        case PngChunk.iTXt:
-        case PngChunk.tEXt:
-        case PngChunk.zTXt:
-            return true;
-        }
-        return false;
-    }
-
-    public void read(int type, DataInput in, int length, PngImage png)
+    public static boolean read(int type, DataInput in, int length, PngImage png)
     throws IOException
     {
         Map props = png.getProperties();
         switch (type) {
-        case PngChunk.IHDR: read_IHDR(in, length, props); break;
-        case PngChunk.IEND: checkLength(length, 0); break;
-        case PngChunk.PLTE: read_PLTE(in, length, props, png); break;
-        case PngChunk.bKGD: read_bKGD(in, length, props, png); break;
-        case PngChunk.tRNS: read_tRNS(in, length, props, png); break;
-        case PngChunk.sBIT: read_sBIT(in, length, props, png); break;
-        case PngChunk.cHRM: read_cHRM(in, length, props); break;
-        case PngChunk.gAMA: read_gAMA(in, length, props); break;
-        case PngChunk.hIST: read_hIST(in, length, props); break;
-        case PngChunk.iCCP: read_iCCP(in, length, props); break;
-        case PngChunk.pHYs: read_pHYs(in, length, props); break;
-        case PngChunk.sRGB: read_sRGB(in, length, props); break;
-        case PngChunk.tIME: read_tIME(in, length, props); break;
-        case PngChunk.sPLT: read_sPLT(in, length, props); break;
-        case PngChunk.gIFg: read_gIFg(in, length, props); break;
-        case PngChunk.oFFs: read_oFFs(in, length, props); break;
-        case PngChunk.sCAL: read_sCAL(in, length, props); break;
-        case PngChunk.sTER: read_sTER(in, length, props); break;
-            // case PngChunk.gIFx: read_gIFx(in, length, props); break;
-        case PngChunk.iTXt:
-        case PngChunk.tEXt:
-        case PngChunk.zTXt:
+        case PngConstants.IDAT: throw new IllegalArgumentException("Unexpected IDAT chunk");
+        case PngConstants.IHDR: read_IHDR(in, length, props); break;
+        case PngConstants.IEND: checkLength(length, 0); break;
+        case PngConstants.PLTE: read_PLTE(in, length, props, png); break;
+        case PngConstants.bKGD: read_bKGD(in, length, props, png); break;
+        case PngConstants.tRNS: read_tRNS(in, length, props, png); break;
+        case PngConstants.sBIT: read_sBIT(in, length, props, png); break;
+        case PngConstants.cHRM: read_cHRM(in, length, props); break;
+        case PngConstants.gAMA: read_gAMA(in, length, props); break;
+        case PngConstants.hIST: read_hIST(in, length, props); break;
+        case PngConstants.iCCP: read_iCCP(in, length, props); break;
+        case PngConstants.pHYs: read_pHYs(in, length, props); break;
+        case PngConstants.sRGB: read_sRGB(in, length, props); break;
+        case PngConstants.tIME: read_tIME(in, length, props); break;
+        case PngConstants.sPLT: read_sPLT(in, length, props); break;
+        case PngConstants.gIFg: read_gIFg(in, length, props); break;
+        case PngConstants.oFFs: read_oFFs(in, length, props); break;
+        case PngConstants.sCAL: read_sCAL(in, length, props); break;
+        case PngConstants.sTER: read_sTER(in, length, props); break;
+            // case PngConstants.gIFx: read_gIFx(in, length, props); break;
+        case PngConstants.iTXt:
+        case PngConstants.tEXt:
+        case PngConstants.zTXt:
             readText(type, in, length, props);
             break;
+        default:
+            return false;
         }
+        return true;
     }
 
-    private void read_IHDR(DataInput in, int length, Map props)
+    private static void read_IHDR(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 13);
@@ -148,7 +139,7 @@ extends PngChunk
         props.put(PngConstants.COLOR_TYPE, Integers.valueOf(colorType));
     }
 
-    private void read_PLTE(DataInput in, int length, Map props, PngImage png)
+    private static void read_PLTE(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         if (length == 0)
@@ -172,7 +163,7 @@ extends PngChunk
         props.put(PngConstants.PALETTE, palette);
     }
 
-    private void read_tRNS(DataInput in, int length, Map props, PngImage png)
+    private static void read_tRNS(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         switch (png.getColorType()) {
@@ -202,7 +193,7 @@ extends PngChunk
         }
     }
 
-    private void read_bKGD(DataInput in, int length, Map props, PngImage png)
+    private static void read_bKGD(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         int[] background;
@@ -228,7 +219,7 @@ extends PngChunk
         props.put(PngConstants.BACKGROUND, background);
     }
 
-    private void read_cHRM(DataInput in, int length, Map props)
+    private static void read_cHRM(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 32);
@@ -239,7 +230,7 @@ extends PngChunk
             props.put(PngConstants.CHROMATICITY, array);
     }
 
-    private void read_gAMA(DataInput in, int length, Map props)
+    private static void read_gAMA(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 4);
@@ -250,7 +241,7 @@ extends PngChunk
             props.put(PngConstants.GAMMA, new Float(gamma / 100000f));
     }
 
-    private void read_hIST(DataInput in, int length, Map props)
+    private static void read_hIST(DataInput in, int length, Map props)
     throws IOException
     {
         // TODO: ensure it is divisible by three
@@ -262,7 +253,7 @@ extends PngChunk
         props.put(PngConstants.HISTOGRAM, array);
     }
 
-    private void read_iCCP(DataInput in, int length, Map props)
+    private static void read_iCCP(DataInput in, int length, Map props)
     throws IOException
     {
         String name = PngUtils.readKeyword(in, length);
@@ -271,7 +262,7 @@ extends PngChunk
         props.put(PngConstants.ICC_PROFILE, data);
     }
 
-    private void read_pHYs(DataInput in, int length, Map props)
+    private static void read_pHYs(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 9);
@@ -285,7 +276,7 @@ extends PngChunk
         props.put(PngConstants.UNIT, Integers.valueOf(unit));
     }
 
-    private void read_sBIT(DataInput in, int length, Map props, PngImage png)
+    private static void read_sBIT(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         boolean paletted = png.getColorType() == PngConstants.COLOR_TYPE_PALETTE;
@@ -302,7 +293,7 @@ extends PngChunk
         props.put(PngConstants.SIGNIFICANT_BITS, array);
     }
 
-    private void read_sRGB(DataInput in, int length, Map props)
+    private static void read_sRGB(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 1);
@@ -314,7 +305,7 @@ extends PngChunk
         });
     }
 
-    private void read_tIME(DataInput in, int length, Map props)
+    private static void read_tIME(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 7);
@@ -336,7 +327,7 @@ extends PngChunk
         return value;
     }
 
-    private void read_sPLT(DataInput in, int length, Map props)
+    private static void read_sPLT(DataInput in, int length, Map props)
     throws IOException
     {
         String name = PngUtils.readKeyword(in, length);
@@ -360,7 +351,7 @@ extends PngChunk
         palettes.add(new SuggestedPaletteImpl(name, sampleDepth, bytes));
     }
 
-    private void readText(int type, DataInput in, int length, Map props)
+    private static void readText(int type, DataInput in, int length, Map props)
     throws IOException
     {
         byte[] bytes = new byte[length];
@@ -374,12 +365,12 @@ extends PngChunk
         String language = null;
         String translated = null;
         switch (type) {
-        case tEXt:
+        case PngConstants.tEXt:
             break;
-        case zTXt:
+        case PngConstants.zTXt:
             compressed = true;
             break;
-        case iTXt:
+        case PngConstants.iTXt:
             enc = PngUtils.UTF_8;
             int flag = data.readByte();
             int method = data.readByte();
@@ -387,9 +378,9 @@ extends PngChunk
                 compressed = true;
                 readMethod = false;
                 if (method != 0)
-                    throw new PngException("Unrecognized " + PngChunk.getName(type) + " compression method: " + method, false);
+                    throw new PngException("Unrecognized " + PngConstants.getChunkName(type) + " compression method: " + method, false);
             } else if (flag != 0) {
-                throw new PngException("Illegal " + PngChunk.getName(type) + " compression flag: " + flag, false);
+                throw new PngException("Illegal " + PngConstants.getChunkName(type) + " compression flag: " + flag, false);
             }
             language = PngUtils.readString(data, data.available(), PngUtils.US_ASCII);
             // TODO: split language on hyphens, check that each component is 1-8 caharacters
@@ -409,7 +400,7 @@ extends PngChunk
         chunks.add(new TextChunkImpl(keyword, text, language, translated, type));
     }
 
-    private void read_gIFg(DataInput in, int length, Map props)
+    private static void read_gIFg(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 4);
@@ -421,7 +412,7 @@ extends PngChunk
         props.put(PngConstants.GIF_DELAY_TIME, Integers.valueOf(delayTime));
     }
 
-    private void read_oFFs(DataInput in, int length, Map props)
+    private static void read_oFFs(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 9);
@@ -436,7 +427,7 @@ extends PngChunk
         props.put(PngConstants.POSITION_UNIT, Integers.valueOf(unit));
     }
 
-    private void read_sCAL(DataInput in, int length, Map props)
+    private static void read_sCAL(DataInput in, int length, Map props)
     throws IOException
     {
         byte[] bytes = new byte[length];
@@ -451,7 +442,7 @@ extends PngChunk
         props.put(PngConstants.PIXEL_HEIGHT, new Double(height));
     }
 
-    private void read_sTER(DataInput in, int length, Map props)
+    private static void read_sTER(DataInput in, int length, Map props)
     throws IOException
     {
         checkLength(length, 1);

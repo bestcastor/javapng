@@ -37,8 +37,8 @@ exception statement from your version.
 package com.sixlegs.png;
 
 /**
- * Common interface to all PNG text chunk data ({@link PngChunk#tEXt tEXt},
- * {@link PngChunk#zTXt zTXt}, {@link PngChunk#iTXt iTXt}).
+ * Common interface to all PNG text chunk data ({@link PngConstants#tEXt tEXt},
+ * {@link PngConstants#zTXt zTXt}, {@link PngConstants#iTXt iTXt}).
  * @see PngImage#getTextChunk
  */
 public interface TextChunk
@@ -69,9 +69,9 @@ public interface TextChunk
     /**
      * Returns the type of this TextChunk.
      * @return 
-     *    {@link PngChunk#tEXt},<br>
-     *    {@link PngChunk#zTXt},<br>
-     *    or {@link PngChunk#iTXt}
+     *    {@link PngConstants#tEXt},<br>
+     *    {@link PngConstants#zTXt},<br>
+     *    or {@link PngConstants#iTXt}
      */
     int getType();
 }

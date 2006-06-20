@@ -73,7 +73,7 @@ extends InputStream
             if (in.getRemaining() <= 0) {
                 in.endChunk(machine.getType());
                 machine.nextState(in.startChunk(in.readInt()));
-                done = machine.getType() != PngChunk.IDAT;
+                done = machine.getType() != PngConstants.IDAT;
             }
         }
         return total;

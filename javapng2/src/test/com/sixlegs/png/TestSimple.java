@@ -36,21 +36,18 @@ extends PngTestCase
     throws Exception
     {
         final String ORIGINAL_GIF = "original_gif";
-        final int msOG_type = PngChunk.getType("msOG");
+        final int msOG_type = PngConstants.getChunkType("msOG");
 
         PngImage png = readResource("/images/misc/anigif.png", new PngImage(){
-            protected PngChunk getChunk(int type) {
+            protected boolean readChunk(int type, DataInput in, int length) throws IOException {
                 if (type == msOG_type) {
-                    return new PngChunk(){
-                        public void read(int type, DataInput in, int length, PngImage png) throws IOException {
-                            byte[] bytes = new byte[length];
-                            in.readFully(bytes);
-                            png.getProperties().put(ORIGINAL_GIF, bytes);
-                        }
-                    };
+                    byte[] bytes = new byte[length];
+                    in.readFully(bytes);
+                    getProperties().put(ORIGINAL_GIF, bytes);
+                    return true;
                 }
-                return super.getChunk(type);
-            }                
+                return super.readChunk(type, in, length);
+            }
         });
         byte[] bytes = (byte[])png.getProperty(ORIGINAL_GIF);
 
