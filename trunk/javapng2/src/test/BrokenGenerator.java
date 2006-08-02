@@ -13,11 +13,7 @@ TODO
   bKGD: 1, 2, 6
   hIST: N * 3
   sBIT: 1, 2, 3, 4
-  cHRM: 32
-  pHYs: 9
-  tIME: 7
   gIFg: 4
-  oFFs: 9
 */  
 public class BrokenGenerator
 {
@@ -197,6 +193,10 @@ public class BrokenGenerator
             addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 0 })), setLength(find(sTER), 2));
         gen("misc/srgb-cc99ff.png", "broken/length_srgb.png", setLength(find(sRGB), 2));
         gen("suite/basn3p08.png", "broken/length_gama.png", setLength(find(gAMA), 3));
+        gen("suite/cdun2c08.png", "broken/length_phys.png", setLength(find(pHYs), 8));
+        gen("suite/cm0n0g04.png", "broken/length_time.png", setLength(find(tIME), 6));
+        gen("misc/pngtest.png", "broken/length_offs.png", setLength(find(oFFs), 8));
+        gen("suite/ccwn2c08.png", "broken/length_chrm.png", setLength(find(cHRM), 31));
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
