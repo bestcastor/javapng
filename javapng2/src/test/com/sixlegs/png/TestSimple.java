@@ -198,6 +198,12 @@ extends PngTestCase
         errorHelper("/images/broken/splt_length_mod_6.png");
         errorHelper("/images/broken/splt_length_mod_10.png");
         errorHelper("/images/broken/splt_duplicate_name.png");
+
+        errorHelper("/images/broken/length_ihdr.png");
+        errorHelper("/images/broken/length_iend.png");
+        errorHelper("/images/broken/length_ster.png");
+        errorHelper("/images/broken/length_srgb.png");
+        errorHelper("/images/broken/length_gama.png");
     }
 
     public void errorHelper(String path)

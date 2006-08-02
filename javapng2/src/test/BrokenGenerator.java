@@ -7,23 +7,17 @@ TODO
   Unrecognized filter type (Defilterer)
   Unrecognized compression method (iCCP, zTXt, iTXt)
   Invalid keyword length
-  tIME
 
   check lengths: 
-  IHDR: 13
   tRNS: 2, 6, N*3
   bKGD: 1, 2, 6
   hIST: N * 3
   sBIT: 1, 2, 3, 4
   cHRM: 32
-  gAMA: 4
   pHYs: 9
-  sRGB: 1
   tIME: 7
   gIFg: 4
   oFFs: 9
-  sTER: 1
-  IEND: 0
 */  
 public class BrokenGenerator
 {
@@ -196,6 +190,13 @@ public class BrokenGenerator
 
         gen("suite/cm0n0g04.png", "broken/time_value_range.png",
             replace(find(tIME), changeByte(extract("suite/cm0n0g04.png", tIME), 2, 0)));
+
+        gen("suite/basn3p08.png", "broken/length_ihdr.png", setLength(find(IHDR), 14));
+        gen("suite/basn3p08.png", "broken/length_iend.png", setLength(find(IEND), 1));
+        gen("suite/basn3p08.png", "broken/length_ster.png",
+            addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 0 })), setLength(find(sTER), 2));
+        gen("misc/srgb-cc99ff.png", "broken/length_srgb.png", setLength(find(sRGB), 2));
+        gen("suite/basn3p08.png", "broken/length_gama.png", setLength(find(gAMA), 3));
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
