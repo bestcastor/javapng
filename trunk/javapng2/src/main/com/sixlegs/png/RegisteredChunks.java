@@ -48,7 +48,6 @@ class RegisteredChunks
     {
         Map props = png.getProperties();
         switch (type) {
-        case PngConstants.IDAT: throw new IllegalArgumentException("Unexpected IDAT chunk");
         case PngConstants.IHDR: read_IHDR(in, length, props); break;
         case PngConstants.IEND: checkLength(length, 0); break;
         case PngConstants.PLTE: read_PLTE(in, length, props, png); break;
@@ -311,19 +310,20 @@ class RegisteredChunks
         checkLength(length, 7);
         Calendar cal = Calendar.getInstance(TIME_ZONE);
         cal.set(in.readUnsignedShort(),
-                check(in.readUnsignedByte(), 1, 12) - 1,
-                check(in.readUnsignedByte(), 1, 31),
-                check(in.readUnsignedByte(), 0, 23),
-                check(in.readUnsignedByte(), 0, 59),
-                check(in.readUnsignedByte(), 0, 60));
+                check(in.readUnsignedByte(), 1, 12, "month") - 1,
+                check(in.readUnsignedByte(), 1, 31, "day"),
+                check(in.readUnsignedByte(), 0, 23, "hour"),
+                check(in.readUnsignedByte(), 0, 59, "minute"),
+                check(in.readUnsignedByte(), 0, 60, "second"));
         props.put(PngConstants.TIME, cal.getTime());
     }
 
-    private static int check(int value, int min, int max)
+    private static int check(int value, int min, int max, String field)
     throws PngException
     {
         if (value < min || value > max)
-            throw new PngException("tIME value out of bounds", false);
+            throw new PngException("tIME " + field + " value " + value +
+                                   " is out of bounds (" + min + "-" + max + ")", false);
         return value;
     }
 
