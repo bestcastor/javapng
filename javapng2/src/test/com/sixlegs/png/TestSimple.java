@@ -208,6 +208,9 @@ extends PngTestCase
         errorHelper("/images/broken/length_time.png");
         errorHelper("/images/broken/length_offs.png");
         errorHelper("/images/broken/length_chrm.png");
+        errorHelper("/images/broken/length_trns_gray.png");
+        errorHelper("/images/broken/length_trns_rgb.png");
+        errorHelper("/images/broken/length_trns_palette.png");
     }
 
     public void errorHelper(String path)

@@ -9,7 +9,6 @@ TODO
   Invalid keyword length
 
   check lengths: 
-  tRNS: 2, 6, N*3
   bKGD: 1, 2, 6
   hIST: N * 3
   sBIT: 1, 2, 3, 4
@@ -197,6 +196,12 @@ public class BrokenGenerator
         gen("suite/cm0n0g04.png", "broken/length_time.png", setLength(find(tIME), 6));
         gen("misc/pngtest.png", "broken/length_offs.png", setLength(find(oFFs), 8));
         gen("suite/ccwn2c08.png", "broken/length_chrm.png", setLength(find(cHRM), 31));
+
+        Processor emptyTrans = replace(find(tRNS), new Chunk(tRNS, new byte[0]));
+        gen("suite/tbbn1g04.png", "broken/length_trns_gray.png", emptyTrans);
+        gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", emptyTrans);
+        gen("suite/tbbn3p08.png", "broken/length_trns_palette.png",
+            replace(find(tRNS), new Chunk(tRNS, new byte[174])));
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
