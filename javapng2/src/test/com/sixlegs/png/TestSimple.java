@@ -185,6 +185,7 @@ extends PngTestCase
         errorHelper("/images/broken/srgb_after_idat.png");
         errorHelper("/images/broken/srgb_after_plte.png");
         errorHelper("/images/broken/ster_after_idat.png");
+        errorHelper("/images/broken/time_value_range.png");
         errorHelper("/images/broken/trns_after_idat.png");
         errorHelper("/images/broken/trns_bad_color_type.png");
         errorHelper("/images/broken/trns_too_many_entries.png");
