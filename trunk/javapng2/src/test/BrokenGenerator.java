@@ -193,11 +193,16 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/splt_duplicate_name.png",
             addAfter(find(IHDR), suggested),
             addAfter(find(IHDR), suggested));
+
+        gen("suite/cm0n0g04.png", "broken/time_value_range.png",
+            replace(find(tIME), changeByte(extract("suite/cm0n0g04.png", tIME), 2, 0)));
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
+    throws IOException
     {
         chunk.data[offset] = (byte)value;
+        chunk.crc = crc(chunk.type, chunk.data);
         return chunk;
     }
 
