@@ -211,6 +211,8 @@ extends PngTestCase
         errorHelper("/images/broken/length_trns_gray.png");
         errorHelper("/images/broken/length_trns_rgb.png");
         errorHelper("/images/broken/length_trns_palette.png");
+        errorHelper("/images/broken/truncate_idat.png");
+        errorHelper("/images/broken/truncate_idat_2.png");
     }
 
     public void errorHelper(String path)
@@ -220,7 +222,15 @@ extends PngTestCase
             readResource(path);
             fail("Expected exception");
         } catch (Exception e) {
-            System.err.println(new File(path).getName() + ": " + e.getMessage());
+            String message = e.getMessage();
+            if (message == null) {
+                if (e instanceof EOFException) {
+                    message = "EOF";
+                } else {
+                    e.printStackTrace(System.err);
+                }
+            }
+            System.err.println(new File(path).getName() + ": " + message);
         }
     }
 
