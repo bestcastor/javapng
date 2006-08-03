@@ -202,6 +202,9 @@ public class BrokenGenerator
         gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", emptyTrans);
         gen("suite/tbbn3p08.png", "broken/length_trns_palette.png",
             replace(find(tRNS), new Chunk(tRNS, new byte[174])));
+
+        gen("suite/basn3p08.png", "broken/truncate_idat.png", truncate(find(IDAT), 20));
+        gen("misc/pngtest.png", "broken/truncate_idat_2.png", truncate(find(IDAT), 6000));
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
@@ -309,6 +312,24 @@ public class BrokenGenerator
                 Collections.swap(chunks,
                                  chunks.indexOf(q1.query(chunks)),
                                  chunks.indexOf(q2.query(chunks)));
+            }
+        };
+    }
+
+    private static Processor truncate(final Query q, final int offset)
+    {
+        return new Processor(){
+            public void process(List<Chunk> chunks) {
+                Chunk chunk = q.query(chunks);
+                int index = chunks.indexOf(chunk);
+                while (chunks.size() > index)
+                    chunks.remove(index);
+
+                byte[] data = new byte[offset];
+                System.arraycopy(chunk.data, 0, data, 0, offset);
+                Chunk replace = new Chunk(chunk.type, data, chunk.crc);
+                replace.length = chunk.length;
+                chunks.add(replace);
             }
         };
     }
