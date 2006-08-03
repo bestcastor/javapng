@@ -56,7 +56,7 @@ class PngUtils
         while (total < len) {
             int result = in.read(b, off + total, len - total);
             if (result == -1)
-                throw new EOFException();
+                throw new EOFException("EOF");
             total += result;
         }
     }

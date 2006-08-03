@@ -115,8 +115,22 @@ extends PngTestCase
         PngImage png = readResource("/images/misc/anigif.png");
         assertEquals(32, png.getWidth());
         assertEquals(32, png.getHeight());
+        // TODO: check gif chunks
     }
     
+    public void testCoverage()
+    throws Exception
+    {
+        PngConfig progressive = new PngConfig.Builder().progressive(true).build();
+        readResource("/images/suite/basi0g01.png", new PngImage(progressive));
+                     
+        PngConfig readHeader = new PngConfig.Builder().readLimit(PngConfig.READ_HEADER).build();
+        assertEquals(32, readResource("/images/suite/basn0g01.png", new PngImage(readHeader)).getWidth());
+
+        PngConfig readUntilData = new PngConfig.Builder().readLimit(PngConfig.READ_UNTIL_DATA).build();
+        assertNotNull(readResource("/images/suite/basn3p01.png", new PngImage(readUntilData)).getProperty(PngConstants.PALETTE));
+    }    
+
     public void testErrors()
     throws Exception
     {
@@ -222,15 +236,7 @@ extends PngTestCase
             readResource(path);
             fail("Expected exception");
         } catch (Exception e) {
-            String message = e.getMessage();
-            if (message == null) {
-                if (e instanceof EOFException) {
-                    message = "EOF";
-                } else {
-                    e.printStackTrace(System.err);
-                }
-            }
-            System.err.println(new File(path).getName() + ": " + message);
+            System.err.println(new File(path).getName() + ": " + e.getMessage());
         }
     }
 
