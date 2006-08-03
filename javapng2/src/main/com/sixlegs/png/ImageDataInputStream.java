@@ -63,19 +63,24 @@ extends InputStream
     {
         if (done)
             return -1;
-        int total = 0;
-        while ((total != len) && !done) {
-            while ((total != len) && in.getRemaining() > 0) {
-                int amt = Math.min(len - total, in.getRemaining());
-                in.readFully(b, off + total, amt);
-                total += amt;
+        try {
+            int total = 0;
+            while ((total != len) && !done) {
+                while ((total != len) && in.getRemaining() > 0) {
+                    int amt = Math.min(len - total, in.getRemaining());
+                    in.readFully(b, off + total, amt);
+                    total += amt;
+                }
+                if (in.getRemaining() <= 0) {
+                    in.endChunk(machine.getType());
+                    machine.nextState(in.startChunk(in.readInt()));
+                    done = machine.getType() != PngConstants.IDAT;
+                }
             }
-            if (in.getRemaining() <= 0) {
-                in.endChunk(machine.getType());
-                machine.nextState(in.startChunk(in.readInt()));
-                done = machine.getType() != PngConstants.IDAT;
-            }
+            return total;
+        } catch (EOFException e) {
+            done = true;
+            return -1;
         }
-        return total;
     }
 }
