@@ -162,6 +162,8 @@ extends PngTestCase
         errorHelper("/images/broken/ihdr_interlace_method.png");
         errorHelper("/images/broken/itxt_compression_flag.png");
         errorHelper("/images/broken/itxt_compression_method.png");
+        errorHelper("/images/broken/itxt_keyword_length.png");
+        errorHelper("/images/broken/itxt_keyword_length_2.png");
         errorHelper("/images/broken/missing_idat.png");
         errorHelper("/images/broken/missing_ihdr.png");
         errorHelper("/images/broken/missing_plte.png");
@@ -241,6 +243,8 @@ extends PngTestCase
             fail("Expected exception");
         } catch (Exception e) {
             System.err.println(new File(path).getName() + ": " + e.getMessage());
+            if (e.getMessage() == null)
+                e.printStackTrace(System.err);
         }
     }
 
