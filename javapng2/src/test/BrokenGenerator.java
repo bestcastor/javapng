@@ -10,7 +10,6 @@ TODO
 
   check lengths: 
   bKGD: 1, 2, 6
-  hIST: N * 3
   sBIT: 1, 2, 3, 4
   gIFg: 4
 */  
@@ -59,7 +58,7 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/chunk_private_critical.png", setType(find(gAMA), GaMA));
         gen("suite/basn3p08.png", "broken/chunk_type.png", setType(find(gAMA), gAM_));
         gen("suite/basn3p08.png", "broken/chunk_crc.png", setCRC(find(IHDR), 0x12345678));
-        gen("suite/basn3p08.png", "broken/chunk_length.png", setLength(find(gAMA), -20));
+        gen("suite/basn3p08.png", "broken/chunk_length.png", setLength(find(gAMA), -20, false));
 
         gen("suite/basn3p08.png", "broken/nonconsecutive_idat.png",
             addAfter(find(IDAT), new Chunk(heRB, new byte[0])),
@@ -189,22 +188,32 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/length_ihdr.png", setLength(find(IHDR), 14));
         gen("suite/basn3p08.png", "broken/length_iend.png", setLength(find(IEND), 1));
         gen("suite/basn3p08.png", "broken/length_ster.png",
-            addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 0 })), setLength(find(sTER), 2));
+            addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 0, 0 })));
         gen("misc/srgb-cc99ff.png", "broken/length_srgb.png", setLength(find(sRGB), 2));
         gen("suite/basn3p08.png", "broken/length_gama.png", setLength(find(gAMA), 3));
         gen("suite/cdun2c08.png", "broken/length_phys.png", setLength(find(pHYs), 8));
         gen("suite/cm0n0g04.png", "broken/length_time.png", setLength(find(tIME), 6));
         gen("misc/pngtest.png", "broken/length_offs.png", setLength(find(oFFs), 8));
         gen("suite/ccwn2c08.png", "broken/length_chrm.png", setLength(find(cHRM), 31));
-
-        Processor emptyTrans = replace(find(tRNS), new Chunk(tRNS, new byte[0]));
-        gen("suite/tbbn1g04.png", "broken/length_trns_gray.png", emptyTrans);
-        gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", emptyTrans);
-        gen("suite/tbbn3p08.png", "broken/length_trns_palette.png",
-            replace(find(tRNS), new Chunk(tRNS, new byte[174])));
+        gen("suite/ch1n3p04.png", "broken/length_hist.png", setLength(find(hIST), 28));
+        gen("suite/tbbn1g04.png", "broken/length_trns_gray.png", setLength(find(tRNS), 0));
+        gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", setLength(find(tRNS), 0));
+        gen("suite/tbbn3p08.png", "broken/length_trns_palette.png", setLength(find(tRNS), 174));
 
         gen("suite/basn3p08.png", "broken/truncate_idat.png", truncate(find(IDAT), 20));
         gen("misc/pngtest.png", "broken/truncate_idat_2.png", truncate(find(IDAT), 6000));
+
+        gen("suite/ctzn0g04.png", "broken/ztxt_compression_method.png", changeByte(find(zTXt), 10, 3));
+        gen("suite/ctzn0g04.png", "broken/ztxt_data_format.png", changeByte(find(zTXt), 11, 3));
+    }
+
+    private static Processor changeByte(final Query q, final int offset, final int value)
+    {
+        return new Processor(){
+            public void process(List<Chunk> chunks) throws IOException {
+                changeByte(q.query(chunks), offset, value);
+            }
+        };
     }
 
     private static Chunk changeByte(Chunk chunk, int offset, int value)
@@ -267,11 +276,23 @@ public class BrokenGenerator
         };
     }
 
-    private static Processor setLength(final Query q, final int length)
+    private static Processor setLength(Query q, int length)
+    {
+        return setLength(q, length, true);
+    }
+    
+    private static Processor setLength(final Query q, final int length, final boolean consistent)
     {
         return new Processor(){
-            public void process(List<Chunk> chunks) {
-                q.query(chunks).length = length;
+            public void process(List<Chunk> chunks) throws IOException {
+                Chunk chunk = q.query(chunks);
+                chunk.length = length;
+                if (consistent) {
+                    byte[] data = new byte[length];
+                    System.arraycopy(chunk.data, 0, data, 0, Math.min(data.length, chunk.data.length));
+                    chunk.data = data;
+                    chunk.crc = crc(chunk.type, data);
+                }
             }
         };
     }
