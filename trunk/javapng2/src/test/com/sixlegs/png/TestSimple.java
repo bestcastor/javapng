@@ -212,6 +212,8 @@ extends PngTestCase
         errorHelper("/images/broken/splt_length_mod_6.png");
         errorHelper("/images/broken/splt_length_mod_10.png");
         errorHelper("/images/broken/splt_duplicate_name.png");
+        errorHelper("/images/broken/ztxt_compression_method.png");
+        errorHelper("/images/broken/ztxt_data_format.png");
 
         errorHelper("/images/broken/length_ihdr.png");
         errorHelper("/images/broken/length_iend.png");
@@ -225,6 +227,8 @@ extends PngTestCase
         errorHelper("/images/broken/length_trns_gray.png");
         errorHelper("/images/broken/length_trns_rgb.png");
         errorHelper("/images/broken/length_trns_palette.png");
+        errorHelper("/images/broken/length_hist.png");
+        
         errorHelper("/images/broken/truncate_idat.png");
         errorHelper("/images/broken/truncate_idat_2.png");
     }
