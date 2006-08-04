@@ -117,6 +117,7 @@ class ImageFactory
                 png.handlePass(image, 0);
         }
         // TODO: handle complete?
+        dst.done();
         return image;
     }
 
@@ -158,6 +159,8 @@ class ImageFactory
             int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
             dst = new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
                                              png.getWidth(), xsub, ysub, xoff, yoff);
+            // if (config.getLowPassFilter())
+            // dst = new LowPassFilterDestination(dst, colorModel.createCompatibleWritableRaster(width, height));
         } else {
             dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), png.getWidth());
         }

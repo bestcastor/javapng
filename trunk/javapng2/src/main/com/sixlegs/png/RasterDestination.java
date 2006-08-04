@@ -74,4 +74,8 @@ extends Destination
     {
         return sourceWidth;
     }
+
+    public void done()
+    {
+    }    
 }
