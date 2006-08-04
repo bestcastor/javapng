@@ -38,10 +38,14 @@ package com.sixlegs.png;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 class RegisteredChunks
 {
-    private static TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
+    private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
+    private static final String ISO_8859_1 = "ISO-8859-1";
+    private static final String US_ASCII = "US-ASCII";
+    private static final String UTF_8 = "UTF-8";
 
     public static boolean read(int type, DataInput in, int length, PngImage png)
     throws IOException
@@ -179,7 +183,6 @@ class RegisteredChunks
             });
             break;
         case PngConstants.COLOR_TYPE_PALETTE:
-            // TODO: ensure it is divisible by three
             int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
             if (length > paletteSize)
                 throw new PngException("Too many transparency palette entries (" + length + " > " + paletteSize + ")", true);
@@ -255,8 +258,8 @@ class RegisteredChunks
     private static void read_iCCP(DataInput in, int length, Map props)
     throws IOException
     {
-        String name = PngUtils.readKeyword(in, length);
-        byte[] data = PngUtils.readCompressed(in, length - name.length() - 1, true);
+        String name = readKeyword(in, length);
+        byte[] data = readCompressed(in, length - name.length() - 1, true);
         props.put(PngConstants.ICC_PROFILE_NAME, name);
         props.put(PngConstants.ICC_PROFILE, data);
     }
@@ -330,7 +333,7 @@ class RegisteredChunks
     private static void read_sPLT(DataInput in, int length, Map props)
     throws IOException
     {
-        String name = PngUtils.readKeyword(in, length);
+        String name = readKeyword(in, length);
         int sampleDepth = in.readByte();
         if (sampleDepth != 8 && sampleDepth != 16)
             throw new PngException("Sample depth must be 8 or 16", false);
@@ -358,8 +361,8 @@ class RegisteredChunks
         in.readFully(bytes);
         DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
 
-        String keyword = PngUtils.readKeyword(data, length);
-        String enc = PngUtils.ISO_8859_1;
+        String keyword = readKeyword(data, length);
+        String enc = ISO_8859_1;
         boolean compressed = false;
         boolean readMethod = true;
         String language = null;
@@ -371,7 +374,7 @@ class RegisteredChunks
             compressed = true;
             break;
         case PngConstants.iTXt:
-            enc = PngUtils.UTF_8;
+            enc = UTF_8;
             int flag = data.readByte();
             int method = data.readByte();
             if (flag == 1) {
@@ -382,15 +385,15 @@ class RegisteredChunks
             } else if (flag != 0) {
                 throw new PngException("Illegal " + PngConstants.getChunkName(type) + " compression flag: " + flag, false);
             }
-            language = PngUtils.readString(data, data.available(), PngUtils.US_ASCII);
+            language = readString(data, data.available(), US_ASCII);
             // TODO: split language on hyphens, check that each component is 1-8 caharacters
-            translated = PngUtils.readString(data, data.available(), PngUtils.UTF_8);
+            translated = readString(data, data.available(), UTF_8);
             // TODO: check for line breaks?
         }
 
         String text;
         if (compressed) {
-            text = new String(PngUtils.readCompressed(data, data.available(), readMethod), enc);
+            text = new String(readCompressed(data, data.available(), readMethod), enc);
         } else {
             text = new String(bytes, bytes.length - data.available(), data.available(), enc);
         }
@@ -435,8 +438,8 @@ class RegisteredChunks
         DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
         
         int unit = data.readByte();
-        double width = PngUtils.readFloatingPoint(data, data.available());
-        double height = PngUtils.readFloatingPoint(data, data.available());
+        double width = readFloatingPoint(data, data.available());
+        double height = readFloatingPoint(data, data.available());
         props.put(PngConstants.SCALE_UNIT, Integers.valueOf(unit));
         props.put(PngConstants.PIXEL_WIDTH, new Double(width));
         props.put(PngConstants.PIXEL_HEIGHT, new Double(height));
@@ -462,5 +465,71 @@ class RegisteredChunks
     {
         if (length != correct)
             throw new PngException("Bad chunk length: " + length + " (expected " + correct + ")", true);
+    }
+
+    private static byte[] readCompressed(DataInput in, int length, boolean readMethod)
+    throws IOException
+    {
+        if (readMethod) {
+            int method = in.readByte();
+            if (method != 0)
+                throw new PngException("Unrecognized compression method: " + method, false);
+            length--;
+        }
+        byte[] data = new byte[length];
+        in.readFully(data);
+        byte[] tmp = new byte[0x1000];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Inflater inf = new Inflater();
+        inf.reset();
+        inf.setInput(data, 0, length);
+        try {
+            while (!inf.needsInput()) {
+                out.write(tmp, 0, inf.inflate(tmp));
+            }
+        } catch (DataFormatException e) {
+            throw new PngException(e.getMessage(), false);
+        }
+        return out.toByteArray();
+    }
+
+    private static String readString(DataInput in, int limit, String enc)
+    throws IOException
+    {
+        return new String(readToNull(in, limit), enc);
+    }
+
+    private static String readKeyword(DataInput in, int limit)
+    throws IOException
+    {
+        String keyword = readString(in, limit, ISO_8859_1);
+        if (keyword.length() == 0 || keyword.length() > 79)
+            throw new PngException("Invalid keyword length: " + keyword.length(), false);
+        return keyword;
+    }
+
+    // TODO: performance
+    private static byte[] readToNull(DataInput in, int limit)
+    throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (int i = 0; i < limit; i++) {
+            int c = in.readUnsignedByte();
+            if (c == 0)
+                return out.toByteArray();
+            out.write(c);
+        }
+        return out.toByteArray();
+    }
+
+    private static double readFloatingPoint(DataInput in, int limit)
+    throws IOException
+    {
+        String s = readString(in, limit, "US-ASCII");
+        int e = Math.max(s.indexOf('e'), s.indexOf('E'));
+        double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
+        if (e > 0)
+            d *= Math.pow(10d, Double.valueOf(s.substring(e + 1)).doubleValue());
+        return d;
     }
 }

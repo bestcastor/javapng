@@ -90,4 +90,9 @@ extends Destination
     {
         return dst.getSourceWidth();
     }
+
+    public void done()
+    {
+        dst.done();
+    }    
 }

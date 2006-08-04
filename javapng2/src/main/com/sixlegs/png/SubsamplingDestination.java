@@ -41,11 +41,11 @@ import java.awt.image.WritableRaster;
 final class SubsamplingDestination
 extends RasterDestination
 {
-    private final int[] singlePixel;
     private final int xsub;
     private final int ysub;
     private final int xoff;
     private final int yoff;
+    private final int[] singlePixel;
     
     public SubsamplingDestination(WritableRaster raster, int sourceWidth,
                                   int xsub, int ysub, int xoff, int yoff)

@@ -84,7 +84,7 @@ class Defilterer
             int filterType = in.read();
             if (filterType == -1)
                 throw new EOFException();
-            PngUtils.readFully(in, cur, bpp, bytesPerRow);
+            readFully(in, cur, bpp, bytesPerRow);
             defilter(cur, prev, bpp, filterType);
             if (isShort) {
                 for (int c = 0, i = bpp; i < rowSize; c++, i += 2)
@@ -173,6 +173,18 @@ class Defilterer
             DataBuffer dbuf = new DataBufferUShort(rowSize / 2);
             return Raster.createInterleavedRaster(dbuf, width, 1, rowSize / 2, samples,
                                                   bandOffsets[samples], origin);
+        }
+    }
+
+    private static void readFully(InputStream in, byte[] b, int off, int len)
+    throws IOException
+    {
+        int total = 0;
+        while (total < len) {
+            int result = in.read(b, off + total, len - total);
+            if (result == -1)
+                throw new EOFException("EOF");
+            total += result;
         }
     }
 }

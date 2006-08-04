@@ -65,6 +65,7 @@ final public class PngConfig
     final boolean gammaCorrect;
     final Rectangle sourceRegion;
     final int[] subsampling;
+    final boolean filter;
 
     PngConfig(Builder builder)
     {
@@ -77,6 +78,7 @@ final public class PngConfig
         this.gammaCorrect = builder.gammaCorrect;
         this.sourceRegion = builder.sourceRegion;
         this.subsampling = builder.subsampling;
+        this.filter = builder.filter;
     }
 
     /**
@@ -103,6 +105,7 @@ final public class PngConfig
         boolean gammaCorrect = true;
         Rectangle sourceRegion;
         int[] subsampling = DEFAULT_SUBSAMPLING;
+        boolean filter = false;
 
         /**
          * Create a new builder using default values.
@@ -125,6 +128,7 @@ final public class PngConfig
             this.reduce16 = cfg.reduce16;
             this.gammaCorrect = cfg.gammaCorrect;
             this.subsampling = cfg.subsampling;
+            this.filter = cfg.filter;
         }
 
         /**
@@ -266,7 +270,22 @@ final public class PngConfig
             subsampling = new int[]{ xsub, ysub, xoff, yoff };
             return this;
         }
+
+        /*
+        public Builder lowPassFilter(boolean filter)
+        {
+            this.filter = filter;
+            return this;
+        }
+        */
     }
+
+    /*
+    public boolean getLowPassFilter()
+    {
+        return filter;
+    }
+    */
 
     /**
      * Returns the current 16-bit reduction setting.

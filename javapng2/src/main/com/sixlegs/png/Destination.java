@@ -46,4 +46,5 @@ abstract class Destination
     abstract public void getPixel(int x, int y, int[] pixel); // used only by ProgressivePixelProcessor
     abstract public WritableRaster getRaster();
     abstract public int getSourceWidth();
+    abstract public void done();
 }

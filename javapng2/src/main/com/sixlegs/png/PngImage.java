@@ -161,7 +161,7 @@ implements Transparency
                     ImageDataInputStream data = new ImageDataInputStream(pin, machine);
                     image = createImage(data);
                     if (data.read() != -1)
-                        PngUtils.skipFully(data, pin.getRemaining());
+                        skipFully(data, pin.getRemaining());
                     type = machine.getType();
                 }
                 try {
@@ -182,12 +182,12 @@ implements Transparency
                     } else {
                         if (!PngConstants.isAncillary(type))
                             throw new PngException("Critical chunk " + PngConstants.getChunkName(type) + " cannot be skipped", true);
-                        PngUtils.skipFully(pin, pin.getRemaining());
+                        skipFully(pin, pin.getRemaining());
                     }
                 } catch (PngException exception) {
                     if (exception.isFatal())
                         throw exception;
-                    PngUtils.skipFully(pin, pin.getRemaining());
+                    skipFully(pin, pin.getRemaining());
                     handleWarning(exception);
                 }
                 pin.endChunk(type);
@@ -661,5 +661,13 @@ implements Transparency
             return true;
         }
         return false;
+    }
+
+    private static void skipFully(InputStream in, long skip)
+    throws IOException
+    {
+        long total = 0;
+        while (total < skip)
+            total += in.skip(skip - total);
     }
 }
