@@ -140,6 +140,8 @@ implements Transparency
     public BufferedImage read(InputStream in, boolean close)
     throws IOException
     {
+        if (in == null)
+            throw new NullPointerException("InputStream is null");
         BufferedImage image = null;
         StateMachine machine = new StateMachine(this);
         try {

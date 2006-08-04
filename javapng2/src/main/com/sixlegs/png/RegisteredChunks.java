@@ -438,6 +438,7 @@ class RegisteredChunks
         DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
         
         int unit = data.readByte();
+        // TODO: check unit specifier
         double width = readFloatingPoint(data, data.available());
         double height = readFloatingPoint(data, data.available());
         props.put(PngConstants.SCALE_UNIT, Integers.valueOf(unit));
@@ -528,7 +529,7 @@ class RegisteredChunks
         String s = readString(in, limit, "US-ASCII");
         int e = Math.max(s.indexOf('e'), s.indexOf('E'));
         double d = Double.valueOf(s.substring(0, (e < 0 ? s.length() : e))).doubleValue();
-        if (e > 0)
+        if (e >= 0)
             d *= Math.pow(10d, Double.valueOf(s.substring(e + 1)).doubleValue());
         return d;
     }

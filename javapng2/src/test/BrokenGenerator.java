@@ -5,8 +5,7 @@ import java.util.zip.*;
 /*
 TODO
   Unrecognized filter type (Defilterer)
-  Unrecognized compression method (iCCP, zTXt, iTXt)
-  Invalid keyword length
+  Invalid unit specifier (sCAL)
 
   check lengths: 
   bKGD: 1, 2, 6
@@ -149,15 +148,24 @@ public class BrokenGenerator
         gen("suite/f01n2c08.png", "broken/gama_zero.png",
             addAfter(find(IHDR), new Chunk(gAMA, new byte[4])));
 
+        // example of scal chunk with exponent
+        gen("misc/pngtest.png", "misc/scal_no_exp.png",
+            changeByte(find(sCAL), 15, (byte)'0'),
+            changeByte(find(sCAL), 16, (byte)'0'));
+
         // we don't even have any valid examples of iTXt
         gen("suite/f01n2c08.png", "misc/itxt_valid.png",
             addAfter(find(IHDR), createIntlText("Vegetable", 0, 0, "en-us", "", "Cucumber")));
-        gen("suite/f01n2c08.png", "misc/itxt_compressed.png",
+        gen("suite/f01n2c08.png", "misc/itxt_compress.png",
             addAfter(find(IHDR), createIntlText("Author", 1, 0, "sv-sw", "f\u00f6rfattare", "Christopher J. N\u00f6kleberg")));
         gen("suite/f01n2c08.png", "broken/itxt_compression_flag.png",
             addAfter(find(IHDR), createIntlText("Vegetable", 2, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "broken/itxt_compression_method.png",
             addAfter(find(IHDR), createIntlText("Vegetable", 1, 1, "en-us", "", "Cucumber")));
+        gen("suite/f01n2c08.png", "broken/itxt_keyword_length.png",
+            addAfter(find(IHDR), createIntlText("", 0, 0, "en-us", "", "Cucumber")));
+        gen("suite/f01n2c08.png", "broken/itxt_keyword_length_2.png",
+            addAfter(find(IHDR), createIntlText("01234567890123456789012345678901234567890123456789012345678901234567890123456789", 0, 0, "en-us", "", "Cucumber")));
 
         gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png",
             replace(find(pHYs), changeByte(extract("suite/cdun2c08.png", pHYs), 8, 2)));
