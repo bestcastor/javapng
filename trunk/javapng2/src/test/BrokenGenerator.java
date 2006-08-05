@@ -5,7 +5,10 @@ import java.util.zip.*;
 /*
 TODO
   Unrecognized filter type (Defilterer)
+  EOF when reading filter type
+  EOF when reading row bytes
   Invalid unit specifier (sCAL)
+  Invalid floating point (sCAL)
 
   check lengths: 
   bKGD: 1, 2, 6
@@ -166,16 +169,10 @@ public class BrokenGenerator
             addAfter(find(IHDR), createIntlText("", 0, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "broken/itxt_keyword_length_2.png",
             addAfter(find(IHDR), createIntlText("01234567890123456789012345678901234567890123456789012345678901234567890123456789", 0, 0, "en-us", "", "Cucumber")));
-
-        gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png",
-            replace(find(pHYs), changeByte(extract("suite/cdun2c08.png", pHYs), 8, 2)));
-        gen("misc/pngtest.png", "broken/offs_unit_specifier.png",
-            replace(find(oFFs), changeByte(extract("misc/pngtest.png", oFFs), 8, 2)));
-
-        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth.png",
-            replace(find(sBIT), changeByte(extract("suite/cs5n2c08.png", sBIT), 0, -1)));
-        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth_2.png",
-            replace(find(sBIT), changeByte(extract("suite/cs5n2c08.png", sBIT), 0, 9)));
+        gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png", changeByte(find(pHYs), 8, 2));
+        gen("misc/pngtest.png", "broken/offs_unit_specifier.png", changeByte(find(oFFs), 8, 2));
+        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth.png", changeByte(find(sBIT), 0, -1));
+        gen("suite/cs5n2c08.png", "broken/sbit_sample_depth_2.png", changeByte(find(sBIT), 0, 9));
         gen("suite/basn3p08.png", "broken/ster_mode.png",
             addAfter(find(IHDR), new Chunk(sTER, new byte[]{ 2 })));
 
@@ -190,9 +187,7 @@ public class BrokenGenerator
             addAfter(find(IHDR), suggested),
             addAfter(find(IHDR), suggested));
 
-        gen("suite/cm0n0g04.png", "broken/time_value_range.png",
-            replace(find(tIME), changeByte(extract("suite/cm0n0g04.png", tIME), 2, 0)));
-
+        gen("suite/cm0n0g04.png", "broken/time_value_range.png", changeByte(find(tIME), 2, 0));
         gen("suite/basn3p08.png", "broken/length_ihdr.png", setLength(find(IHDR), 14));
         gen("suite/basn3p08.png", "broken/length_iend.png", setLength(find(IEND), 1));
         gen("suite/basn3p08.png", "broken/length_ster.png",
@@ -219,17 +214,11 @@ public class BrokenGenerator
     {
         return new Processor(){
             public void process(List<Chunk> chunks) throws IOException {
-                changeByte(q.query(chunks), offset, value);
+                Chunk chunk = q.query(chunks);
+                chunk.data[offset] = (byte)value;
+                chunk.crc = crc(chunk.type, chunk.data);
             }
         };
-    }
-
-    private static Chunk changeByte(Chunk chunk, int offset, int value)
-    throws IOException
-    {
-        chunk.data[offset] = (byte)value;
-        chunk.crc = crc(chunk.type, chunk.data);
-        return chunk;
     }
 
     private static Processor replaceHeader(int width, int height, int bitDepth, int colorType,
