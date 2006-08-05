@@ -275,6 +275,14 @@
         </javadoc>
     </target>
 
+    <target name="dist-broken" depends="broken" description="Create broken suite distribution">
+        <tstamp/>
+        <mkdir dir="dist"/>
+        <zip zipfile="dist/brokensuite-${DSTAMP}.zip">
+            <fileset dir="src/test/images/broken" includes="*.png"/>
+        </zip>
+    </target>
+
     <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
         <mkdir dir="dist"/>
         <jar jarfile="dist/${prefix}-src.jar" filesonly="true">
