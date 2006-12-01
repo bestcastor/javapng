@@ -83,7 +83,7 @@ class Defilterer
         for (int srcY = 0, dstY = yOffset; srcY < passHeight; srcY++, dstY += yStep) {
             int filterType = in.read();
             if (filterType == -1)
-                throw new EOFException();
+                throw new EOFException("Unexpected end of image data");
             readFully(in, cur, bpp, bytesPerRow);
             defilter(cur, prev, bpp, filterType);
             if (isShort) {
@@ -183,7 +183,7 @@ class Defilterer
         while (total < len) {
             int result = in.read(b, off + total, len - total);
             if (result == -1)
-                throw new EOFException("EOF");
+                throw new EOFException("Unexpected end of image data");
             total += result;
         }
     }

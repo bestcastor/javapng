@@ -59,8 +59,7 @@ extends PixelProcessor
     public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
     {
         // run non-progressive processor first
-        if (!pp.process(row, xOffset, xStep, yStep, y, width))
-            return false;
+        pp.process(row, xOffset, xStep, yStep, y, width);
 
         // then replicate pixels across entire block
         int blockHeight = xStep;
