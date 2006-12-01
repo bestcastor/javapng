@@ -136,7 +136,6 @@
         <mkdir dir="build/coverage"/>
         <copy todir="build/coverage" overwrite="true">
             <fileset dir="build/main"/>
-            <fileset dir="build/examples"/>
         </copy>
         <cobertura-instrument>
             <fileset dir="build/coverage" includes="**/*.class"/>
