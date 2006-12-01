@@ -230,6 +230,9 @@ extends PngTestCase
         errorHelper("/images/broken/length_trns_rgb.png");
         errorHelper("/images/broken/length_trns_palette.png");
         errorHelper("/images/broken/length_hist.png");
+        errorHelper("/images/broken/length_bkgd_gray.png");
+        errorHelper("/images/broken/length_bkgd_rgb.png");
+        errorHelper("/images/broken/length_bkgd_palette.png");
         
         errorHelper("/images/broken/truncate_idat.png");
         errorHelper("/images/broken/truncate_idat_2.png");

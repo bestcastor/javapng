@@ -11,7 +11,6 @@ TODO
   Invalid floating point (sCAL)
 
   check lengths: 
-  bKGD: 1, 2, 6
   sBIT: 1, 2, 3, 4
   gIFg: 4
 */  
@@ -203,6 +202,10 @@ public class BrokenGenerator
         gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", setLength(find(tRNS), 0));
         gen("suite/tbbn3p08.png", "broken/length_trns_palette.png", setLength(find(tRNS), 174));
 
+        gen("suite/bgbn4a08.png", "broken/length_bkgd_gray.png", setLength(find(bKGD), 6));
+        gen("suite/bgwn6a08.png", "broken/length_bkgd_rgb.png", setLength(find(bKGD), 2));
+        gen("suite/tbbn3p08.png", "broken/length_bkgd_palette.png", setLength(find(bKGD), 6));
+        
         gen("suite/basn3p08.png", "broken/truncate_idat.png", truncate(find(IDAT), 20));
         gen("misc/pngtest.png", "broken/truncate_idat_2.png", truncate(find(IDAT), 6000));
 
