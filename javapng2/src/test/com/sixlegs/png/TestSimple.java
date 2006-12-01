@@ -35,6 +35,7 @@ extends PngTestCase
         assertEquals(0, pixel[1]);
         assertEquals(51, pixel[2]);
         assertEquals(255, pixel[3]);
+        assertEquals(0, splt.getFrequency(0));
         assertEquals(0, splt.getFrequency(1));
     }
 
@@ -289,12 +290,16 @@ extends PngTestCase
         
         assertTrue(PngConstants.isReserved(PngConstants.getChunkType("HErB")));
         assertTrue(PngConstants.isSafeToCopy(PngConstants.getChunkType("HERb")));
+
+        readResource("/images/suite/tbbn2c16.png",
+                     new PngImage(new PngConfig.Builder().gammaCorrect(false).build()));
         
-        PngConfig progressive = new PngConfig.Builder().progressive(true).build();
-        readResource("/images/suite/basi0g01.png", new PngImage(progressive));
+        readResource("/images/suite/basi0g01.png",
+                     new PngImage(new PngConfig.Builder().progressive(true).build()));
                      
         PngConfig readHeader = new PngConfig.Builder().readLimit(PngConfig.READ_HEADER).build();
         assertEquals(32, readResource("/images/suite/basn0g01.png", new PngImage(readHeader)).getWidth());
+        assertEquals(PngConfig.READ_HEADER, new PngConfig.Builder(readHeader).build().getReadLimit());
 
         PngConfig readUntilData = new PngConfig.Builder().readLimit(PngConfig.READ_UNTIL_DATA).build();
         assertNotNull(readResource("/images/suite/basn3p01.png", new PngImage(readUntilData)).getProperty(PngConstants.PALETTE));
@@ -405,39 +410,11 @@ extends PngTestCase
         errorHelper("/images/broken/length_bkgd_gray.png");
         errorHelper("/images/broken/length_bkgd_rgb.png");
         errorHelper("/images/broken/length_bkgd_palette.png");
-        
-        // errorHelper("/images/broken/truncate_idat.png");
-        // errorHelper("/images/broken/truncate_idat_2.png");
-    }
-
-    public void testHerby()
-    throws Exception
-    {
         errorHelper("/images/broken/unknown_filter_type.png");
         errorHelper("/images/broken/truncate_zlib.png");
         errorHelper("/images/broken/truncate_zlib_2.png");
         errorHelper("/images/broken/truncate_idat_0.png");
         errorHelper("/images/broken/truncate_idat_1.png");
-        /*
-        errorHelper("/images/broken/truncate_idat_2.png");
-        errorHelper("/images/broken/truncate_idat_3.png");
-        errorHelper("/images/broken/truncate_idat_4.png");
-        errorHelper("/images/broken/truncate_idat_5.png");
-        errorHelper("/images/broken/truncate_idat_6.png");
-        errorHelper("/images/broken/truncate_idat_7.png");
-        errorHelper("/images/broken/truncate_idat_8.png");
-        errorHelper("/images/broken/truncate_idat_9.png");
-        errorHelper("/images/broken/truncate_idat_10.png");
-        errorHelper("/images/broken/truncate_idat_11.png");
-        errorHelper("/images/broken/truncate_idat_12.png");
-        errorHelper("/images/broken/truncate_idat_13.png");
-        errorHelper("/images/broken/truncate_idat_14.png");
-        errorHelper("/images/broken/truncate_idat_15.png");
-        errorHelper("/images/broken/truncate_idat_16.png");
-        errorHelper("/images/broken/truncate_idat_17.png");
-        errorHelper("/images/broken/truncate_idat_18.png");
-        errorHelper("/images/broken/truncate_idat_19.png");
-        */
     }
 
     public void errorHelper(String path)
@@ -448,10 +425,10 @@ extends PngTestCase
             fail("Expected exception");
         } catch (Exception e) {
             System.err.println(new File(path).getName() + ": " + e.getMessage());
-            StackTraceElement stack = e.getStackTrace()[0];
-            System.err.println("\t" + stack.getFileName() + ":" + stack.getLineNumber());
-//             if (e.getMessage() == null)
-//                 e.printStackTrace(System.err);
+            // StackTraceElement stack = e.getStackTrace()[0];
+            // System.err.println("\t" + stack.getFileName() + ":" + stack.getLineNumber());
+            if (e.getMessage() == null)
+                e.printStackTrace(System.err);
         }
     }
 
