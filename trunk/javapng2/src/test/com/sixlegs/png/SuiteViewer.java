@@ -46,13 +46,29 @@ public class SuiteViewer
     private static final int ACROSS = 15;
     private static final int DOWN = 16;
 
-    private static final PngConfig config =
-        new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_METADATA).build();
-    
+    final private PngConfig config;
+
+    public SuiteViewer()
+    {
+        this(new PngConfig.Builder()
+             .readLimit(PngConfig.READ_EXCEPT_METADATA)
+             .build());
+    }
+
+    public SuiteViewer(PngConfig config)
+    {
+        this.config = config;
+    }
+
     public static void main(String[] args)
     throws Exception
     {
-        boolean createImage = args.length > 0;
+        ImageIO.write(new SuiteViewer().render(true), "PNG", new File(args[0]));
+    }
+
+    public BufferedImage render(boolean createImage)
+    throws IOException
+    {
         int w = (32 + PADDING) * ACROSS;
         int h = (32 + PADDING) * DOWN;
         BufferedImage test = null;
@@ -88,7 +104,8 @@ public class SuiteViewer
         }
         if (createImage) {
             g.dispose();
-            ImageIO.write(test, "PNG", new File(args[0]));
+            return test;
         }
+        return null;
     }
 }
