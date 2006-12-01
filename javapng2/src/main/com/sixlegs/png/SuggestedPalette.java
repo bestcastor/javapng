@@ -81,7 +81,7 @@ public interface SuggestedPalette
      * Retrieve a sample frequency value. The frequency value is proportional to the
      * fraction of pixels in the image that are closest to that palette entry in RGBA
      * space. The range of individual values will reasonably fill 0 to 65535.
-     * Entries apear in decreasing order of frequency.
+     * Entries appear in decreasing order of frequency.
      * @param index the sample index
      */
     int getFrequency(int index);
