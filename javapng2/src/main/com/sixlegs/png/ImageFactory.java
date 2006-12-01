@@ -254,8 +254,8 @@ class ImageFactory
         // TODO: cache identity tables?
         int size = 1 << bitDepth;
         short[] table = new short[size];
-        for (short i = 0; i < size; i++)
-            table[i] = i;
+        for (int i = 0; i < size; i++)
+            table[i] = (short)i;
         return table;
     }
 }

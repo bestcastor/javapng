@@ -161,6 +161,7 @@
     </target>
 
     <target name="suite" depends="compile-test,compile-viewer" description="Decode and display PngSuite">
+        <delete file="${suite.file}"/>
         <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
             <arg value="${suite.file}"/>
         </java>
