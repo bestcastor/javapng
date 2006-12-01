@@ -114,9 +114,8 @@ implements DataInput
     }
 
     public void close()
-    throws IOException
     {
-        in.close();
+        throw new UnsupportedOperationException("do not close me");
     }
     
     ////////// DataInput methods we implement directly //////////

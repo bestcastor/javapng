@@ -11,6 +11,7 @@ import junit.framework.*;
 public class TestSimple
 extends PngTestCase
 {
+        private static final int msOG_type = PngConstants.getChunkType("msOG");
     private byte[] buf = new byte[0x2000];
 
     public void testNonFatalWarning()
@@ -110,12 +111,59 @@ extends PngTestCase
         file.delete();
     }
 
+    /*
+    public void testDataInputMethods()
+    throws Exception
+    {
+        // this is mostly just for test coverage
+        readResource("/images/misc/anigif.png", new PngImage(){
+            protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+                if (type == msOG_type) {
+                    // readBoolean
+                    // readShort
+                    // readChar
+                    // readFloat
+                    // readDouble
+                    // int skipBytes
+                    // readLine
+                    // readUTF
+                    
+                    // readUnsignedByte -> EOF
+                    // readUnsignedShort -> EOF
+                    // readInt -> EOF
+                    return true;
+                }
+                return super.readChunk(type, in, length);
+            }
+        });
+    }
+    */
+
+    public void testBrokenCustomReadChunk()
+    throws Exception
+    {
+        try {
+            readResource("/images/misc/anigif.png", new PngImage(){
+                protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+                    try {
+                        ((InputStream)in).close();
+                        fail("expected exception");
+                    } catch (UnsupportedOperationException ignore) { }
+                    if (type == msOG_type) {
+                        in.readFully(new byte[length - 1]);
+                        return true;
+                    }
+                    return super.readChunk(type, in, length);
+                }
+            });
+            fail("expected exception");
+        } catch (PngException ignore) { }
+    }
+    
     public void testPrivateChunk()
     throws Exception
     {
         final String ORIGINAL_GIF = "original_gif";
-        final int msOG_type = PngConstants.getChunkType("msOG");
-
         PngImage png = readResource("/images/misc/anigif.png", new PngImage(){
             protected boolean readChunk(int type, DataInput in, int length) throws IOException {
                 if (type == msOG_type) {
