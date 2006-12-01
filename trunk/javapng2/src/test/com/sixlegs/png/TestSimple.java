@@ -20,6 +20,24 @@ extends PngTestCase
         new PngImage().read(getClass().getResourceAsStream("/images/broken/gama_zero.png"), true);
     }
 
+    public void testReadSuggestedPalette()
+    throws Exception
+    {
+        PngImage png = readResource("/images/misc/ps2n2c16.png");
+        SuggestedPalette splt =
+            (SuggestedPalette)((List)png.getProperty(PngConstants.SUGGESTED_PALETTES)).get(0);
+        assertEquals("six-cube", splt.getName());
+        assertEquals(16, splt.getSampleDepth());
+        assertEquals(216, splt.getSampleCount());
+        short[] pixel = new short[4];
+        splt.getSample(1, pixel);
+        assertEquals(0, pixel[0]);
+        assertEquals(0, pixel[1]);
+        assertEquals(51, pixel[2]);
+        assertEquals(255, pixel[3]);
+        assertEquals(0, splt.getFrequency(1));
+    }
+
     public void testGetBackground()
     throws Exception
     {
@@ -388,8 +406,38 @@ extends PngTestCase
         errorHelper("/images/broken/length_bkgd_rgb.png");
         errorHelper("/images/broken/length_bkgd_palette.png");
         
-        errorHelper("/images/broken/truncate_idat.png");
+        // errorHelper("/images/broken/truncate_idat.png");
+        // errorHelper("/images/broken/truncate_idat_2.png");
+    }
+
+    public void testHerby()
+    throws Exception
+    {
+        errorHelper("/images/broken/unknown_filter_type.png");
+        errorHelper("/images/broken/truncate_zlib.png");
+        errorHelper("/images/broken/truncate_zlib_2.png");
+        errorHelper("/images/broken/truncate_idat_0.png");
+        errorHelper("/images/broken/truncate_idat_1.png");
+        /*
         errorHelper("/images/broken/truncate_idat_2.png");
+        errorHelper("/images/broken/truncate_idat_3.png");
+        errorHelper("/images/broken/truncate_idat_4.png");
+        errorHelper("/images/broken/truncate_idat_5.png");
+        errorHelper("/images/broken/truncate_idat_6.png");
+        errorHelper("/images/broken/truncate_idat_7.png");
+        errorHelper("/images/broken/truncate_idat_8.png");
+        errorHelper("/images/broken/truncate_idat_9.png");
+        errorHelper("/images/broken/truncate_idat_10.png");
+        errorHelper("/images/broken/truncate_idat_11.png");
+        errorHelper("/images/broken/truncate_idat_12.png");
+        errorHelper("/images/broken/truncate_idat_13.png");
+        errorHelper("/images/broken/truncate_idat_14.png");
+        errorHelper("/images/broken/truncate_idat_15.png");
+        errorHelper("/images/broken/truncate_idat_16.png");
+        errorHelper("/images/broken/truncate_idat_17.png");
+        errorHelper("/images/broken/truncate_idat_18.png");
+        errorHelper("/images/broken/truncate_idat_19.png");
+        */
     }
 
     public void errorHelper(String path)
@@ -400,8 +448,10 @@ extends PngTestCase
             fail("Expected exception");
         } catch (Exception e) {
             System.err.println(new File(path).getName() + ": " + e.getMessage());
-            if (e.getMessage() == null)
-                e.printStackTrace(System.err);
+            StackTraceElement stack = e.getStackTrace()[0];
+            System.err.println("\t" + stack.getFileName() + ":" + stack.getLineNumber());
+//             if (e.getMessage() == null)
+//                 e.printStackTrace(System.err);
         }
     }
 

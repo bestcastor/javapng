@@ -206,11 +206,39 @@ public class BrokenGenerator
         gen("suite/bgwn6a08.png", "broken/length_bkgd_rgb.png", setLength(find(bKGD), 2));
         gen("suite/tbbn3p08.png", "broken/length_bkgd_palette.png", setLength(find(bKGD), 6));
         
-        gen("suite/basn3p08.png", "broken/truncate_idat.png", truncate(find(IDAT), 20));
-        gen("misc/pngtest.png", "broken/truncate_idat_2.png", truncate(find(IDAT), 6000));
-
         gen("suite/ctzn0g04.png", "broken/ztxt_compression_method.png", changeByte(find(zTXt), 10, 3));
         gen("suite/ctzn0g04.png", "broken/ztxt_data_format.png", changeByte(find(zTXt), 11, 3));
+
+        gen("suite/basn3p08.png", "broken/truncate_zlib.png", truncate(find(IDAT), 20));
+        gen("misc/pngtest.png", "broken/truncate_zlib_2.png", truncate(find(IDAT), 6000));
+        gen("suite/basn0g01.png", "broken/truncate_idat_0.png", setDataLength(0));
+        gen("suite/basn0g01.png", "broken/truncate_idat_1.png", setDataLength(1));
+
+        gen("suite/basn0g01.png", "broken/unknown_filter_type.png", changeDataByte(0, 5));
+
+//         for (int i = 0; i < 160; i++)
+//             gen("suite/basn0g01.png", "broken/truncate_idat_" + i + ".png", setDataLength(i));
+   }
+
+    private static Processor setDataLength(final int length)
+    {
+        return new DataProcessor(){
+            public byte[] process(byte[] data) {
+                byte[] replace = new byte[length];
+                System.arraycopy(data, 0, replace, 0, length);
+                return replace;
+            }
+        };
+    }
+
+    private static Processor changeDataByte(final int offset, final int value)
+    {
+        return new DataProcessor(){
+            public byte[] process(byte[] data) {
+                data[offset] = (byte)value;
+                return data;
+            }
+        };
     }
 
     private static Processor changeByte(final Query q, final int offset, final int value)
@@ -372,6 +400,65 @@ public class BrokenGenerator
                 return null;
             }
         };
+    }
+
+    abstract private static class DataProcessor
+    implements Processor
+    {
+        public void process(List<Chunk> chunks)
+        throws IOException
+        {
+            List<byte[]> dataList = new ArrayList<byte[]>();
+            int length = 0;
+            int index = chunks.indexOf(find(IDAT).query(chunks));
+            for (Iterator<Chunk> it = chunks.iterator(); it.hasNext();) {
+                Chunk chunk = it.next();
+                if (chunk.type == IDAT) {
+                    it.remove();
+                    dataList.add(chunk.data);
+                    length += chunk.length;
+                }
+            }
+            byte[] concat = new byte[length];
+            int pos = 0;
+            for (byte[] data : dataList) {
+                System.arraycopy(data, 0, concat, pos, data.length);
+                pos += data.length;
+            }
+            concat = deflate(process(inflate(concat)));
+            chunks.add(index, new Chunk(IDAT, concat, crc(IDAT, concat)));
+        }
+
+        abstract public byte[] process(byte[] data);
+    }
+
+    private static byte[] inflate(byte[] data)
+    throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        pipe(new InflaterInputStream(new ByteArrayInputStream(data)), out, new byte[0x2000]);
+        return out.toByteArray();
+    }
+
+    private static byte[] deflate(byte[] data)
+    throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DeflaterOutputStream defl = new DeflaterOutputStream(out);
+        pipe(new ByteArrayInputStream(data), defl, new byte[0x2000]);
+        defl.close();
+        return out.toByteArray();
+    }
+    
+    private static void pipe(InputStream in, OutputStream out, byte[] buf)
+    throws IOException
+    {
+        for (;;) {
+            int amt = in.read(buf);
+            if (amt < 0)
+                break;
+            out.write(buf, 0, amt);
+        }
     }
 
     private interface Query
