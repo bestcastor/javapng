@@ -88,7 +88,7 @@ implements SuggestedPalette
         
     public int getFrequency(int index)
     {
-        int from = index * (entrySize + 1) - 2;
+        int from = (index + 1) * entrySize - 2;
         int a = 0xFF & bytes[from];
         int b = 0xFF & bytes[from + 1];
         return ((a << 8) | b);
