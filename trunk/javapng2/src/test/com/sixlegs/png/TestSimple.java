@@ -1,5 +1,6 @@
 package com.sixlegs.png;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -11,6 +12,36 @@ public class TestSimple
 extends PngTestCase
 {
     private byte[] buf = new byte[0x2000];
+
+    public void testNonFatalWarning()
+    throws Exception
+    {
+        new PngImage().read(getClass().getResourceAsStream("/images/broken/gama_zero.png"), true);
+    }
+
+    public void testGetBackground()
+    throws Exception
+    {
+        assertEquals(Color.yellow, readResource("/images/suite/bgyn6a16.png").getBackground());
+        assertEquals(Color.black, readResource("/images/suite/bgbn4a08.png").getBackground());
+        assertEquals(Color.white, readResource("/images/suite/bgwn6a08.png").getBackground());
+        assertEquals(new Color(0xABABAB), readResource("/images/suite/tbgn3p08.png").getBackground());
+        assertNull(readResource("/images/suite/basn0g01.png").getBackground());
+    }
+
+    public void testReadTextChunk()
+    throws Exception
+    {
+        PngImage png = readResource("/images/suite/ct1n0g04.png");
+        TextChunk title = png.getTextChunk("Title");
+        assertEquals("Title", title.getKeyword());
+        assertNull(title.getTranslatedKeyword());
+        assertNull(title.getLanguage());
+        assertEquals("PngSuite", title.getText());
+        assertEquals(PngConstants.tEXt, title.getType());
+
+        assertNull(png.getTextChunk("foobar"));
+    }
 
     public void testSubsampling()
     throws Exception
@@ -75,6 +106,7 @@ extends PngTestCase
         File file = File.createTempFile("recolor", ".png");
         javax.imageio.ImageIO.write(png.read(in, true), "PNG", file);
         assertEquals(2661639413L, getChecksum(new java.util.zip.CRC32(), file, buf));
+        new PngImage().read(file); // test reading from a file
         file.delete();
     }
 
@@ -161,10 +193,34 @@ extends PngTestCase
         assertEquals(32, png.getHeight());
         // TODO: check gif chunks
     }
+
+    public void testSkipCriticalChunk()
+    throws Exception
+    {
+        try {
+            readResource("/images/misc/penguin.png", new PngImage(){
+                protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+                    if (type == PngConstants.PLTE)
+                        return false;
+                    return super.readChunk(type, in, length);
+                }
+            });
+        } catch (PngException ignore) { }
+    }
     
     public void testCoverage()
     throws Exception
     {
+        try {
+            new PngImage().read(null, true);
+            fail("expected exception");
+        } catch (NullPointerException ignore) { }
+
+        try {
+            new PngImage().getWidth();
+            fail("expected exception");
+        } catch (IllegalStateException ignore) { }
+        
         assertTrue(PngConstants.isReserved(PngConstants.getChunkType("HErB")));
         assertTrue(PngConstants.isSafeToCopy(PngConstants.getChunkType("HERb")));
         
@@ -176,6 +232,9 @@ extends PngTestCase
 
         PngConfig readUntilData = new PngConfig.Builder().readLimit(PngConfig.READ_UNTIL_DATA).build();
         assertNotNull(readResource("/images/suite/basn3p01.png", new PngImage(readUntilData)).getProperty(PngConstants.PALETTE));
+
+        PngConfig readExceptData = new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
+        assertEquals(32, readResource("/images/suite/basn0g01.png", new PngImage(readExceptData)).getWidth());
     }    
 
     public void testErrors()
