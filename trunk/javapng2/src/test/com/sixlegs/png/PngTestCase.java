@@ -1,7 +1,9 @@
 package com.sixlegs.png;
 
 import java.lang.reflect.Constructor;
+import java.io.*;
 import java.util.*;
+import java.util.zip.Checksum;
 import junit.framework.*;
 
 abstract public class PngTestCase
@@ -45,5 +47,23 @@ extends TestCase
             testMethodNames.add(tokenizer.nextToken());
         }
         return testMethodNames;
+    }
+
+    public static long getChecksum(Checksum checksum, File file, byte[] buf)
+    throws IOException
+    {
+        checksum.reset();
+        InputStream in = new FileInputStream(file);
+        try {
+            for (;;) {
+                int amt = in.read(buf);
+                if (amt < 0)
+                    break;
+                checksum.update(buf, 0, amt);
+            }
+        } finally {
+            in.close();
+        }
+        return checksum.getValue();
     }
 }

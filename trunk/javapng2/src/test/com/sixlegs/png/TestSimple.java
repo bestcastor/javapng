@@ -1,13 +1,58 @@
 package com.sixlegs.png;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 import junit.framework.*;
 
+// TODO: reduce reliance on ImageIO for checksum calc
 public class TestSimple
 extends PngTestCase
 {
+    private byte[] buf = new byte[0x2000];
+
+    public void testSubsampling()
+    throws Exception
+    {
+        subsamplingHelper("/images/misc/penguin.png", 3, 3, 923164955L);
+        subsamplingHelper("/images/misc/pngtest.png", 3, 3, 1930297805L);
+    }
+
+    private void subsamplingHelper(String path, int xsub, int ysub, long expect)
+    throws Exception
+    {
+        PngImage png = new PngImage(new PngConfig.Builder().sourceSubsampling(xsub, ysub, 0, 0).build());
+        BufferedImage image = png.read(getClass().getResourceAsStream(path), true);
+        assertChecksum(expect, image, "subsample");
+    }
+
+    public void testSourceRegions()
+    throws Exception
+    {
+        regionHelper("/images/misc/penguin.png", new Rectangle(75, 0, 105, 125), 490287408L);
+        regionHelper("/images/misc/pngtest.png", new Rectangle(10, 20, 30, 40), 2689440455L);
+    }
+
+    private void regionHelper(String path, Rectangle region, long expect)
+    throws Exception
+    {
+        PngImage png = new PngImage(new PngConfig.Builder().sourceRegion(region).build());
+        BufferedImage image = png.read(getClass().getResourceAsStream(path), true);
+        assertEquals(region.width, image.getWidth());
+        assertEquals(region.height, image.getHeight());
+        assertChecksum(expect, image, "region");
+    }
+
+    private void assertChecksum(long expect, BufferedImage image, String desc)
+    throws Exception
+    {
+        File file = File.createTempFile(desc, ".png");
+        javax.imageio.ImageIO.write(image, "PNG", file);
+        assertEquals(expect, getChecksum(new java.util.zip.CRC32(), file, buf));
+        file.delete();
+    }
+    
     public void testRecolorMonochrome()
     throws Exception
     {
@@ -27,10 +72,11 @@ extends PngTestCase
             }
         };
         InputStream in = getClass().getResourceAsStream("/images/suite/basn0g01.png");
-        BufferedImage img = png.read(in, true);
-        javax.imageio.ImageIO.write(img, "PNG", File.createTempFile("recolor", ".png"));
+        File file = File.createTempFile("recolor", ".png");
+        javax.imageio.ImageIO.write(png.read(in, true), "PNG", file);
+        assertEquals(2661639413L, getChecksum(new java.util.zip.CRC32(), file, buf));
+        file.delete();
     }
-
 
     public void testPrivateChunk()
     throws Exception
@@ -57,10 +103,8 @@ extends PngTestCase
         OutputStream out = new FileOutputStream(file);
         out.write(bytes, 11, bytes.length - 11);
         out.close();
-
-        BufferedImage image = javax.imageio.ImageIO.read(file);
-        assertEquals(32, image.getWidth());
-        assertEquals(32, image.getHeight());        
+        assertEquals(916473047L, getChecksum(new java.util.zip.CRC32(), file, buf));
+        file.delete();
     }
 
     public void testRead()
@@ -121,6 +165,9 @@ extends PngTestCase
     public void testCoverage()
     throws Exception
     {
+        assertTrue(PngConstants.isReserved(PngConstants.getChunkType("HErB")));
+        assertTrue(PngConstants.isSafeToCopy(PngConstants.getChunkType("HERb")));
+        
         PngConfig progressive = new PngConfig.Builder().progressive(true).build();
         readResource("/images/suite/basi0g01.png", new PngImage(progressive));
                      

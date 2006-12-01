@@ -134,7 +134,7 @@
         <taskdef resource="tasks.properties" classpathref="path.libdev"/>
         <delete file="cobertura.ser"/>
         <mkdir dir="build/coverage"/>
-        <copy todir="build/coverage">
+        <copy todir="build/coverage" overwrite="true">
             <fileset dir="build/main"/>
             <fileset dir="build/examples"/>
         </copy>
