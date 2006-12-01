@@ -53,11 +53,11 @@
             <path refid="path.libdev"/>
             <pathelement path="build/test"/>
         </path>
-        <path id="path.test.emma">
+        <path id="path.coverage">
             <path refid="path.lib"/>
             <path refid="path.libdev"/>
             <pathelement path="build/test"/>
-            <pathelement path="build/emma"/>
+            <pathelement path="build/coverage"/>
         </path>
     </target>
 
@@ -130,28 +130,22 @@
         <mytest refid="path.test" includes="**/*Todo.java"/>
     </target>
 
-    <target name="emma" depends="compile-test" description="Generate code coverage report using Emma">
-        <taskdef resource="emma_ant.properties" classpathref="path.libdev"/>
-        <mkdir dir="build/emma"/>
-        <copy todir="build/emma">
+    <target name="coverage" depends="compile-test" description="Generate code coverage report">
+        <taskdef resource="tasks.properties" classpathref="path.libdev"/>
+        <delete file="cobertura.ser"/>
+        <mkdir dir="build/coverage"/>
+        <copy todir="build/coverage">
             <fileset dir="build/main"/>
             <fileset dir="build/examples"/>
         </copy>
-        <emma enabled="true">
-            <instr
-              instrpath="build/emma"
-              mode="overwrite"
-            />
-        </emma>
-        <mytest refid="path.test.emma" includes="com/sixlegs/png/Test*.java" fork="true"/>
+        <cobertura-instrument>
+            <fileset dir="build/coverage" includes="**/*.class"/>
+        </cobertura-instrument>
+        <mytest refid="path.coverage" includes="com/sixlegs/png/Test*.java" fork="true"/>
         <mkdir dir="reports"/>
-        <emma enabled="true">
-            <report sourcepath="src/main">
-                <infileset dir="${user.dir}" includes="*.em, *.ec"/>
-                <txt outfile="reports/coverage.txt"/>
-                <html outfile="reports/coverage.html"/>
-            </report>
-        </emma>
+        <cobertura-report destdir="reports/coverage">
+            <fileset dir="src/main"/>
+        </cobertura-report>
     </target>
 
     <macrodef name="viewerImpl">
@@ -188,8 +182,7 @@
         <delete dir="build"/>
         <delete dir="dist"/>
         <delete dir="reports"/>
-        <delete file="${user.dir}/coverage.em"/>
-        <delete file="${user.dir}/coverage.ec"/>
+        <delete file="cobertura.ser"/>
         <delete file="${suite.file}"/>
         <delete>
             <fileset dir="." includes="TEST*"/>
