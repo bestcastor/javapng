@@ -79,6 +79,10 @@ final public class PngConfig
         this.sourceRegion = builder.sourceRegion;
         this.subsampling = builder.subsampling;
         this.filter = builder.filter;
+        if (progressive &&
+            ((getSourceXSubsampling() != 1 || getSourceYSubsampling() != 1) ||
+             getSourceRegion() != null))
+            throw new IllegalStateException("Progressive rendering cannot be used with source regions or subsampling");
     }
 
     /**

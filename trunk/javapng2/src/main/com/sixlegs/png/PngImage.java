@@ -60,7 +60,6 @@ import java.util.*;
 public class PngImage
 implements Transparency
 {
-    private static final long SIGNATURE = 0x89504E470D0A1A0AL;
     private static final PngConfig DEFAULT_CONFIG =
         new PngConfig.Builder().build();
       
@@ -147,15 +146,9 @@ implements Transparency
         try {
             props = new HashMap();
             PngInputStream pin = new PngInputStream(in);
-            long sig = pin.readLong();
-            if (sig != SIGNATURE) {
-                throw new PngException("Improper signature, expected 0x" +
-                                       Long.toHexString(SIGNATURE) + ", got 0x" +
-                                       Long.toHexString(sig), true);
-            }
             Set seen = new HashSet();
             while (machine.getState() != StateMachine.STATE_END) {
-                int type = pin.startChunk(pin.readInt());
+                int type = pin.startChunk();
                 machine.nextState(type);
                 if (type == PngConstants.IDAT) {
                     if (config.getReadLimit() == PngConfig.READ_UNTIL_DATA)
@@ -624,10 +617,13 @@ implements Transparency
      * By default this method will handle all of the chunk types defined
      * in Version 1.2 of the PNG Specification, and most of the
      * registered extension chunks.
+     * <p>
+     * Attempting to read past the end of the chunk data will result in
+     * an {@link EOFException}.
      * @param type the chunk type
      * @param in the input stream to read the chunk data from
      * @param length the length of the chunk data
-     * @return whether the chunk data has been read from the stream
+     * @return whether the chunk data has been processed
      */
     protected boolean readChunk(int type, DataInput in, int length)
     throws IOException

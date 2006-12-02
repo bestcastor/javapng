@@ -11,7 +11,8 @@ import junit.framework.*;
 public class TestSimple
 extends PngTestCase
 {
-        private static final int msOG_type = PngConstants.getChunkType("msOG");
+    private static final int msOG_type = PngConstants.getChunkType("msOG");
+    private static final int heRB_type = PngConstants.getChunkType("heRB");
     private byte[] buf = new byte[0x2000];
 
     public void testNonFatalWarning()
@@ -68,6 +69,11 @@ extends PngTestCase
     {
         subsamplingHelper("/images/misc/penguin.png", 3, 3, 923164955L);
         subsamplingHelper("/images/misc/pngtest.png", 3, 3, 1930297805L);
+        try {
+            readResource("/images/suite/s02n3p01.png",
+                         new PngImage(new PngConfig.Builder().sourceSubsampling(3, 3, 2, 2).build()));
+            fail("expected exception");
+        } catch (IllegalStateException ignore) { }
     }
 
     private void subsamplingHelper(String path, int xsub, int ysub, long expect)
@@ -83,6 +89,10 @@ extends PngTestCase
     {
         regionHelper("/images/misc/penguin.png", new Rectangle(75, 0, 105, 125), 490287408L);
         regionHelper("/images/misc/pngtest.png", new Rectangle(10, 20, 30, 40), 2689440455L);
+        try {
+            regionHelper("/images/misc/pngtest.png", new Rectangle(10, 20, 100, 100), 0L);
+            fail("expected exception");
+        } catch (IllegalStateException ignore) { }
     }
 
     private void regionHelper(String path, Rectangle region, long expect)
@@ -130,33 +140,75 @@ extends PngTestCase
         file.delete();
     }
 
-    /*
+    abstract private static class PrivateChunkReader
+    extends PngImage
+    {
+        private final int type;
+        public PrivateChunkReader(int type) { this.type = type; }
+
+        abstract protected void readChunk(DataInput in) throws IOException;
+        protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+            if (type == this.type) {
+                readChunk(in);
+                return true;
+            }
+            return super.readChunk(type, in, length);
+        }
+    }
+
     public void testDataInputMethods()
     throws Exception
     {
-        // this is mostly just for test coverage
-        readResource("/images/misc/anigif.png", new PngImage(){
-            protected boolean readChunk(int type, DataInput in, int length) throws IOException {
-                if (type == msOG_type) {
-                    // readBoolean
-                    // readShort
-                    // readChar
-                    // readFloat
-                    // readDouble
-                    // int skipBytes
-                    // readLine
-                    // readUTF
-                    
-                    // readUnsignedByte -> EOF
-                    // readUnsignedShort -> EOF
-                    // readInt -> EOF
-                    return true;
-                }
-                return super.readChunk(type, in, length);
+        readResource("/images/misc/herbio.png", new PrivateChunkReader(heRB_type){
+            protected void readChunk(DataInput in) throws IOException {
+                assertEquals(true, in.readBoolean());
+                assertEquals(false, in.readBoolean());
+                assertEquals(250, in.readUnsignedByte());
+                assertEquals((byte)250, in.readByte());
+                assertEquals(50000, in.readUnsignedShort());
+                assertEquals((short)50000, in.readShort());
+                assertEquals('Z', in.readChar());
+                assertEquals((float)Math.PI, in.readFloat());
+                assertEquals(Math.PI, in.readDouble());
+                assertEquals("Chris", in.readLine());
+                assertEquals("Nokleberg", in.readUTF());
+                assertEquals(2000000000, in.readInt());
             }
         });
+        readResource("/images/misc/herbio.png", new PrivateChunkReader(heRB_type){
+            protected void readChunk(DataInput in) throws IOException {
+                skipFully(in, 39);
+                assertEquals(2000000000, in.readInt());
+            }
+        });
+        try {
+            readResource("/images/misc/herbio.png", new PrivateChunkReader(heRB_type){
+                protected void readChunk(DataInput in) throws IOException {
+                    skipFully(in, 40);
+                    in.readInt();
+                    fail("expected exception");
+                }
+            });
+        } catch (EOFException ignore) { }
+        try {
+            readResource("/images/misc/herbio.png", new PrivateChunkReader(heRB_type){
+                protected void readChunk(DataInput in) throws IOException {
+                    skipFully(in, 42);
+                    in.readShort();
+                    fail("expected exception");
+                }
+            });
+        } catch (EOFException ignore) { }
+        try {
+            readResource("/images/misc/herbio.png", new PrivateChunkReader(heRB_type){
+                protected void readChunk(DataInput in) throws IOException {
+                    skipFully(in, 43);
+                    in.readByte();
+                    fail("expected exception");
+                }
+            });
+        } catch (EOFException ignore) { }
     }
-    */
 
     public void testBrokenCustomReadChunk()
     throws Exception
@@ -287,6 +339,32 @@ extends PngTestCase
             new PngImage().getWidth();
             fail("expected exception");
         } catch (IllegalStateException ignore) { }
+
+        try {
+            new PngConfig.Builder().sourceRegion(new Rectangle(-1, 0, 1, 1));
+            fail("expected exception");
+        } catch (IllegalArgumentException ignore) { }
+
+        try {
+            new PngConfig.Builder().sourceSubsampling(0, 2, 0, 0);
+            fail("expected exception");
+        } catch (IllegalArgumentException ignore) { }
+        
+        try {
+            new PngConfig.Builder()
+                .sourceRegion(new Rectangle(0, 0, 10, 10))
+                .progressive(true)
+                .build();
+            fail("expected exception");
+        } catch (IllegalStateException ignore) { }
+
+        try {
+            new PngConfig.Builder()
+                .sourceSubsampling(2, 2, 0, 0)
+                .progressive(true)
+                .build();
+            fail("expected exception");
+        } catch (IllegalStateException ignore) { }
         
         assertTrue(PngConstants.isReserved(PngConstants.getChunkType("HErB")));
         assertTrue(PngConstants.isSafeToCopy(PngConstants.getChunkType("HERb")));
@@ -297,7 +375,10 @@ extends PngTestCase
         readResource("/images/suite/basi0g01.png",
                      new PngImage(new PngConfig.Builder().progressive(true).build()));
                      
-        PngConfig readHeader = new PngConfig.Builder().readLimit(PngConfig.READ_HEADER).build();
+        PngConfig readHeader = new PngConfig.Builder()
+            .sourceRegion(null) // for coverage
+            .readLimit(PngConfig.READ_HEADER)
+            .build();
         assertEquals(32, readResource("/images/suite/basn0g01.png", new PngImage(readHeader)).getWidth());
         assertEquals(PngConfig.READ_HEADER, new PngConfig.Builder(readHeader).build().getReadLimit());
 

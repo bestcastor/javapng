@@ -38,10 +38,6 @@ package com.sixlegs.png;
 
 class Integers
 {
-    private Integers()
-    {
-    }
-    
     public static Integer valueOf(int i)
     {
         switch (i) {
@@ -53,6 +49,7 @@ class Integers
         case 5: return INT_5;
         case 6: return INT_6;
         case 7: return INT_7;
+        case 8: return INT_8;
         default:
             return new Integer(i);
         }
@@ -66,4 +63,5 @@ class Integers
     private static final Integer INT_5 = new Integer(5);
     private static final Integer INT_6 = new Integer(6);
     private static final Integer INT_7 = new Integer(7);
+    private static final Integer INT_8 = new Integer(8);
 }
