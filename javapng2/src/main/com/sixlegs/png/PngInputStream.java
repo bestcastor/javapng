@@ -48,28 +48,39 @@ final class PngInputStream
 extends InputStream
 implements DataInput
 {
+    private static final long SIGNATURE = 0x89504E470D0A1A0AL;
+
     private CRC32 crc = new CRC32();
     private InputStream in;
     private DataInputStream data;
     private byte[] tmp = new byte[0x1000];
-    private long count;
     private int length;
+    private int left;
 
     PngInputStream(InputStream in)
+    throws IOException
     {
         this.in = in;
         data = new DataInputStream(this);
+        left = 8;
+        long sig = readLong();
+        if (sig != SIGNATURE) {
+            throw new PngException("Improper signature, expected 0x" +
+                                   Long.toHexString(SIGNATURE) + ", got 0x" +
+                                   Long.toHexString(sig), true);
+        }
     }
 
-    int startChunk(int length)
+    int startChunk()
     throws IOException
     {
+        left = 8; // length, type
+        length = readInt();
         if (length < 0)
             throw new PngException("Bad chunk length: " + (0xFFFFFFFFL & length), true);
         crc.reset();
         int type = readInt();
-        count = 0;
-        this.length = length;
+        left = length;
         return type;
     }
     
@@ -77,7 +88,8 @@ implements DataInput
     throws IOException
     {
         if (getRemaining() != 0)
-            throw new PngException(PngConstants.getChunkName(type) + " read " + count + " bytes, expected " + length, true);
+            throw new PngException(PngConstants.getChunkName(type) + " read " + (length - left) + " bytes, expected " + length, true);
+        left = 4;
         if ((int)crc.getValue() != readInt())
             throw new PngException("Bad CRC value for " + PngConstants.getChunkName(type) + " chunk", true);
     }
@@ -87,10 +99,12 @@ implements DataInput
     public int read()
     throws IOException
     {
+        if (left == 0)
+            return -1;
         int result = in.read();
         if (result != -1) {
             crc.update(result);
-            count++;
+            left--;
         }
         return result;
     }
@@ -98,10 +112,14 @@ implements DataInput
     public int read(byte[] b, int off, int len)
     throws IOException
     {
-        int result = in.read(b, off, len);
+        if (len == 0)
+            return 0;
+        if (left == 0)
+            return -1;
+        int result = in.read(b, off, Math.min(left, len));
         if (result != -1) {
             crc.update(b, off, result);
-            count += result;
+            left -= result;
         }
         return result;
     }
@@ -235,6 +253,6 @@ implements DataInput
      */
     public int getRemaining()
     {
-        return (int)(length - count);
+        return left;
     }
 }

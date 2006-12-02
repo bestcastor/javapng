@@ -66,4 +66,18 @@ extends TestCase
         }
         return checksum.getValue();
     }
+
+    public static void skipFully(DataInput in, int n)
+    throws IOException
+    {
+        while (n > 0) {
+            int amt = in.skipBytes(n);
+            if (amt == 0) {
+                in.readByte();
+                n--;
+            } else {
+                n -= amt;
+            }
+        }
+    }
 }

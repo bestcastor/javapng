@@ -155,7 +155,8 @@ public class BrokenGenerator
             changeByte(find(sCAL), 15, (byte)'0'),
             changeByte(find(sCAL), 16, (byte)'0'));
 
-        // we don't even have any valid examples of iTXt
+        gen("suite/basn3p08.png", "misc/herbio.png", addAfter(find(IHDR), createPrivateChunk()));
+        
         gen("suite/f01n2c08.png", "misc/itxt_valid.png",
             addAfter(find(IHDR), createIntlText("Vegetable", 0, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "misc/itxt_compress.png",
@@ -215,9 +216,6 @@ public class BrokenGenerator
         gen("suite/basn0g01.png", "broken/truncate_idat_1.png", setDataLength(1));
 
         gen("suite/basn0g01.png", "broken/unknown_filter_type.png", changeDataByte(0, 5));
-
-//         for (int i = 0; i < 160; i++)
-//             gen("suite/basn0g01.png", "broken/truncate_idat_" + i + ".png", setDataLength(i));
    }
 
     private static Processor setDataLength(final int length)
@@ -611,5 +609,26 @@ public class BrokenGenerator
         data.write(bytes);
         data.flush();
         return new Chunk(sPLT, baos.toByteArray());
+    }
+
+    private static Chunk createPrivateChunk()
+    throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(baos);
+        data.writeBoolean(true);
+        data.writeBoolean(false);
+        data.writeByte((byte)250);
+        data.writeByte((byte)250);
+        data.writeShort((short)50000);
+        data.writeShort((short)50000);
+        data.writeChar('Z');
+        data.writeFloat((float)Math.PI);
+        data.writeDouble(Math.PI);
+        data.writeBytes("Chris\n");
+        data.writeUTF("Nokleberg");
+        data.writeInt(2000000000);
+        data.flush();
+        return new Chunk(heRB, baos.toByteArray());
     }
 }

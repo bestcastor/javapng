@@ -78,7 +78,7 @@ extends Destination
 
     public void getPixel(int x, int y, int[] pixel)
     {
-        throw new UnsupportedOperationException("Cannot use progressive + source region");
+        throw new UnsupportedOperationException();
     }
 
     public WritableRaster getRaster()
