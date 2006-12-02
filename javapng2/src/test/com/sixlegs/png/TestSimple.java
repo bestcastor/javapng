@@ -433,7 +433,7 @@ extends PngTestCase
         errorHelper("/images/broken/multiple_iccp.png");
         errorHelper("/images/broken/multiple_ihdr.png");
         errorHelper("/images/broken/multiple_offs.png");
-        // errorHelper("/images/broken/multiple_pcal.png");
+        errorHelper("/images/broken/multiple_pcal.png");
         errorHelper("/images/broken/multiple_phys.png");
         errorHelper("/images/broken/multiple_plte.png");
         errorHelper("/images/broken/multiple_sbit.png");
@@ -465,6 +465,8 @@ extends PngTestCase
         errorHelper("/images/broken/trns_too_many_entries.png");
         errorHelper("/images/broken/phys_unit_specifier.png");
         errorHelper("/images/broken/offs_unit_specifier.png");
+        errorHelper("/images/broken/scal_unit_specifier.png");
+        errorHelper("/images/broken/scal_floating_point.png");
         errorHelper("/images/broken/sbit_sample_depth.png");
         errorHelper("/images/broken/sbit_sample_depth_2.png");
         errorHelper("/images/broken/ster_mode.png");
@@ -484,18 +486,21 @@ extends PngTestCase
         errorHelper("/images/broken/length_time.png");
         errorHelper("/images/broken/length_offs.png");
         errorHelper("/images/broken/length_chrm.png");
+        errorHelper("/images/broken/length_gifg.png");
         errorHelper("/images/broken/length_trns_gray.png");
         errorHelper("/images/broken/length_trns_rgb.png");
         errorHelper("/images/broken/length_trns_palette.png");
         errorHelper("/images/broken/length_hist.png");
+        errorHelper("/images/broken/length_sbit.png");
+        errorHelper("/images/broken/length_sbit_2.png");
         errorHelper("/images/broken/length_bkgd_gray.png");
         errorHelper("/images/broken/length_bkgd_rgb.png");
         errorHelper("/images/broken/length_bkgd_palette.png");
-        errorHelper("/images/broken/unknown_filter_type.png");
         errorHelper("/images/broken/truncate_zlib.png");
         errorHelper("/images/broken/truncate_zlib_2.png");
         errorHelper("/images/broken/truncate_idat_0.png");
         errorHelper("/images/broken/truncate_idat_1.png");
+        errorHelper("/images/broken/unknown_filter_type.png");
     }
 
     public void errorHelper(String path)

@@ -438,7 +438,8 @@ class RegisteredChunks
         DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
         
         int unit = data.readByte();
-        // TODO: check unit specifier
+        if (unit != PngConstants.SCALE_UNIT_METER && unit != PngConstants.SCALE_UNIT_RADIAN)
+            throw new PngException("Illegal sCAL chunk unit specifier: " + unit, false);
         double width = readFloatingPoint(data, data.available());
         double height = readFloatingPoint(data, data.available());
         props.put(PngConstants.SCALE_UNIT, Integers.valueOf(unit));
