@@ -392,9 +392,9 @@ extends PngTestCase
     public void testErrors()
     throws Exception
     {
-        errorHelper("/images/suite/x00n0g01.png");
-        errorHelper("/images/suite/xcrn0g04.png");
-        errorHelper("/images/suite/xlfn0g04.png");
+        errorHelper("/images/broken/x00n0g01.png");
+        errorHelper("/images/broken/xcrn0g04.png");
+        errorHelper("/images/broken/xlfn0g04.png");
 
         errorHelper("/images/broken/bkgd_after_idat.png");
         errorHelper("/images/broken/chrm_after_idat.png");
