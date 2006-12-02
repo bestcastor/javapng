@@ -2,18 +2,6 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
-/*
-TODO
-  Unrecognized filter type (Defilterer)
-  EOF when reading filter type
-  EOF when reading row bytes
-  Invalid unit specifier (sCAL)
-  Invalid floating point (sCAL)
-
-  check lengths: 
-  sBIT: 1, 2, 3, 4
-  gIFg: 4
-*/  
 public class BrokenGenerator
 {
     private static final int IHDR = 0x49484452;
@@ -106,12 +94,12 @@ public class BrokenGenerator
         gen("misc/pngtest.png", "broken/pcal_after_idat.png", swap(pCAL, IDAT));
         gen("misc/pngtest.png", "broken/scal_after_idat.png", swap(sCAL, IDAT));
 
-        Chunk iccp = extract("misc/ntsciccp.png", iCCP);
-        Chunk srgb = extract("misc/srgbsrgb.png", sRGB);
+        gen("suite/basn0g01.png", "broken/length_sbit_2.png",
+            addAfter(find(IHDR), extract("suite/basn3p02.png", sBIT)));
         gen("suite/basn2c08.png", "broken/iccp_after_idat.png",
-            remove(find(gAMA)), addAfter(find(IDAT), iccp));
+            remove(find(gAMA)), addAfter(find(IDAT), extract("misc/ntsciccp.png", iCCP)));
         gen("suite/basn2c08.png", "broken/srgb_after_idat.png",
-            remove(find(gAMA)), addAfter(find(IDAT), srgb));
+            remove(find(gAMA)), addAfter(find(IDAT), extract("misc/srgbsrgb.png", sRGB)));
 
         gen("suite/basn3p08.png", "broken/ihdr_image_size.png",
             replaceHeader(-32, -32, 8, 3, 0, 0, 0));
@@ -150,7 +138,7 @@ public class BrokenGenerator
         gen("suite/f01n2c08.png", "broken/gama_zero.png",
             addAfter(find(IHDR), new Chunk(gAMA, new byte[4])));
 
-        // example of scal chunk with exponent
+        // example of scal chunk without exponent
         gen("misc/pngtest.png", "misc/scal_no_exp.png",
             changeByte(find(sCAL), 15, (byte)'0'),
             changeByte(find(sCAL), 16, (byte)'0'));
@@ -169,6 +157,8 @@ public class BrokenGenerator
             addAfter(find(IHDR), createIntlText("", 0, 0, "en-us", "", "Cucumber")));
         gen("suite/f01n2c08.png", "broken/itxt_keyword_length_2.png",
             addAfter(find(IHDR), createIntlText("01234567890123456789012345678901234567890123456789012345678901234567890123456789", 0, 0, "en-us", "", "Cucumber")));
+        gen("misc/pngtest.png", "broken/scal_floating_point.png", changeByte(find(sCAL), 1, (byte)'Q'));
+        gen("misc/pngtest.png", "broken/scal_unit_specifier.png", changeByte(find(sCAL), 0, 3));
         gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png", changeByte(find(pHYs), 8, 2));
         gen("misc/pngtest.png", "broken/offs_unit_specifier.png", changeByte(find(oFFs), 8, 2));
         gen("suite/cs5n2c08.png", "broken/sbit_sample_depth.png", changeByte(find(sBIT), 0, -1));
@@ -199,9 +189,11 @@ public class BrokenGenerator
         gen("misc/pngtest.png", "broken/length_offs.png", setLength(find(oFFs), 8));
         gen("suite/ccwn2c08.png", "broken/length_chrm.png", setLength(find(cHRM), 31));
         gen("suite/ch1n3p04.png", "broken/length_hist.png", setLength(find(hIST), 28));
+        gen("suite/basn3p02.png", "broken/length_sbit.png", setLength(find(sBIT), 4));
         gen("suite/tbbn1g04.png", "broken/length_trns_gray.png", setLength(find(tRNS), 0));
         gen("suite/tbrn2c08.png", "broken/length_trns_rgb.png", setLength(find(tRNS), 0));
         gen("suite/tbbn3p08.png", "broken/length_trns_palette.png", setLength(find(tRNS), 174));
+        gen("misc/anigif.png", "broken/length_gifg.png", setLength(find(gIFg), 5));
 
         gen("suite/bgbn4a08.png", "broken/length_bkgd_gray.png", setLength(find(bKGD), 6));
         gen("suite/bgwn6a08.png", "broken/length_bkgd_rgb.png", setLength(find(bKGD), 2));
