@@ -467,7 +467,8 @@ extends PngTestCase
         errorHelper("/images/broken/offs_unit_specifier.png");
         errorHelper("/images/broken/scal_unit_specifier.png");
         errorHelper("/images/broken/scal_floating_point.png");
-        errorHelper("/images/broken/scal_measurements.png");
+        errorHelper("/images/broken/scal_negative.png");
+        errorHelper("/images/broken/scal_zero.png");
         errorHelper("/images/broken/sbit_sample_depth.png");
         errorHelper("/images/broken/sbit_sample_depth_2.png");
         errorHelper("/images/broken/ster_mode.png");
