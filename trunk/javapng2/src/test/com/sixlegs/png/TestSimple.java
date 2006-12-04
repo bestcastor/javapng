@@ -467,6 +467,7 @@ extends PngTestCase
         errorHelper("/images/broken/offs_unit_specifier.png");
         errorHelper("/images/broken/scal_unit_specifier.png");
         errorHelper("/images/broken/scal_floating_point.png");
+        errorHelper("/images/broken/scal_measurements.png");
         errorHelper("/images/broken/sbit_sample_depth.png");
         errorHelper("/images/broken/sbit_sample_depth_2.png");
         errorHelper("/images/broken/ster_mode.png");
@@ -501,6 +502,12 @@ extends PngTestCase
         errorHelper("/images/broken/truncate_idat_0.png");
         errorHelper("/images/broken/truncate_idat_1.png");
         errorHelper("/images/broken/unknown_filter_type.png");
+        errorHelper("/images/broken/text_trailing_null.png");
+
+        errorHelper("/images/broken/private_compression_method.png");
+        errorHelper("/images/broken/private_filter_method.png");
+        errorHelper("/images/broken/private_interlace_method.png");
+        errorHelper("/images/broken/private_filter_type.png");
     }
 
     public void errorHelper(String path)
@@ -508,7 +515,7 @@ extends PngTestCase
     {
         try {
             readResource(path);
-            fail("Expected exception");
+            fail("Expected exception in " + path);
         } catch (Exception e) {
             System.err.println(new File(path).getName() + ": " + e.getMessage());
             // StackTraceElement stack = e.getStackTrace()[0];
