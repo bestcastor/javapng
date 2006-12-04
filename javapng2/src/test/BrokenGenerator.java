@@ -52,7 +52,7 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/nonconsecutive_idat.png",
             addAfter(find(IDAT), new Chunk(heRB, new byte[0])),
             addAfter(find(heRB), find(IDAT)));
-
+        
         gen("suite/basn3p08.png", "broken/multiple_gama.png", duplicate(gAMA));
         gen("suite/basn3p08.png", "broken/multiple_plte.png", duplicate(PLTE));
         gen("suite/basn3p08.png", "broken/multiple_ihdr.png", duplicate(IHDR));
@@ -110,13 +110,21 @@ public class BrokenGenerator
         gen("suite/basn3p08.png", "broken/ihdr_16bit_palette.png",
             replaceHeader(32, 32, 16, 3, 0, 0, 0));
         gen("suite/basn6a08.png", "broken/ihdr_1bit_alpha.png",
-            replaceHeader(32, 32, 1, 6, 1, 0, 0));
+            replaceHeader(32, 32, 1, 6, 0, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_compression_method.png",
             replaceHeader(32, 32, 8, 3, 1, 0, 0));
         gen("suite/basn3p08.png", "broken/ihdr_filter_method.png",
             replaceHeader(32, 32, 8, 3, 0, 1, 0));
         gen("suite/basn3p08.png", "broken/ihdr_interlace_method.png",
             replaceHeader(32, 32, 8, 3, 0, 0, 2));
+
+        gen("suite/basn3p08.png", "broken/private_compression_method.png",
+            replaceHeader(32, 32, 8, 3, 128, 0, 0));
+        gen("suite/basn3p08.png", "broken/private_filter_method.png",
+            replaceHeader(32, 32, 8, 3, 0, 128, 0));
+        gen("suite/basn3p08.png", "broken/private_interlace_method.png",
+            replaceHeader(32, 32, 8, 3, 0, 0, 128));
+        gen("suite/basn0g01.png", "broken/private_filter_type.png", changeDataByte(0, 128));
 
         gen("suite/basn3p08.png", "broken/plte_length_mod_three.png",
             replace(find(PLTE), new Chunk(PLTE, new byte[2])));
@@ -159,6 +167,11 @@ public class BrokenGenerator
             addAfter(find(IHDR), createIntlText("01234567890123456789012345678901234567890123456789012345678901234567890123456789", 0, 0, "en-us", "", "Cucumber")));
         gen("misc/pngtest.png", "broken/scal_floating_point.png", changeByte(find(sCAL), 1, (byte)'Q'));
         gen("misc/pngtest.png", "broken/scal_unit_specifier.png", changeByte(find(sCAL), 0, 3));
+        gen("suite/basn3p08.png", "broken/scal_zero.png",
+            addAfter(find(IHDR), new Chunk(sCAL, new byte[]{ 1, '0', 0, '0'})));
+        gen("suite/basn3p08.png", "broken/scal_negative.png",
+            addAfter(find(IHDR), new Chunk(sCAL, new byte[]{ 1, '1', 0, '-', '1'})));
+        
         gen("suite/cdun2c08.png", "broken/phys_unit_specifier.png", changeByte(find(pHYs), 8, 2));
         gen("misc/pngtest.png", "broken/offs_unit_specifier.png", changeByte(find(oFFs), 8, 2));
         gen("suite/cs5n2c08.png", "broken/sbit_sample_depth.png", changeByte(find(sBIT), 0, -1));
@@ -201,6 +214,7 @@ public class BrokenGenerator
         
         gen("suite/ctzn0g04.png", "broken/ztxt_compression_method.png", changeByte(find(zTXt), 10, 3));
         gen("suite/ctzn0g04.png", "broken/ztxt_data_format.png", changeByte(find(zTXt), 11, 3));
+        gen("suite/ct1n0g04.png", "broken/text_trailing_null.png", append(find(tEXt), new byte[1]));
 
         gen("suite/basn3p08.png", "broken/truncate_zlib.png", truncate(find(IDAT), 20));
         gen("misc/pngtest.png", "broken/truncate_zlib_2.png", truncate(find(IDAT), 6000));
@@ -208,7 +222,31 @@ public class BrokenGenerator
         gen("suite/basn0g01.png", "broken/truncate_idat_1.png", setDataLength(1));
 
         gen("suite/basn0g01.png", "broken/unknown_filter_type.png", changeDataByte(0, 5));
-   }
+    }
+
+    private static void gen(String src, String dst, Processor... processors)
+    throws IOException
+    {
+        List<Chunk> chunks = readChunks(new File(src));
+        for (Processor p : processors)
+            p.process(chunks);
+        writeChunks(new File(dst), chunks);
+    }
+
+    private static Processor append(final Query q, final byte[] append)
+    {
+        return new Processor(){
+            public void process(List<Chunk> chunks) throws IOException {
+                Chunk chunk = q.query(chunks);
+                byte[] data = new byte[chunk.length + append.length];
+                System.arraycopy(chunk.data, 0, data, 0, chunk.length);
+                System.arraycopy(append, 0, data, chunk.length, append.length);
+                chunk.data = data;
+                chunk.length = data.length;
+                chunk.crc = crc(chunk.type, chunk.data);
+            }
+        };
+    }
 
     private static Processor setDataLength(final int length)
     {
@@ -255,15 +293,6 @@ public class BrokenGenerator
     throws IOException
     {
         return find(type).query(readChunks(new File(src)));
-    }
-
-    private static void gen(String src, String dst, Processor... processors)
-    throws IOException
-    {
-        List<Chunk> chunks = readChunks(new File(src));
-        for (Processor p : processors)
-            p.process(chunks);
-        writeChunks(new File(dst), chunks);
     }
 
     private static Processor swap(int t1, int t2)
@@ -486,6 +515,12 @@ public class BrokenGenerator
         public Chunk query(List<Chunk> chunks)
         {
             return this;
+        }
+
+        public String toString()
+        {
+            return "Chunk" + "(type=" + type +
+                ",len=" + length + ",actual=" + data.length + ",crc=" + crc + ")";
         }
     }
 

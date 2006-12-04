@@ -397,6 +397,8 @@ class RegisteredChunks
         } else {
             text = new String(bytes, bytes.length - data.available(), data.available(), enc);
         }
+        if (text.indexOf('\0') >= 0)
+            throw new PngException("Text value contains null", false);
         List chunks = (List)props.get(PngConstants.TEXT_CHUNKS);
         if (chunks == null)
             props.put(PngConstants.TEXT_CHUNKS, chunks = new ArrayList());
@@ -442,6 +444,8 @@ class RegisteredChunks
             throw new PngException("Illegal sCAL chunk unit specifier: " + unit, false);
         double width = readFloatingPoint(data, data.available());
         double height = readFloatingPoint(data, data.available());
+        if (width <= 0 || height <= 0)
+            throw new PngException("sCAL measurements must be >= 0", false);
         props.put(PngConstants.SCALE_UNIT, Integers.valueOf(unit));
         props.put(PngConstants.PIXEL_WIDTH, new Double(width));
         props.put(PngConstants.PIXEL_HEIGHT, new Double(height));
