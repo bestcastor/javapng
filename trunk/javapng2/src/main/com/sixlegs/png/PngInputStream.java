@@ -93,11 +93,12 @@ implements DataInput
         if (getRemaining() != 0)
             throw new PngException(PngConstants.getChunkName(type) + " read " + (length - left) + " bytes, expected " + length, true);
         left = 4;
-        int embeddedChecksum = readInt();
-        if ((int)crc.getValue() != embeddedChecksum)
+        int actual = (int)crc.getValue();
+        int expect = readInt();
+        if (actual != expect)
             throw new PngException("Bad CRC value for " + PngConstants.getChunkName(type) + " chunk", true);
         total += length + 4;
-        return embeddedChecksum;
+        return actual;
     }
 
     ////////// count/crc InputStream methods //////////
