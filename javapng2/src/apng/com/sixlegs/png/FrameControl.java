@@ -79,4 +79,10 @@ public class FrameControl
     {
         return skip;
     }
+
+    public String toString()
+    {
+        return "FrameControl{bounds=" + bounds + ",delay=" + delay +
+            ",dispose=" + dispose + ",blend=" + blend + ",skip=" + skip + "}";
+    }
 }
