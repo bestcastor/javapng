@@ -161,7 +161,7 @@ implements Transparency
                 }
                 try {
                     Integer key = Integers.valueOf(type);
-                    if (!isMultipleOK(type)) {
+                    if (!isMultipleOK(type) && !PngConstants.isPrivate(type)) {
                         if (seen.contains(key)) {
                             String msg = "Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed";
                             if (PngConstants.isAncillary(type))
@@ -190,7 +190,7 @@ implements Transparency
                 case PngConstants.IHDR:
                 case PngConstants.PLTE:
                     // for APNG
-                    props.put(PngConstants.getChunkName(type).toLowerCase() + " _crc", new Integer(crc));
+                    props.put(PngConstants.getChunkName(type).toLowerCase() + "_crc", new Integer(crc));
                 }
             }
             return image;
