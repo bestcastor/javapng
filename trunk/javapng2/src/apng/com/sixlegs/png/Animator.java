@@ -48,6 +48,7 @@ import java.util.List;
 public class Animator
 implements ActionListener
 {
+    private static final Color TRANSPARENT_BLACK = new Color(0, true);
     private static final int MIN_DELAY = 5;
     
     private final AnimatedPngImage png;
@@ -83,7 +84,7 @@ implements ActionListener
         this.g = target.createGraphics();
 
         Color bkgd = png.getBackground();
-        this.background = (bkgd != null) ? bkgd : Color.black;
+        this.background = (bkgd != null) ? bkgd : TRANSPARENT_BLACK;
         
         List renderList = new ArrayList();
         int minDelay = Integer.MAX_VALUE;
