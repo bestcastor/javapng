@@ -38,9 +38,10 @@ package com.sixlegs.png.viewer;
 
 import com.sixlegs.png.PngConfig;
 import com.sixlegs.png.PngImage;
+import com.sixlegs.png.AnimatedPngImage;
+import com.sixlegs.png.Animator;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +49,7 @@ import javax.swing.*;
 
 public class Viewer
 {
-    private PngConfig config = new PngConfig.Builder().progressive(true).build();
+    private PngConfig config = new PngConfig.Builder().progressive(true).warningsFatal(true).build();
     private int progressiveDelay = 0; // TODO
     private ImagePanel imagePanel;
     private Paint checker;
@@ -99,8 +100,10 @@ public class Viewer
 
     private void open(File file)
     {
-        new Thread(new ReadPngAction(new PngImage(config){
+        new Thread(new ReadPngAction(new AnimatedPngImage(config){
             protected boolean handlePass(final BufferedImage image, int pass) {
+                if (isAnimated())
+                    return true;
                 SwingUtilities.invokeLater(new UpdateImageAction(imagePanel, image));
                 if (progressiveDelay > 0 && (pass == 6 || !isInterlaced())) {
                     try {
@@ -111,7 +114,7 @@ public class Viewer
                 }
                 return true;
             }
-        }, file)).start();
+        }, file, imagePanel)).start();
     }
 
     private static PngImage readHeader(File file)
@@ -134,20 +137,34 @@ public class Viewer
     private static class ReadPngAction
     implements Runnable
     {
-        private PngImage png;
+        private AnimatedPngImage png;
         private File file;
+        private ImagePanel panel;
 
-        public ReadPngAction(PngImage png, File file)
+        public ReadPngAction(AnimatedPngImage png, File file, ImagePanel panel)
         {
             this.png = png;
             this.file = file;
+            this.panel = panel;
         }
             
         public void run()
         {
             try {
                 // TODO: disable loading
-                png.read(file);
+                BufferedImage[] frames = png.readAllFrames(file);
+                if (png.isAnimated()) {
+                    panel.setPreferredSize(new Dimension(png.getWidth(), png.getHeight()));
+                    final Animator animator = new Animator(png, frames, null);
+                    Timer timer = new Timer(animator.getTimerDelay(), null);
+                    timer.addActionListener(animator);
+                    timer.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            panel.setImage(animator.getTarget());
+                        }
+                    });
+                    timer.start();
+                }
             } catch (IOException e) {
                 // TODO: error dialog
                 e.printStackTrace(System.err);
