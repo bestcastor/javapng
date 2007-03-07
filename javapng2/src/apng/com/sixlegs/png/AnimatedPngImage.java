@@ -67,6 +67,15 @@ extends PngImage
     private int headerChecksum;
     private int paletteChecksum;
 
+    public AnimatedPngImage()
+    {
+    }
+
+    public AnimatedPngImage(PngConfig config)
+    {
+        super(config);
+    }
+    
     public boolean isAnimated()
     {
         return animated;
@@ -131,11 +140,11 @@ extends PngImage
             int w = in.readInt();
             int h = in.readInt();
             Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
-            int delayNum = in.readInt();
-            int delayDen = in.readInt();
+            int delayNum = in.readUnsignedShort();
+            int delayDen = in.readUnsignedShort();
             if (delayDen == 0)
                 delayDen = 100;
-            int renderOp = in.readInt();
+            int renderOp = in.readByte();
             add(seq, new FrameControl(bounds,
                                       (float)delayNum / delayDen,
                                       renderOp & 7,
@@ -166,7 +175,7 @@ extends PngImage
     private void add(int seq, Object chunk)
     {
         // TODO: put limit on sequence number to prevent OOM
-        while (chunks.size() < seq)
+        while (chunks.size() <= seq)
             chunks.add(null);
         chunks.set(seq, chunk);
     }
@@ -177,17 +186,9 @@ extends PngImage
         if (!animated)
             return;
         try {
-            System.err.println("found end");
-            Map props = getProperties();
             validateChecksum(headerChecksum, "ihdr_crc", "header");
-            validateChecksum(paletteChecksum, "plte_crc", "palette");
-            for (int i = 0; i < chunks.size(); i++) {
-                Object chunk = chunks.get(i);
-                if (chunk == null)
-                    throw new PngException("Missing APNG sequence number " + i, false);
-                if (chunk instanceof FrameControl)
-                    frames.add(chunk);
-            }
+            if (getColorType() == PngConstants.COLOR_TYPE_PALETTE)
+                validateChecksum(paletteChecksum, "plte_crc", "palette");
 
             FrameControl first = (FrameControl)chunks.get(0);
             Rectangle r = first.getBounds();
@@ -200,18 +201,24 @@ extends PngImage
             if (chunks.size() > 1 && !(chunks.get(1) instanceof FrameControl))
                 throw new PngException("First APNG frame cannot have frame data", false);
 
-            Iterator it = chunks.iterator();
-            List list;
-            frameData.put(it.next(), null);
-            frameData.put(it.next(), list = new ArrayList());
-            while (it.hasNext()) {
-                Object chunk = it.next();
-                if (chunk instanceof FrameData) {
-                    list.add(chunk);
+            List list = null;
+            for (int i = 0; i < chunks.size(); i++) {
+                Object chunk = chunks.get(i);
+                if (chunk == null)
+                    throw new PngException("Missing APNG sequence number " + i, false);
+                if (chunk instanceof FrameControl) {
+                    frames.add(chunk);
+                    frameData.put(chunk, list = new ArrayList());
                 } else {
-                    frameData.put(it.next(), list = new ArrayList());
+                    list.add(chunk);
                 }
             }
+
+            for (int i = 1; i < frames.size(); i++) {
+                if (((List)frameData.get(frames.get(i))).isEmpty())
+                    throw new PngException("Missing data for frame " + i, false);
+            }
+            System.err.println("frameData=" + frameData);
         } catch (IOException e) {
             animated = false;
         }
