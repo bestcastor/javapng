@@ -282,7 +282,7 @@ extends ImageReader
             return true;
         }
 
-        protected boolean readChunk(int type, DataInput in, int length)
+        protected boolean readChunk(int type, DataInput in, long offset, int length)
         throws IOException
         {
             if (ignoreMetadata) {
@@ -297,7 +297,7 @@ extends ImageReader
                     return false;
                 }
             }
-            if (!super.readChunk(type, in, length)) {
+            if (!super.readChunk(type, in, offset, length)) {
                 byte[] bytes = new byte[length];
                 in.readFully(bytes);
                 unknownChunks.put(new Integer(type), bytes);

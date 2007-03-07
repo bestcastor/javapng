@@ -38,49 +38,24 @@ package com.sixlegs.png;
 
 import java.io.*;
 
-class ImageDataInputStream
-extends InputStream
+class FrameData
 {
-    private final PngInputStream in;
-    private final StateMachine machine;
-    private final byte[] onebyte = new byte[1];
-    private boolean done;
+    private final long offset;
+    private final int length;
 
-    public ImageDataInputStream(PngInputStream in, StateMachine machine)
+    public FrameData(long offset, int length)
     {
-        this.in = in;
-        this.machine = machine;
-    }
-    
-    public int read()
-    throws IOException
-    {
-        return (read(onebyte, 0, 1) == -1) ? -1 : 0xFF & onebyte[0];
+        this.offset = offset;
+        this.length = length;
     }
 
-    public int read(byte[] b, int off, int len)
-    throws IOException
+    public long getOffset()
     {
-        if (done)
-            return -1;
-        try {
-            int total = 0;
-            while ((total != len) && !done) {
-                while ((total != len) && in.getRemaining() > 0) {
-                    int amt = Math.min(len - total, in.getRemaining());
-                    in.readFully(b, off + total, amt);
-                    total += amt;
-                }
-                if (in.getRemaining() <= 0) {
-                    in.endChunk(machine.getType());
-                    machine.nextState(in.startChunk());
-                    done = machine.getType() != PngConstants.IDAT;
-                }
-            }
-            return total;
-        } catch (EOFException e) {
-            done = true;
-            return -1;
-        }
+        return offset;
+    }
+
+    public int getLength()
+    {
+        return length;
     }
 }

@@ -36,6 +36,7 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -55,11 +56,18 @@ class ImageFactory
     public static BufferedImage createImage(PngImage png, InputStream in)
     throws IOException
     {
+        return createImage(png, in, new Dimension(png.getWidth(), png.getHeight()));
+    }
+
+    // width and height are overridable for APNG
+    public static BufferedImage createImage(PngImage png, InputStream in, Dimension size)
+    throws IOException
+    {
         PngConfig config = png.getConfig();
         Map props = png.getProperties();
-        
-        int width     = png.getWidth();
-        int height    = png.getHeight();
+
+        int width     = size.width;
+        int height    = size.height;
         int bitDepth  = png.getBitDepth();
         int samples   = png.getSamples();
 
