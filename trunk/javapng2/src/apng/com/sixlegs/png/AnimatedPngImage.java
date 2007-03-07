@@ -45,12 +45,12 @@ import java.util.List;
 public class AnimatedPngImage
 extends PngImage
 {
+    public static final int APNG_RENDER_OP_DISPOSE_NONE = 0;
+    public static final int APNG_RENDER_OP_DISPOSE_BACKGROUND = 1;
+    public static final int APNG_RENDER_OP_DISPOSE_PREVIOUS = 2;
+
     private static final int APNG_RENDER_OP_BLEND_FLAG = 8;
     private static final int APNG_RENDER_OP_SKIP_FRAME = 16;
-
-    private static final int APNG_RENDER_OP_DISPOSE_NONE = 0;
-    private static final int APNG_RENDER_OP_DISPOSE_BACKGROUND = 1;
-    private static final int APNG_RENDER_OP_DISPOSE_PREVIOUS = 2;
 
     private static final int acTl = 0x6163546C;
     private static final int fcTl = 0x6663546C;
@@ -145,11 +145,20 @@ extends PngImage
             if (delayDen == 0)
                 delayDen = 100;
             int renderOp = in.readByte();
-            add(seq, new FrameControl(bounds,
-                                      (float)delayNum / delayDen,
-                                      renderOp & 7,
-                                      (renderOp & APNG_RENDER_OP_BLEND_FLAG) != 0,
-                                      (renderOp & APNG_RENDER_OP_SKIP_FRAME) != 0));
+
+            boolean skip = (renderOp & APNG_RENDER_OP_SKIP_FRAME) != 0;
+            boolean blend = (renderOp & APNG_RENDER_OP_BLEND_FLAG) != 0;
+            if (blend) {
+                switch (getColorType()) {
+                case PngConstants.COLOR_TYPE_GRAY:
+                case PngConstants.COLOR_TYPE_RGB:
+                    throw new PngException("APNG blend flag is not valid for color type " + getColorType(), false);
+                }
+            }
+            int dispose = renderOp & 7;
+            if (dispose < 0 || dispose > 2)
+                throw new PngException("Unknown APNG dispose op " + dispose, false);
+            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend, skip));
             return true;
         case fdAt:
             seq = in.readInt();
@@ -207,6 +216,7 @@ extends PngImage
                 if (chunk == null)
                     throw new PngException("Missing APNG sequence number " + i, false);
                 if (chunk instanceof FrameControl) {
+                    // System.err.println(chunk);
                     frames.add(chunk);
                     frameData.put(chunk, list = new ArrayList());
                 } else {
@@ -218,7 +228,6 @@ extends PngImage
                 if (((List)frameData.get(frames.get(i))).isEmpty())
                     throw new PngException("Missing data for frame " + i, false);
             }
-            System.err.println("frameData=" + frameData);
         } catch (IOException e) {
             animated = false;
         }
