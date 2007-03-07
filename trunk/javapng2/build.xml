@@ -71,7 +71,7 @@
     </target>
 
     <target name="compile-viewer" depends="compile" description="Compile viewer">
-        <compile module="viewer" refid="path.main"/>
+        <compile module="viewer" refid="path.apng"/>
     </target>
 
     <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
