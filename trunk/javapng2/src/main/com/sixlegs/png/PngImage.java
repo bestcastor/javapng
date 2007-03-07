@@ -171,7 +171,7 @@ implements Transparency
                             seen.add(key);
                         }
                     }
-                    if (readChunk(type, pin, pin.getRemaining())) {
+                    if (readChunk(type, pin, pin.getOffset(), pin.getRemaining())) {
                         if (type == PngConstants.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
                             return null;
                     } else {
@@ -185,7 +185,13 @@ implements Transparency
                     skipFully(pin, pin.getRemaining());
                     handleWarning(exception);
                 }
-                pin.endChunk(type);
+                int crc = pin.endChunk(type);
+                switch (type) {
+                case PngConstants.IHDR:
+                case PngConstants.PLTE:
+                    // for APNG
+                    props.put(PngConstants.getChunkName(type).toLowerCase() + " _crc", new Integer(crc));
+                }
             }
             return image;
         } finally {
@@ -625,7 +631,7 @@ implements Transparency
      * @param length the length of the chunk data
      * @return whether the chunk data has been processed
      */
-    protected boolean readChunk(int type, DataInput in, int length)
+    protected boolean readChunk(int type, DataInput in, long offset, int length)
     throws IOException
     {
         if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngConstants.isAncillary(type)) {

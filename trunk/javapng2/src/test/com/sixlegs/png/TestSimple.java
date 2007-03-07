@@ -147,12 +147,12 @@ extends PngTestCase
         public PrivateChunkReader(int type) { this.type = type; }
 
         abstract protected void readChunk(DataInput in) throws IOException;
-        protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+        @Override protected boolean readChunk(int type, DataInput in, long off, int len) throws IOException {
             if (type == this.type) {
                 readChunk(in);
                 return true;
             }
-            return super.readChunk(type, in, length);
+            return super.readChunk(type, in, off, len);
         }
     }
 
@@ -215,16 +215,16 @@ extends PngTestCase
     {
         try {
             readResource("/images/misc/anigif.png", new PngImage(){
-                protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+                @Override protected boolean readChunk(int type, DataInput in, long off, int len) throws IOException {
                     try {
                         ((InputStream)in).close();
                         fail("expected exception");
                     } catch (UnsupportedOperationException ignore) { }
                     if (type == msOG_type) {
-                        in.readFully(new byte[length - 1]);
+                        in.readFully(new byte[len - 1]);
                         return true;
                     }
-                    return super.readChunk(type, in, length);
+                    return super.readChunk(type, in, off, len);
                 }
             });
             fail("expected exception");
@@ -236,14 +236,14 @@ extends PngTestCase
     {
         final String ORIGINAL_GIF = "original_gif";
         PngImage png = readResource("/images/misc/anigif.png", new PngImage(){
-            protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+            @Override protected boolean readChunk(int type, DataInput in, long off, int len) throws IOException {
                 if (type == msOG_type) {
-                    byte[] bytes = new byte[length];
+                    byte[] bytes = new byte[len];
                     in.readFully(bytes);
                     getProperties().put(ORIGINAL_GIF, bytes);
                     return true;
                 }
-                return super.readChunk(type, in, length);
+                return super.readChunk(type, in, off, len);
             }
         });
         byte[] bytes = (byte[])png.getProperty(ORIGINAL_GIF);
@@ -318,10 +318,10 @@ extends PngTestCase
     {
         try {
             readResource("/images/misc/penguin.png", new PngImage(){
-                protected boolean readChunk(int type, DataInput in, int length) throws IOException {
+                @Override protected boolean readChunk(int type, DataInput in, long off, int len) throws IOException {
                     if (type == PngConstants.PLTE)
                         return false;
-                    return super.readChunk(type, in, length);
+                    return super.readChunk(type, in, off, len);
                 }
             });
         } catch (PngException ignore) { }

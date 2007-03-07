@@ -466,7 +466,7 @@ class RegisteredChunks
         }
     }
 
-    private static void checkLength(int chunk, int length, int correct)
+    public static void checkLength(int chunk, int length, int correct)
     throws PngException
     {
         if (length != correct)

@@ -50,14 +50,15 @@ implements DataInput
 {
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
-    private CRC32 crc = new CRC32();
-    private InputStream in;
-    private DataInputStream data;
-    private byte[] tmp = new byte[0x1000];
+    private final CRC32 crc = new CRC32();
+    private final InputStream in;
+    private final DataInputStream data;
+    private final byte[] tmp = new byte[0x1000];
+    private long total;
     private int length;
     private int left;
 
-    PngInputStream(InputStream in)
+    public PngInputStream(InputStream in)
     throws IOException
     {
         this.in = in;
@@ -69,9 +70,10 @@ implements DataInput
                                    Long.toHexString(SIGNATURE) + ", got 0x" +
                                    Long.toHexString(sig), true);
         }
+        total += 8;
     }
 
-    int startChunk()
+    public int startChunk()
     throws IOException
     {
         left = 8; // length, type
@@ -81,17 +83,21 @@ implements DataInput
         crc.reset();
         int type = readInt();
         left = length;
+        total += 8;
         return type;
     }
     
-    void endChunk(int type)
+    public int endChunk(int type)
     throws IOException
     {
         if (getRemaining() != 0)
             throw new PngException(PngConstants.getChunkName(type) + " read " + (length - left) + " bytes, expected " + length, true);
         left = 4;
-        if ((int)crc.getValue() != readInt())
+        int embeddedChecksum = readInt();
+        if ((int)crc.getValue() != embeddedChecksum)
             throw new PngException("Bad CRC value for " + PngConstants.getChunkName(type) + " chunk", true);
+        total += length + 4;
+        return embeddedChecksum;
     }
 
     ////////// count/crc InputStream methods //////////
@@ -255,4 +261,9 @@ implements DataInput
     {
         return left;
     }
+
+    public long getOffset()
+    {
+        return total;
+    }    
 }

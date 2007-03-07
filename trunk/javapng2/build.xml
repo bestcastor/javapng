@@ -35,12 +35,16 @@
             <path refid="path.lib"/>
             <pathelement path="build/main"/>
         </path>
-        <path id="path.viewer">
+        <path id="path.apng">
             <path refid="path.main"/>
+            <pathelement path="build/apng"/>
+        </path>
+        <path id="path.viewer">
+            <path refid="path.apng"/>
             <pathelement path="build/viewer"/>
         </path>
         <path id="path.iio">
-            <path refid="path.main"/>
+            <path refid="path.apng"/>
             <pathelement path="build/iio"/>
         </path>
         <path id="path.examples">
@@ -63,6 +67,7 @@
 
     <target name="compile" depends="init" description="Compile">
         <compile module="main" refid="path.lib" source="1.2" target="1.2" bootclasspath="${compile.bootclasspath.12}"/>
+        <compile module="apng" refid="path.main" source="1.2" target="1.2" bootclasspath="${compile.bootclasspath.12}"/>
     </target>
 
     <target name="compile-viewer" depends="compile" description="Compile viewer">
