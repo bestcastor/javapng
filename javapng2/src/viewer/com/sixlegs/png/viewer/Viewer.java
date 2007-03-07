@@ -157,6 +157,7 @@ public class Viewer
                     panel.setPreferredSize(new Dimension(png.getWidth(), png.getHeight()));
                     final Animator animator = new Animator(png, frames, null);
                     Timer timer = new Timer(animator.getTimerDelay(), null);
+                    timer.setInitialDelay(0);
                     timer.addActionListener(animator);
                     timer.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {

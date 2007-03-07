@@ -59,7 +59,7 @@ implements ActionListener
     private final int timerDelay;
     private final Color background;
 
-    private long waitUntil;
+    private long waitUntil = 0;
     private int index = -1;
     private int iter;
     private boolean done;
@@ -112,7 +112,8 @@ implements ActionListener
 
     public void reset()
     {
-        waitUntil = iter = 0;
+        waitUntil = 0;
+        iter = 0;
         index = -1;
         done = false;
     }
@@ -130,23 +131,24 @@ implements ActionListener
     public void actionPerformed(ActionEvent e)
     {
         long now = System.currentTimeMillis();
-        if (done)
+        if (done || waitUntil > now)
             return;
-        if (now < waitUntil)
-            return;
-        if (index >= 0)
-            dispose(render[index]);
-        if (++index == render.length) {
-            int maxIter = png.getNumIterations();
-            if (++iter == maxIter && maxIter != 0) {
-                done = true;
-                return;
+        if (waitUntil == 0)
+            waitUntil = now;
+        while (waitUntil <= now) {
+            if (index >= 0)
+                dispose(render[index]);
+            if (++index == render.length) {
+                int maxIter = png.getNumIterations();
+                if (++iter == maxIter && maxIter != 0) {
+                    done = true;
+                    return;
+                }
+                index = 0;
             }
-            index = 0;
+            waitUntil += render[index].delay;
+            draw(render[index]);
         }
-        // System.err.println("drawing " + index);
-        draw(render[index]);
-        waitUntil = now + render[index].delay;
     }
 
     private void dispose(RenderData rd)
