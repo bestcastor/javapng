@@ -111,9 +111,12 @@ extends PngImage
         List data = (List)frameData.get(frame);
         if (data == null)
             throw new IllegalArgumentException("Cannot read data for first APNG frame");
-        return ImageFactory.createImage(this,
-                                        new FrameDataInputStream(file, data),
-                                        frame.getBounds().getSize());
+        FrameDataInputStream in = new FrameDataInputStream(file, data);
+        try {
+            return ImageFactory.createImage(this, in, frame.getBounds().getSize());
+        } finally {
+            in.close();
+        }
     }
 
     protected boolean readChunk(int type, DataInput in, long offset, int length)
