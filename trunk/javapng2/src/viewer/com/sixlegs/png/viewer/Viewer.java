@@ -159,7 +159,7 @@ public class Viewer
                         panel.getGraphicsConfiguration().createCompatibleImage(png.getWidth(), png.getHeight(),
                                                                                Transparency.TRANSLUCENT);
                     final Animator animator = new Animator(png, frames, target);
-                    Timer timer = new Timer(animator.getTimerDelay(), null);
+                    Timer timer = new Timer(50, null);
                     timer.setInitialDelay(0);
                     timer.addActionListener(animator);
                     timer.addActionListener(new ActionListener() {
