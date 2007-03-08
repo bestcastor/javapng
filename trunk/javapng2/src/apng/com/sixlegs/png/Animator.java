@@ -173,7 +173,7 @@ implements ActionListener
         if (rd.prev != null)
             rd.prev_g.drawImage(target, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
         g.setComposite(rd.blend);
-        g.drawImage(rd.image,  bounds.x, bounds.y, bounds.width, bounds.height, null, null);
+        g.drawImage(rd.image, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
     }
 
     private static class RenderData
