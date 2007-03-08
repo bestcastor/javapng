@@ -49,7 +49,7 @@ public class Animator
 implements ActionListener
 {
     private static final Color TRANSPARENT_BLACK = new Color(0, true);
-    private static final int MIN_DELAY = 5;
+    private static final int MIN_DELAY = 10;
     
     private final AnimatedPngImage png;
     private final BufferedImage[] frames;
