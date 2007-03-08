@@ -194,7 +194,7 @@
         </delete>
     </target>
 
-    <target name="jar" depends="compile" description="Create jar">
+    <target name="jar" depends="compile-all" description="Create jar">
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
         <delete file="dist/temp.jar"/>
