@@ -74,7 +74,7 @@ class ImageFactory
         boolean interlaced = png.isInterlaced();
         short[] gammaTable = config.getGammaCorrect() ? getGammaTable(png) : null;
         ColorModel colorModel = createColorModel(png, gammaTable);
-        Destination dst = createDestination(png, colorModel);
+        Destination dst = createDestination(config, colorModel, size);
         BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);
 
         PixelProcessor pp = null;
@@ -143,11 +143,10 @@ class ImageFactory
         return png.getGammaTable();
     }
 
-    private static Destination createDestination(PngImage png, ColorModel colorModel)
+    private static Destination createDestination(PngConfig config, ColorModel colorModel, Dimension size)
     {
-        PngConfig config = png.getConfig();
-        int width = png.getWidth();
-        int height = png.getHeight();
+        int width = size.width;
+        int height = size.height;
         Rectangle sourceRegion = config.getSourceRegion();
         if (sourceRegion != null) {
             if (!new Rectangle(width, height).contains(sourceRegion))
@@ -166,11 +165,11 @@ class ImageFactory
             int subw = calcSubsamplingSize(width, xsub, xoff, 'X');
             int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
             dst = new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
-                                             png.getWidth(), xsub, ysub, xoff, yoff);
+                                             size.width, xsub, ysub, xoff, yoff);
             // if (config.getLowPassFilter())
             // dst = new LowPassFilterDestination(dst, colorModel.createCompatibleWritableRaster(width, height));
         } else {
-            dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), png.getWidth());
+            dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), size.height);
         }
         return (sourceRegion != null) ? new SourceRegionDestination(dst, sourceRegion) : dst;
     }
