@@ -122,13 +122,14 @@ public class AnimatedGif2Png
         byte[] row = new byte[first.bounds.width];
         int index = 0;
         for (Frame frame : frames) {
+            int width = frame.bounds.width;
             BufferedImage image = imageReader.read(index++);
             raw.reset();
             DeflaterOutputStream defl = new DeflaterOutputStream(raw);
-            for (int y = 0, h = frame.bounds.height; y < h; y++) {
-                image.getRaster().getDataElements(0, y, frame.bounds.width, 1, row);
+            for (int y = 0, height = frame.bounds.height; y < height; y++) {
+                image.getRaster().getDataElements(0, y, width, 1, row);
                 defl.write(0); // filter byte
-                defl.write(row, 0, frame.bounds.width);
+                defl.write(row, 0, width);
             }
             defl.close();
             w.frame(frame, raw.toByteArray());
@@ -142,23 +143,98 @@ public class AnimatedGif2Png
         // TODO: could use tRNS instead of alpha channel in some cases for better compression
         Frame first = frames.get(0);
         w.start(first.bounds.getSize(), PngConstants.COLOR_TYPE_RGB_ALPHA, null, frames.size());
-        BufferedImage canvas =
-            new BufferedImage(first.bounds.width, first.bounds.height, BufferedImage.TYPE_INT_ARGB);
-        byte[] buf = new byte[0x2000];
+        ByteArrayOutputStream raw = new ByteArrayOutputStream();
+        byte[] row = new byte[first.bounds.width];
+        byte[] rgbs = new byte[4 * row.length];
+        byte[] prev = new byte[4 * row.length];
+        Filterer filterer = new Filterer(4 * row.length, 4);
         int index = 0;
-        File temp = File.createTempFile("frame", ".png");
         for (Frame frame : frames) {
+            int[] palette = frame.palette;
+            int width = frame.bounds.width;
             BufferedImage image = imageReader.read(index++);
-            BufferedImage subcanvas = canvas.getSubimage(0, 0, frame.bounds.width, frame.bounds.height);
-            Graphics2D g = subcanvas.createGraphics();
-            g.drawImage(image, null, null);
-            g.dispose();
-            ImageIO.write(subcanvas, "PNG", temp);
-            w.frame(frame, extractData(temp, buf));
+            raw.reset();
+            DataOutputStream defl = new DataOutputStream(new DeflaterOutputStream(raw));
+            for (int y = 0, height = frame.bounds.height; y < height; y++) {
+                 image.getRaster().getDataElements(0, y, width, 1, row);
+                 int toX = 0;
+                 for (int x = 0; x < width; x++) {
+                     int argb = palette[0xFF & row[x]];
+                     rgbs[toX++] = (byte)(0xFF & (argb >>> 16));
+                     rgbs[toX++] = (byte)(0xFF & (argb >>> 8));
+                     rgbs[toX++] = (byte)(0xFF & argb);
+                     rgbs[toX++] = (byte)(0xFF & (argb >>> 24));
+                 }
+                 int filterType = filterer.filter(rgbs, prev, 4 * width);
+                 defl.write(filterType);
+                 defl.write(rgbs, 0, 4 * width);
+                 byte[] t = rgbs; rgbs = prev; prev = t; // swap
+            }
+            defl.close();
+            w.frame(frame, raw.toByteArray());
         }
-        temp.delete();
         w.finish();
     }
+
+    private static class Filterer
+    {
+        private final byte[] work;
+        private final byte[] best;
+        private final int pixelStride;
+        
+        public Filterer(int maxLength, int pixelStride)
+        {
+            work = new byte[maxLength];
+            best = new byte[maxLength];
+            this.pixelStride = pixelStride;
+        }
+
+        public int filter(byte[] row, byte[] prev, int length)
+        {
+            int bestType = 0;
+            int bestSum = Integer.MAX_VALUE;
+            for (int type = 0; type <= 2; type++) {
+                filter(row, prev, length, type);
+                int sum = sumBytes(work, length);
+                if (sum < bestSum) {
+                    bestSum = sum;
+                    bestType = type;
+                    System.arraycopy(work, 0, best, 0, length);
+                }
+            }
+            System.arraycopy(best, 0, row, 0, length);
+            return bestType;
+        }
+
+        private static int sumBytes(byte[] bytes, int length)
+        {
+            int sum = 0;
+            for (int i = 0; i < length; i++)
+                sum += 0xFF & bytes[i];
+            return sum;
+        }
+
+        private void filter(byte[] row, byte[] prev, int length, int type)
+        {
+            switch (type) {
+            case 0: // None
+                System.arraycopy(row, 0, work, 0, length);
+                break;
+            case 1: // Sub
+                for (int i = 0; i < pixelStride; i++)
+                    work[i] = row[i];
+                for (int i = pixelStride, from = 0; i < length; i++, from++)
+                    work[i] = (byte)((row[i] - row[from]) % 256);
+                break;
+            case 2: // Up
+                for (int i = 0; i < length; i++)
+                    work[i] = (byte)((row[i] - prev[i]) % 256);
+                break;
+            default:
+                throw new UnsupportedOperationException("implement me");
+            }
+        }
+    }    
 
     private static class PngWriter
     {
@@ -184,7 +260,7 @@ public class AnimatedGif2Png
             chunk.writeByte(colorType);
             chunk.writeByte(PngConstants.COMPRESSION_BASE);
             chunk.writeByte(PngConstants.FILTER_BASE);
-            chunk.writeByte(PngConstants.INTERLACE_NONE); // TODO: does ImageIO write interlaced?
+            chunk.writeByte(PngConstants.INTERLACE_NONE);
             int ihdr_crc = chunk.finish(data);
             int plte_crc = 0;
 
@@ -287,30 +363,6 @@ public class AnimatedGif2Png
             data.write(bytes);
             data.flush();
             return (int)checked.getChecksum().getValue();
-        }
-    }
-
-    private static byte[] extractData(File file, final byte[] buf)
-    throws IOException
-    {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        (new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_METADATA).build()) {
-            @Override protected BufferedImage createImage(InputStream in) throws IOException {
-                pipe(in, out, buf);
-                return null;
-            }
-        }).read(file);
-        return out.toByteArray();
-    }
-
-    private static void pipe(InputStream in, OutputStream out, byte[] buf)
-    throws IOException
-    {
-        for (;;) {
-            int amt = in.read(buf);
-            if (amt < 0)
-                break;
-            out.write(buf, 0, amt);
         }
     }
     
