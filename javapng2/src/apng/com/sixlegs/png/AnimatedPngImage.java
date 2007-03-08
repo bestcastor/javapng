@@ -155,8 +155,14 @@ extends PngImage
                 }
             }
             int dispose = renderOp & 7;
-            if (dispose < 0 || dispose > 2)
+            switch (dispose) {
+            case FrameControl.DISPOSE_NONE:
+            case FrameControl.DISPOSE_BACKGROUND:
+            case FrameControl.DISPOSE_PREVIOUS:
+                break;
+            default:
                 throw new PngException("Unknown APNG dispose op " + dispose, false);
+            }
             add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend, skip));
             return true;
         case fdAt:
@@ -229,6 +235,7 @@ extends PngImage
             }
         } catch (IOException e) {
             animated = false;
+            throw e;
         }
     }
 
