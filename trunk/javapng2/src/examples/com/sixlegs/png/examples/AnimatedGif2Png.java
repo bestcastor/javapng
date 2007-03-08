@@ -37,10 +37,11 @@ exception statement from your version.
 package com.sixlegs.png.examples;
 
 import com.sixlegs.png.*;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.zip.*;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
@@ -57,23 +58,34 @@ public class AnimatedGif2Png
         convert(new File(args[0]), new File(args[1]));
     }
 
-    public static void convert(final File in, final File out)
+    public static void convert(File in, File out)
     throws IOException
     {
         ImageReader imageReader = ImageIO.getImageReadersByFormatName("GIF").next();
         imageReader.setInput(new FileImageInputStream(in));
         int index = 0;
-        final List<Frame> frames = new ArrayList<Frame>();
+        Set<Integer> entries = new HashSet<Integer>();
+        List<Frame> frames = new ArrayList<Frame>();
+        int[] prev = null;
+        boolean different = false;
         try {
             for (;;) {
-                BufferedImage image = imageReader.read(index);
-                File temp = File.createTempFile("frame", ".png");
-                ImageIO.write(image, "PNG", temp);
+                // TODO: get palette from metadata instead of decoding image?
+                ColorModel colorModel = imageReader.read(index).getColorModel();
+                IndexColorModel icm = (IndexColorModel)colorModel;
+                int[] palette = new int[icm.getMapSize()];
+                icm.getRGBs(palette);
+                for (int i = 0; i < palette.length; i++)
+                    entries.add(palette[i]);
+                if (!different && prev != null && !Arrays.equals(palette, prev))
+                    different = true;
+                prev = palette;
+                
                 IIOMetadata metadata = imageReader.getImageMetadata(index);
                 Node node = metadata.getAsTree(metadata.getNativeMetadataFormatName());
                 Node desc = getChild(node, "ImageDescriptor");
                 Node gce = getChild(node, "GraphicControlExtension");
-                frames.add(new Frame(temp,
+                frames.add(new Frame(palette,
                                      new Rectangle(Integer.parseInt(getAttr(desc, "imageLeftPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
@@ -86,104 +98,222 @@ public class AnimatedGif2Png
             // no more frames
         }
 
-        PngImage png = new PngImage() {
-            private long dataStart;
-            private long dataEnd;
-            private long chunkEnd;
-                
-            @Override protected boolean readChunk(int type, DataInput in, long offset, int length)
-            throws IOException
-            {
-                chunkEnd = offset + length + 4;
-                if (dataEnd == 0) {
-                    if (dataStart > 0)
-                        dataEnd = offset - 8;
-                }
-                if (type == PngConstants.IEND)
-                    finish();
-                return super.readChunk(type, in, offset, length);
-            }
-
-            @Override protected BufferedImage createImage(InputStream in)
-            throws IOException
-            {
-                dataStart = chunkEnd;
-                return null;
-            }
-                
-            private void finish()
-            throws IOException
-            {
-                RandomAccessFile rf = new RandomAccessFile(frames.get(0).file, "r");
-                byte[] buf = new byte[0x2000];
-                DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(out)));
-
-                copy(rf, 0, dataStart, os, buf);
-
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DataOutput data = new DataOutputStream(baos);
-                data.writeInt(AnimatedPngImage.acTl);
-                data.writeInt(frames.size());
-                data.writeInt(0); // TODO: numIterations
-                data.writeInt(((Number)getProperty("ihdr_crc")).intValue());
-                data.writeInt(((Number)getProperty("plte_crc")).intValue());
-                data.writeInt(crc(baos.toByteArray()));
-                os.writeInt(baos.size() - 8);
-                os.write(baos.toByteArray());
-
-                int seq = 0;
-                for (Frame frame : frames) {
-                    baos.reset();
-                    data = new DataOutputStream(baos);
-                    data.writeInt(AnimatedPngImage.fcTl);
-                    data.writeInt(seq++);
-                    data.writeInt(frame.bounds.width);
-                    data.writeInt(frame.bounds.height);
-                    data.writeInt(frame.bounds.x);
-                    data.writeInt(frame.bounds.y);
-                    data.writeShort(frame.delayTime);
-                    data.writeShort(1000);
-                    data.writeByte(frame.disposalMethod);
-                    data.writeInt(crc(baos.toByteArray()));
-                    os.writeInt(baos.size() - 8);
-                    os.write(baos.toByteArray());
-                    
-                    baos.reset();
-                    data = new DataOutputStream(baos);
-                    if (seq == 1) {
-                        data.writeInt(PngConstants.IDAT);
-                    } else {
-                        data.writeInt(AnimatedPngImage.fdAt);
-                        data.writeInt(seq++);
-                    }
-                    data.write(extractData(frame.file, buf));
-                    data.writeInt(crc(baos.toByteArray()));
-                    os.writeInt(baos.size() - 8);
-                    os.write(baos.toByteArray());
-                }
-                copy(rf, dataEnd, chunkEnd - dataEnd, os, buf);
-                rf.close();
-                os.close();
-            }
-        };
-        png.read(frames.get(0).file);
-
-        for (Frame frame : frames)
-            frame.file.delete();
+        Frame first = frames.get(0);
+        PngWriter w = new PngWriter(out);
+        if (entries.size() <= 256) {
+            if (different)
+                // this should be rare, implement it later
+                throw new UnsupportedOperationException("implement palette remapping");
+            writePaletted(w, imageReader, frames);
+        } else {
+            writeTruecolor(w, imageReader, frames);
+        }
+        imageReader.dispose();
     }
 
-    private static void copy(RandomAccessFile rf, long off, long len, OutputStream out, byte[] buf)
+    private static void writePaletted(PngWriter w, ImageReader imageReader, List<Frame> frames)
     throws IOException
     {
-        rf.seek(off);
-        while (len > 0) {
-            int amt = (int)Math.min(len, buf.length);
-            rf.readFully(buf, 0, amt);
-            out.write(buf, 0, amt);
-            len -= amt;
+        Frame first = frames.get(0);
+        w.start(first.bounds.getSize(), PngConstants.COLOR_TYPE_PALETTE, first.palette, frames.size());
+
+        // TODO: if palette is <= 64 entries, use smaller bit depth
+        ByteArrayOutputStream raw = new ByteArrayOutputStream();
+        byte[] row = new byte[first.bounds.width];
+        int index = 0;
+        for (Frame frame : frames) {
+            BufferedImage image = imageReader.read(index++);
+            raw.reset();
+            DeflaterOutputStream defl = new DeflaterOutputStream(raw);
+            for (int y = 0, h = frame.bounds.height; y < h; y++) {
+                image.getRaster().getDataElements(0, y, frame.bounds.width, 1, row);
+                defl.write(0); // filter byte
+                defl.write(row, 0, frame.bounds.width);
+            }
+            defl.close();
+            w.frame(frame, raw.toByteArray());
+        }
+        w.finish();
+    }
+
+    private static void writeTruecolor(PngWriter w, ImageReader imageReader, List<Frame> frames)
+    throws IOException
+    {
+        // TODO: could use tRNS instead of alpha channel in some cases for better compression
+        Frame first = frames.get(0);
+        w.start(first.bounds.getSize(), PngConstants.COLOR_TYPE_RGB_ALPHA, null, frames.size());
+        BufferedImage canvas =
+            new BufferedImage(first.bounds.width, first.bounds.height, BufferedImage.TYPE_INT_ARGB);
+        byte[] buf = new byte[0x2000];
+        int index = 0;
+        File temp = File.createTempFile("frame", ".png");
+        for (Frame frame : frames) {
+            BufferedImage image = imageReader.read(index++);
+            BufferedImage subcanvas = canvas.getSubimage(0, 0, frame.bounds.width, frame.bounds.height);
+            Graphics2D g = subcanvas.createGraphics();
+            g.drawImage(image, null, null);
+            g.dispose();
+            ImageIO.write(subcanvas, "PNG", temp);
+            w.frame(frame, extractData(temp, buf));
+        }
+        temp.delete();
+        w.finish();
+    }
+
+    private static class PngWriter
+    {
+        private final DataOutputStream data;
+        private final ChunkWriter chunk = new ChunkWriter();
+        private int seq;
+        
+        public PngWriter(File out)
+        throws IOException
+        {
+            this.data = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(out)));
+        }
+
+        public void start(Dimension size, int colorType, int[] palette, int numFrames)
+        throws IOException
+        {
+            data.writeLong(0x89504E470D0A1A0AL);
+
+            chunk.start(PngConstants.IHDR);
+            chunk.writeInt(size.width);
+            chunk.writeInt(size.height);
+            chunk.writeByte(8); // bit depth
+            chunk.writeByte(colorType);
+            chunk.writeByte(PngConstants.COMPRESSION_BASE);
+            chunk.writeByte(PngConstants.FILTER_BASE);
+            chunk.writeByte(PngConstants.INTERLACE_NONE); // TODO: does ImageIO write interlaced?
+            int ihdr_crc = chunk.finish(data);
+            int plte_crc = 0;
+
+            if (colorType == PngConstants.COLOR_TYPE_PALETTE) {
+                chunk.start(PngConstants.PLTE);
+                int numTrans = 0;
+                int maxTrans = 0;
+                for (int i = 0; i < palette.length; i++) {
+                    Color color = new Color(palette[i], true);
+                    chunk.writeByte(color.getRed());
+                    chunk.writeByte(color.getGreen());
+                    chunk.writeByte(color.getBlue());
+                    if (color.getAlpha() != 0xFF) {
+                        numTrans++;
+                        maxTrans = i;
+                    }
+                }
+                plte_crc = chunk.finish(data);
+
+                if (numTrans > 0) {
+                    chunk.start(PngConstants.tRNS);
+                    for (int i = 0; i <= maxTrans; i++)
+                        chunk.writeByte(new Color(palette[i]).getAlpha());
+                    chunk.finish(data);
+                }
+            }
+
+            chunk.start(AnimatedPngImage.acTl);
+            chunk.writeInt(numFrames);
+            chunk.writeInt(0); // TODO: numIterations
+            chunk.writeInt(ihdr_crc);
+            chunk.writeInt(plte_crc);
+            chunk.finish(data);
+        }
+
+        public void frame(Frame frame, byte[] bytes)
+        throws IOException
+        {
+            chunk.start(AnimatedPngImage.fcTl);
+            chunk.writeInt(seq++);
+            chunk.writeInt(frame.bounds.width);
+            chunk.writeInt(frame.bounds.height);
+            chunk.writeInt(frame.bounds.x);
+            chunk.writeInt(frame.bounds.y);
+            chunk.writeShort(frame.delayTime);
+            chunk.writeShort(1000);
+            chunk.writeByte(frame.disposalMethod);
+            chunk.finish(data);
+
+            if (seq == 1) {
+                chunk.start(PngConstants.IDAT);
+            } else {
+                chunk.start(AnimatedPngImage.fdAt);
+                chunk.writeInt(seq++);
+            }
+            chunk.write(bytes);
+            chunk.finish(data);
+        }
+
+        public void finish()
+        throws IOException
+        {
+            chunk.start(PngConstants.IEND);
+            chunk.finish(data);
+            data.close();
         }
     }
 
+    private static class ChunkWriter
+    extends DataOutputStream
+    {
+        public ChunkWriter()
+        {
+            super(new ByteArrayOutputStream());
+        }
+
+        public void start(int type)
+        throws IOException
+        {
+            ((ByteArrayOutputStream)out).reset();
+            writeInt(type);
+        }
+
+        public int finish(DataOutput data)
+        throws IOException
+        {
+            byte[] bytes = ((ByteArrayOutputStream)out).toByteArray();
+            int crc = crc(bytes);
+            data.writeInt(bytes.length - 4);
+            data.write(bytes);
+            data.writeInt(crc);
+            return crc;
+        }
+
+        private static int crc(byte[] bytes)
+        throws IOException
+        {
+            CheckedOutputStream checked = new CheckedOutputStream(new NullOutputStream(), new CRC32());
+            DataOutputStream data = new DataOutputStream(checked);
+            data.write(bytes);
+            data.flush();
+            return (int)checked.getChecksum().getValue();
+        }
+    }
+
+    private static byte[] extractData(File file, final byte[] buf)
+    throws IOException
+    {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        (new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_METADATA).build()) {
+            @Override protected BufferedImage createImage(InputStream in) throws IOException {
+                pipe(in, out, buf);
+                return null;
+            }
+        }).read(file);
+        return out.toByteArray();
+    }
+
+    private static void pipe(InputStream in, OutputStream out, byte[] buf)
+    throws IOException
+    {
+        for (;;) {
+            int amt = in.read(buf);
+            if (amt < 0)
+                break;
+            out.write(buf, 0, amt);
+        }
+    }
+    
     private static Node getChild(Node node, String name)
     {
         for (node = node.getFirstChild(); node != null; node = node.getNextSibling())
@@ -206,50 +336,16 @@ public class AnimatedGif2Png
         return FrameControl.DISPOSE_NONE | 8; // turn on blend
     }
 
-    private static byte[] extractData(File file, final byte[] buf)
-    throws IOException
-    {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        (new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_METADATA).build()) {
-            @Override protected BufferedImage createImage(InputStream in) throws IOException {
-                pipe(in, out, buf);
-                return null;
-            }
-        }).read(file);
-        return out.toByteArray();
-    }
-
-    private static int crc(byte[] bytes)
-    throws IOException
-    {
-        CheckedOutputStream checked = new CheckedOutputStream(new NullOutputStream(), new CRC32());
-        DataOutputStream data = new DataOutputStream(checked);
-        data.write(bytes);
-        data.flush();
-        return (int)checked.getChecksum().getValue();
-    }
-
-    private static void pipe(InputStream in, OutputStream out, byte[] buf)
-    throws IOException
-    {
-        for (;;) {
-            int amt = in.read(buf);
-            if (amt < 0)
-                break;
-            out.write(buf, 0, amt);
-        }
-    }
-
     private static class Frame
     {
-        final File file;
+        final int[] palette;
         final Rectangle bounds;
         final int delayTime;
         final int disposalMethod;
 
-        public Frame(File file, Rectangle bounds, int delayTime, int disposalMethod)
+        public Frame(int[] palette, Rectangle bounds, int delayTime, int disposalMethod)
         {
-            this.file = file;
+            this.palette = palette;
             this.bounds = bounds;
             this.delayTime = delayTime;
             this.disposalMethod = disposalMethod;
