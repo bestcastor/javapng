@@ -97,7 +97,7 @@ implements ActionListener
             rd.bounds = frame.getBounds();
             rd.dispose = frame.getDispose();
             rd.blend = frame.isBlend() ? AlphaComposite.SrcOver : AlphaComposite.Src;
-            if (frame.getDispose() == AnimatedPngImage.APNG_RENDER_OP_DISPOSE_PREVIOUS) {
+            if (frame.getDispose() == FrameControl.DISPOSE_PREVIOUS) {
                 rd.prev = createCompatibleImage(rd.image, rd.bounds.width, rd.bounds.height);
                 rd.prev_g = rd.prev.createGraphics();
                 rd.prev_g.setComposite(AlphaComposite.Src);
@@ -128,6 +128,7 @@ implements ActionListener
         return timerDelay;
     }
 
+    // TODO: add fudge factor in case we get triggered a little too early
     public void actionPerformed(ActionEvent e)
     {
         long now = System.currentTimeMillis();
@@ -155,11 +156,11 @@ implements ActionListener
     {
         Rectangle bounds = rd.bounds;
         switch (rd.dispose) {
-        case AnimatedPngImage.APNG_RENDER_OP_DISPOSE_BACKGROUND:
+        case FrameControl.DISPOSE_BACKGROUND:
             g.setColor(background);
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             break;
-        case AnimatedPngImage.APNG_RENDER_OP_DISPOSE_PREVIOUS:
+        case FrameControl.DISPOSE_PREVIOUS:
             g.setComposite(AlphaComposite.Src);
             g.drawImage(rd.prev, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
             break;
