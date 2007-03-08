@@ -50,6 +50,13 @@ extends PngTestCase
         assertNull(readResource("/images/suite/basn0g01.png").getBackground());
     }
 
+    public void testReadExceptMultipleDataChunks()
+    throws Exception
+    {
+        readResource("/images/suite/oi4n0g16.png",
+                     new PngImage(new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build()));
+    }
+
     public void testReadTextChunk()
     throws Exception
     {
