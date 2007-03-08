@@ -64,8 +64,9 @@ public class AnimatedGif2Png
         final List<Frame> frames = new ArrayList<Frame>();
         try {
             for (;;) {
-                File temp = File.createTempFile("frame", null);
-                ImageIO.write(imageReader.read(index), "PNG", temp);
+                BufferedImage image = imageReader.read(index);
+                File temp = File.createTempFile("frame", ".png");
+                ImageIO.write(image, "PNG", temp);
                 IIOMetadata metadata = imageReader.getImageMetadata(index);
                 Node node = metadata.getAsTree(metadata.getNativeMetadataFormatName());
                 Node desc = getChild(node, "ImageDescriptor");
@@ -83,8 +84,7 @@ public class AnimatedGif2Png
             // no more frames
         }
 
-        PngConfig config = new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
-        PngImage png = new PngImage(config) {
+        PngImage png = new PngImage() {
             private long dataStart;
             private long dataEnd;
             private long chunkEnd;
@@ -92,22 +92,21 @@ public class AnimatedGif2Png
             @Override protected boolean readChunk(int type, DataInput in, long offset, int length)
             throws IOException
             {
+                chunkEnd = offset + length + 4;
                 if (dataEnd == 0) {
                     if (dataStart > 0)
                         dataEnd = offset - 8;
-                    chunkEnd = offset + length + 4;
                 }
-                boolean result = super.readChunk(type, in, offset, length);
                 if (type == PngConstants.IEND)
                     finish();
-                return result;
+                return super.readChunk(type, in, offset, length);
             }
 
             @Override protected BufferedImage createImage(InputStream in)
             throws IOException
             {
                 dataStart = chunkEnd;
-                return super.createImage(in);
+                return null;
             }
                 
             private void finish()
@@ -160,8 +159,6 @@ public class AnimatedGif2Png
                     data.writeInt(crc(baos.toByteArray()));
                     os.writeInt(baos.size() - 8);
                     os.write(baos.toByteArray());
-
-                    frame.file.delete();
                 }
                 copy(rf, dataEnd, chunkEnd - dataEnd, os, buf);
                 rf.close();
@@ -169,6 +166,9 @@ public class AnimatedGif2Png
             }
         };
         png.read(frames.get(0).file);
+
+        for (Frame frame : frames)
+            frame.file.delete();
     }
 
     private static void copy(RandomAccessFile rf, long off, long len, OutputStream out, byte[] buf)
@@ -202,7 +202,7 @@ public class AnimatedGif2Png
             return FrameControl.DISPOSE_BACKGROUND;
         if (gifDisposalMethod.equals("restoreToPrevious"))
             return FrameControl.DISPOSE_PREVIOUS;
-        return FrameControl.DISPOSE_NONE;
+        return FrameControl.DISPOSE_NONE | 8; // turn on blend
     }
 
     private static byte[] extractData(File file, final byte[] buf)
