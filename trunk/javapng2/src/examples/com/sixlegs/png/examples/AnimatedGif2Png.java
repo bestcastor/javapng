@@ -49,6 +49,8 @@ import org.w3c.dom.Node;
 
 public class AnimatedGif2Png
 {
+    private static final int MIN_DELAY = 75; // ms
+    
     public static void main(String[] args)
     throws IOException
     {
@@ -76,7 +78,7 @@ public class AnimatedGif2Png
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
                                                    Integer.parseInt(getAttr(desc, "imageHeight"))),
-                                     Integer.parseInt(getAttr(gce, "delayTime")),
+                                     Math.max(10 * Integer.parseInt(getAttr(gce, "delayTime")), MIN_DELAY),
                                      mapDisposal(getAttr(gce, "disposalMethod"))));
                 index++;
             }
@@ -112,7 +114,6 @@ public class AnimatedGif2Png
             private void finish()
             throws IOException
             {
-                System.err.println("writing " + out);
                 RandomAccessFile rf = new RandomAccessFile(frames.get(0).file, "r");
                 byte[] buf = new byte[0x2000];
                 DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(out)));
@@ -141,7 +142,7 @@ public class AnimatedGif2Png
                     data.writeInt(frame.bounds.x);
                     data.writeInt(frame.bounds.y);
                     data.writeShort(frame.delayTime);
-                    data.writeShort(0);
+                    data.writeShort(1000);
                     data.writeByte(frame.disposalMethod);
                     data.writeInt(crc(baos.toByteArray()));
                     os.writeInt(baos.size() - 8);

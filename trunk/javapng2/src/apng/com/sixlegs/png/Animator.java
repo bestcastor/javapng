@@ -102,8 +102,8 @@ implements ActionListener
                 rd.prev_g = rd.prev.createGraphics();
                 rd.prev_g.setComposite(AlphaComposite.Src);
             }
-            rd.delay = (int)(frame.getDelay() * 1000);
-            minDelay = Math.min(minDelay, Math.max(rd.delay, MIN_DELAY));
+            rd.delay = Math.max((int)(frame.getDelay() * 1000), MIN_DELAY);
+            minDelay = Math.min(minDelay, rd.delay);
             renderList.add(rd);
         }
         this.timerDelay = minDelay;
@@ -157,6 +157,7 @@ implements ActionListener
         Rectangle bounds = rd.bounds;
         switch (rd.dispose) {
         case FrameControl.DISPOSE_BACKGROUND:
+            g.setComposite(AlphaComposite.Src);
             g.setColor(background);
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             break;
