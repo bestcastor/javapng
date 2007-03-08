@@ -155,9 +155,11 @@ implements Transparency
                         return null;
                     ImageDataInputStream data = new ImageDataInputStream(pin, machine);
                     image = createImage(data);
-                    if (data.read() != -1)
-                        skipFully(data, pin.getRemaining());
-                    type = machine.getType();
+                    do {
+                        if (data.read() != -1)
+                            skipFully(data, pin.getRemaining());
+                        type = machine.getType();
+                    } while (type == PngConstants.IDAT);
                 }
                 try {
                     Integer key = Integers.valueOf(type);
