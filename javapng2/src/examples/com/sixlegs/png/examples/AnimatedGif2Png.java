@@ -207,7 +207,7 @@ public class AnimatedGif2Png
                 if (numTrans > 0) {
                     chunk.start(PngConstants.tRNS);
                     for (int i = 0; i <= maxTrans; i++)
-                        chunk.writeByte(new Color(palette[i]).getAlpha());
+                        chunk.writeByte(palette[i] >>> 24);
                     chunk.finish(data);
                 }
             }
