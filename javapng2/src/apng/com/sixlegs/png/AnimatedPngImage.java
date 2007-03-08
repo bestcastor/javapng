@@ -45,17 +45,13 @@ import java.util.List;
 public class AnimatedPngImage
 extends PngImage
 {
-    public static final int APNG_RENDER_OP_DISPOSE_NONE = 0;
-    public static final int APNG_RENDER_OP_DISPOSE_BACKGROUND = 1;
-    public static final int APNG_RENDER_OP_DISPOSE_PREVIOUS = 2;
-
+    public static final int acTl = 0x6163546C;
+    public static final int fcTl = 0x6663546C;
+    public static final int fdAt = 0x66644174;
+        
     private static final int APNG_RENDER_OP_BLEND_FLAG = 8;
     private static final int APNG_RENDER_OP_SKIP_FRAME = 16;
 
-    private static final int acTl = 0x6163546C;
-    private static final int fcTl = 0x6663546C;
-    private static final int fdAt = 0x66644174;
-        
     private final List chunks = new ArrayList();
     private final List frames = new ArrayList();
     private final Map frameData = new HashMap();
@@ -152,7 +148,7 @@ extends PngImage
                 switch (getColorType()) {
                 case PngConstants.COLOR_TYPE_GRAY:
                 case PngConstants.COLOR_TYPE_RGB:
-                    throw new PngException("APNG blend flag is not valid for color type " + getColorType(), false);
+                    throw new PngException("APNG blend not valid for color type " + getColorType(), false);
                 }
             }
             int dispose = renderOp & 7;
@@ -214,7 +210,7 @@ extends PngImage
             for (int i = 0; i < chunks.size(); i++) {
                 Object chunk = chunks.get(i);
                 if (chunk == null)
-                    throw new PngException("Missing APNG sequence number " + i, false);
+                    throw new PngException("Missing APNG sequence " + i, false);
                 if (chunk instanceof FrameControl) {
                     // System.err.println(chunk);
                     frames.add(chunk);

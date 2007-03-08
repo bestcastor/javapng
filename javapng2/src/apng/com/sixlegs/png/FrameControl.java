@@ -40,6 +40,10 @@ import java.awt.Rectangle;
 
 public class FrameControl
 {
+    public static final int DISPOSE_NONE = 0;
+    public static final int DISPOSE_BACKGROUND = 1;
+    public static final int DISPOSE_PREVIOUS = 2;
+
     private final Rectangle bounds;
     private final float delay;
     private final int dispose;
