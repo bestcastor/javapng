@@ -155,13 +155,16 @@ public class Viewer
                 BufferedImage[] frames = png.readAllFrames(file);
                 if (png.isAnimated()) {
                     panel.setPreferredSize(new Dimension(png.getWidth(), png.getHeight()));
-                    final Animator animator = new Animator(png, frames, null);
+                    final BufferedImage target =
+                        panel.getGraphicsConfiguration().createCompatibleImage(png.getWidth(), png.getHeight(),
+                                                                               Transparency.TRANSLUCENT);
+                    final Animator animator = new Animator(png, frames, target);
                     Timer timer = new Timer(animator.getTimerDelay(), null);
                     timer.setInitialDelay(0);
                     timer.addActionListener(animator);
                     timer.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
-                            panel.setImage(animator.getTarget());
+                            panel.setImage(target);
                         }
                     });
                     timer.start();
