@@ -55,6 +55,10 @@ public class AnimatedGif2Png
     public static void main(String[] args)
     throws IOException
     {
+        if (args.length != 2) {
+            System.err.println("Usage: java -jar gif2apng.jar <in.gif> <out.png>");
+            return;
+        }
         convert(new File(args[0]), new File(args[1]));
     }
 

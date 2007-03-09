@@ -57,6 +57,10 @@ public class Viewer
     public static void main(final String[] args)
     throws Exception
     {
+        if (args.length != 1) {
+            System.err.println("Usage: java -jar pngviewer.jar <example.png>");
+            return;
+        }
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new Viewer(args);
