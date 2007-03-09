@@ -64,6 +64,17 @@ public class AnimatedGif2Png
         ImageReader imageReader = ImageIO.getImageReadersByFormatName("GIF").next();
         imageReader.setInput(new FileImageInputStream(in));
 
+        int numIterations = 1;
+        byte[] netscape = getAppExtension(imageReader.getImageMetadata(0), "NETSCAPE", "2.0");
+        if (netscape != null && netscape[0] != 0) {
+            int repeat = ((0xFF & netscape[2]) << 8) | (0xFF & netscape[1]);
+            if (repeat == 0) {
+                numIterations = 0;
+            } else {
+                numIterations = 1 + repeat;
+            }
+        }
+
         int index = 0;
         Set<Integer> entries = new HashSet<Integer>();
         List<Frame> frames = new ArrayList<Frame>();
@@ -84,10 +95,9 @@ public class AnimatedGif2Png
                 prev = palette;
                 
                 IIOMetadata metadata = imageReader.getImageMetadata(index);
-                Node node = metadata.getAsTree(metadata.getNativeMetadataFormatName());
-                Node desc = getChild(node, "ImageDescriptor");
-                Node gce = getChild(node, "GraphicControlExtension");
-
+                Node root = metadata.getAsTree(metadata.getNativeMetadataFormatName());
+                Node desc = getChild(root, "ImageDescriptor");
+                Node gce = getChild(root, "GraphicControlExtension");
                 frames.add(new Frame(palette,
                                      new Rectangle(Integer.parseInt(getAttr(desc, "imageLeftPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
@@ -106,7 +116,7 @@ public class AnimatedGif2Png
         int colorType = paletted ? PngConstants.COLOR_TYPE_PALETTE :
             PngConstants.COLOR_TYPE_RGB_ALPHA;
         Frame first = frames.get(0);
-        w.start(first.bounds.getSize(), colorType, first.palette, frames.size());
+        w.start(first.bounds.getSize(), colorType, first.palette, frames.size(), numIterations);
         if (paletted) {
             if (different)
                 throw new UnsupportedOperationException("implement palette remapping");
@@ -116,6 +126,20 @@ public class AnimatedGif2Png
         }
         w.finish();
         imageReader.dispose();
+    }
+
+    private static byte[] getAppExtension(IIOMetadata metadata, String id, String code)
+    {
+        Node root = metadata.getAsTree(metadata.getNativeMetadataFormatName());
+        Node extensions = getChild(root, "ApplicationExtensions");
+        if (extensions == null)
+            return null;
+        for (Node node = extensions.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (id.equals(getAttr(node, "applicationID")) &&
+                code.equals(getAttr(node, "authenticationCode")))
+                return (byte[])((IIOMetadataNode)node).getUserObject();
+        }
+        return null;
     }
 
     /*
@@ -271,7 +295,7 @@ public class AnimatedGif2Png
             this.data = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(out)));
         }
 
-        public void start(Dimension size, int colorType, int[] palette, int numFrames)
+        public void start(Dimension size, int colorType, int[] palette, int numFrames, int numIterations)
         throws IOException
         {
             data.writeLong(0x89504E470D0A1A0AL);
@@ -313,7 +337,7 @@ public class AnimatedGif2Png
 
             chunk.start(AnimatedPngImage.acTl);
             chunk.writeInt(numFrames);
-            chunk.writeInt(0); // TODO: numIterations
+            chunk.writeInt(numIterations);
             chunk.writeInt(ihdr_crc);
             chunk.writeInt(plte_crc);
             chunk.finish(data);
