@@ -7,6 +7,7 @@
 
     <property name="compile.bootclasspath.12" value="${java.home}/lib/rt.jar"/>
     <property name="compile.bootclasspath.14" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.bootclasspath.15" value="${java.home}/lib/rt.jar"/>
     <property name="compile.extdirs" value=""/>
 
     <property name="compile.debug" value="true"/>
@@ -192,6 +193,43 @@
         <delete>
             <fileset dir="." includes="TEST*"/>
         </delete>
+    </target>
+
+    <target name="jar-gif2apng" depends="compile-all" description="Create gif2apng jar">
+        <mkdir dir="dist"/>
+        <jar jarfile="dist/gif2apng-${version}.jar">
+            <fileset dir="build/examples" includes="com/sixlegs/png/examples/AnimatedGif2Png*.class"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.sixlegs.png.examples.AnimatedGif2Png"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jar-pngviewer" depends="compile-all" description="Create pngviewer jar">
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
+        <mkdir dir="dist"/>
+        <delete file="dist/temp.jar"/>
+        <jar jarfile="dist/temp.jar">
+            <fileset dir="build/main"/>
+            <fileset dir="build/apng"/>
+            <fileset dir="build/viewer"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.sixlegs.png.viewer.Viewer"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+        </jar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/temp.jar
+            -outjars dist/pngviewer-${version}.jar
+            -libraryjars ${compile.bootclasspath.15}
+            -libraryjars lib
+            -keep public class com.sixlegs.png.viewer.Viewer { public *; }
+            -keepattributes InnerClasses
+        </proguard>
+        <delete file="dist/temp.jar"/>
     </target>
 
     <target name="jar" depends="compile-all" description="Create jar">
