@@ -167,6 +167,7 @@ public class AnimatedGif2Png
     throws IOException
     {
         // TODO: if palette is <= 64 entries, use smaller bit depth
+        boolean animated = frames.size() > 1;
         Frame first = frames.get(0);
         ByteArrayOutputStream raw = new ByteArrayOutputStream();
         byte[] row = new byte[first.bounds.width];
@@ -182,7 +183,7 @@ public class AnimatedGif2Png
                 defl.write(row, 0, width);
             }
             defl.close();
-            w.frame(frame, raw.toByteArray());
+            w.frame(animated, frame, raw.toByteArray());
         }
     }
 
@@ -190,6 +191,7 @@ public class AnimatedGif2Png
     throws IOException
     {
         // TODO: could use tRNS instead of alpha channel in some cases for better compression
+        boolean animated = frames.size() > 1;
         Frame first = frames.get(0);
         ByteArrayOutputStream raw = new ByteArrayOutputStream();
         byte[] row = new byte[first.bounds.width];
@@ -219,7 +221,7 @@ public class AnimatedGif2Png
                  byte[] t = rgbs; rgbs = prev; prev = t; // swap
             }
             defl.close();
-            w.frame(frame, raw.toByteArray());
+            w.frame(animated, frame, raw.toByteArray());
         }
     }
 
@@ -335,36 +337,43 @@ public class AnimatedGif2Png
                 }
             }
 
-            chunk.start(AnimatedPngImage.acTl);
-            chunk.writeInt(numFrames);
-            chunk.writeInt(numIterations);
-            chunk.writeInt(ihdr_crc);
-            chunk.writeInt(plte_crc);
-            chunk.finish(data);
+            if (numFrames > 1) {
+                chunk.start(AnimatedPngImage.acTl);
+                chunk.writeInt(numFrames);
+                chunk.writeInt(numIterations);
+                chunk.writeInt(ihdr_crc);
+                chunk.writeInt(plte_crc);
+                chunk.finish(data);
+            }
         }
 
-        public void frame(Frame frame, byte[] bytes)
+        public void frame(boolean animated, Frame frame, byte[] bytes)
         throws IOException
         {
-            chunk.start(AnimatedPngImage.fcTl);
-            chunk.writeInt(seq++);
-            chunk.writeInt(frame.bounds.width);
-            chunk.writeInt(frame.bounds.height);
-            chunk.writeInt(frame.bounds.x);
-            chunk.writeInt(frame.bounds.y);
-            chunk.writeShort(frame.delayTime);
-            chunk.writeShort(1000);
-            chunk.writeByte(frame.renderOp);
-            chunk.finish(data);
-
-            if (seq == 1) {
-                chunk.start(PngConstants.IDAT);
-            } else {
-                chunk.start(AnimatedPngImage.fdAt);
+            if (animated) {
+                chunk.start(AnimatedPngImage.fcTl);
                 chunk.writeInt(seq++);
+                chunk.writeInt(frame.bounds.width);
+                chunk.writeInt(frame.bounds.height);
+                chunk.writeInt(frame.bounds.x);
+                chunk.writeInt(frame.bounds.y);
+                chunk.writeShort(frame.delayTime);
+                chunk.writeShort(1000);
+                chunk.writeByte(frame.renderOp);
+                chunk.finish(data);
+                if (seq == 1) {
+                    chunk.start(PngConstants.IDAT);
+                } else {
+                    chunk.start(AnimatedPngImage.fdAt);
+                    chunk.writeInt(seq++);
+                }
+                chunk.write(bytes);
+                chunk.finish(data);
+            } else {
+                chunk.start(PngConstants.IDAT);
+                chunk.write(bytes);
+                chunk.finish(data);
             }
-            chunk.write(bytes);
-            chunk.finish(data);
         }
 
         public void finish()
