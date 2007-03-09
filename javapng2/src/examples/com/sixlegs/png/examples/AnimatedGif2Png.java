@@ -63,6 +63,7 @@ public class AnimatedGif2Png
     {
         ImageReader imageReader = ImageIO.getImageReadersByFormatName("GIF").next();
         imageReader.setInput(new FileImageInputStream(in));
+
         int index = 0;
         Set<Integer> entries = new HashSet<Integer>();
         List<Frame> frames = new ArrayList<Frame>();
@@ -71,7 +72,8 @@ public class AnimatedGif2Png
         try {
             for (;;) {
                 // TODO: get palette from metadata instead of decoding image?
-                ColorModel colorModel = imageReader.read(index).getColorModel();
+                BufferedImage image = imageReader.read(index);
+                ColorModel colorModel = image.getColorModel();
                 IndexColorModel icm = (IndexColorModel)colorModel;
                 int[] palette = new int[icm.getMapSize()];
                 icm.getRGBs(palette);
@@ -85,39 +87,63 @@ public class AnimatedGif2Png
                 Node node = metadata.getAsTree(metadata.getNativeMetadataFormatName());
                 Node desc = getChild(node, "ImageDescriptor");
                 Node gce = getChild(node, "GraphicControlExtension");
+
                 frames.add(new Frame(palette,
                                      new Rectangle(Integer.parseInt(getAttr(desc, "imageLeftPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
                                                    Integer.parseInt(getAttr(desc, "imageHeight"))),
                                      Math.max(10 * Integer.parseInt(getAttr(gce, "delayTime")), MIN_DELAY),
-                                     mapDisposal(getAttr(gce, "disposalMethod"))));
+                                     8 | mapDisposal(getAttr(gce, "disposalMethod"))));
                 index++;
             }
         } catch (IndexOutOfBoundsException e) {
             // no more frames
         }
 
-        Frame first = frames.get(0);
         PngWriter w = new PngWriter(out);
-        if (entries.size() <= 256) {
+        boolean paletted = entries.size() <= 256;
+        int colorType = paletted ? PngConstants.COLOR_TYPE_PALETTE :
+            PngConstants.COLOR_TYPE_RGB_ALPHA;
+        Frame first = frames.get(0);
+        w.start(first.bounds.getSize(), colorType, first.palette, frames.size());
+        if (paletted) {
             if (different)
-                // this should be rare, implement it later
                 throw new UnsupportedOperationException("implement palette remapping");
             writePaletted(w, imageReader, frames);
         } else {
             writeTruecolor(w, imageReader, frames);
         }
+        w.finish();
         imageReader.dispose();
     }
+
+    /*
+    private static Color getGifBackground(ImageReader imageReader)
+    throws IOException
+    {
+        IIOMetadata metadata = imageReader.getStreamMetadata();
+        Node globalColorTable =
+            getChild(metadata.getAsTree(metadata.getNativeMetadataFormatName()), "GlobalColorTable");
+        if (globalColorTable == null)
+            return null;
+        String index = getAttr(globalColorTable, "backgroundColorIndex");
+        for (Node node = globalColorTable.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (getAttr(node, "index").equals(index)) {
+                return new Color(Integer.parseInt(getAttr(node, "red")),
+                                 Integer.parseInt(getAttr(node, "green")),
+                                 Integer.parseInt(getAttr(node, "blue")));
+            }                
+        }
+        return null;
+    }
+    */
 
     private static void writePaletted(PngWriter w, ImageReader imageReader, List<Frame> frames)
     throws IOException
     {
-        Frame first = frames.get(0);
-        w.start(first.bounds.getSize(), PngConstants.COLOR_TYPE_PALETTE, first.palette, frames.size());
-
         // TODO: if palette is <= 64 entries, use smaller bit depth
+        Frame first = frames.get(0);
         ByteArrayOutputStream raw = new ByteArrayOutputStream();
         byte[] row = new byte[first.bounds.width];
         int index = 0;
@@ -134,7 +160,6 @@ public class AnimatedGif2Png
             defl.close();
             w.frame(frame, raw.toByteArray());
         }
-        w.finish();
     }
 
     private static void writeTruecolor(PngWriter w, ImageReader imageReader, List<Frame> frames)
@@ -142,7 +167,6 @@ public class AnimatedGif2Png
     {
         // TODO: could use tRNS instead of alpha channel in some cases for better compression
         Frame first = frames.get(0);
-        w.start(first.bounds.getSize(), PngConstants.COLOR_TYPE_RGB_ALPHA, null, frames.size());
         ByteArrayOutputStream raw = new ByteArrayOutputStream();
         byte[] row = new byte[first.bounds.width];
         byte[] rgbs = new byte[4 * row.length];
@@ -173,7 +197,6 @@ public class AnimatedGif2Png
             defl.close();
             w.frame(frame, raw.toByteArray());
         }
-        w.finish();
     }
 
     private static class Filterer
@@ -307,7 +330,7 @@ public class AnimatedGif2Png
             chunk.writeInt(frame.bounds.y);
             chunk.writeShort(frame.delayTime);
             chunk.writeShort(1000);
-            chunk.writeByte(frame.disposalMethod);
+            chunk.writeByte(frame.renderOp);
             chunk.finish(data);
 
             if (seq == 1) {
@@ -385,7 +408,7 @@ public class AnimatedGif2Png
             return FrameControl.DISPOSE_BACKGROUND;
         if (gifDisposalMethod.equals("restoreToPrevious"))
             return FrameControl.DISPOSE_PREVIOUS;
-        return FrameControl.DISPOSE_NONE | 8; // turn on blend
+        return FrameControl.DISPOSE_NONE;
     }
 
     private static class Frame
@@ -393,14 +416,14 @@ public class AnimatedGif2Png
         final int[] palette;
         final Rectangle bounds;
         final int delayTime;
-        final int disposalMethod;
+        final int renderOp;
 
-        public Frame(int[] palette, Rectangle bounds, int delayTime, int disposalMethod)
+        public Frame(int[] palette, Rectangle bounds, int delayTime, int renderOp)
         {
             this.palette = palette;
             this.bounds = bounds;
             this.delayTime = delayTime;
-            this.disposalMethod = disposalMethod;
+            this.renderOp = renderOp;
         }
     }
 
