@@ -55,6 +55,8 @@ implements ActionListener
     private final BufferedImage[] frames;
     private final BufferedImage target;
     private final Graphics2D g;
+    private final BufferedImage prev;
+    private final Graphics2D gPrev;
     private final RenderData[] render;
     private final int timerDelay;
 
@@ -83,8 +85,9 @@ implements ActionListener
         this.png = png;
         this.frames = frames;
         this.target = target;
-        this.g = target.createGraphics();
-        
+        g = target.createGraphics();
+
+        Rectangle prevBounds = new Rectangle(0, 0, 0, 0);
         List renderList = new ArrayList();
         int minDelay = Integer.MAX_VALUE;
         for (int i = 0; i < png.getNumFrames(); i++) {
@@ -96,17 +99,22 @@ implements ActionListener
             rd.bounds = frame.getBounds();
             rd.dispose = frame.getDispose();
             rd.blend = frame.isBlend() ? AlphaComposite.SrcOver : AlphaComposite.Src;
-            if (frame.getDispose() == FrameControl.DISPOSE_PREVIOUS) {
-                rd.prev = createCompatibleImage(rd.image, rd.bounds.width, rd.bounds.height);
-                rd.prev_g = rd.prev.createGraphics();
-                rd.prev_g.setComposite(AlphaComposite.Src);
-            }
+            if (frame.getDispose() == FrameControl.DISPOSE_PREVIOUS)
+                prevBounds.add(new Rectangle(rd.bounds.getSize()));
             rd.delay = Math.max((int)(frame.getDelay() * 1000), MIN_DELAY);
             minDelay = Math.min(minDelay, rd.delay);
             renderList.add(rd);
         }
-        this.timerDelay = minDelay;
-        this.render = (RenderData[])renderList.toArray(new RenderData[renderList.size()]);
+        timerDelay = minDelay;
+        render = (RenderData[])renderList.toArray(new RenderData[renderList.size()]);
+        if (prevBounds.isEmpty()) {
+            prev = null;
+            gPrev = null;
+        } else {
+            prev = createCompatibleImage(frames[0], prevBounds.width, prevBounds.height);
+            gPrev = prev.createGraphics();
+            gPrev.setComposite(AlphaComposite.Src);
+        }
     }
 
     public void reset()
@@ -174,7 +182,7 @@ implements ActionListener
             break;
         case FrameControl.DISPOSE_PREVIOUS:
             g.setComposite(AlphaComposite.Src);
-            g.drawImage(rd.prev, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
+            g.drawImage(prev, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
             break;
         }
     }
@@ -182,8 +190,8 @@ implements ActionListener
     private void draw(RenderData rd)
     {
         Rectangle bounds = rd.bounds;
-        if (rd.prev != null)
-            rd.prev_g.drawImage(target, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
+        if (rd.dispose == FrameControl.DISPOSE_PREVIOUS)
+            gPrev.drawImage(target, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
         g.setComposite(rd.blend);
         g.drawImage(rd.image, bounds.x, bounds.y, bounds.width, bounds.height, null, null);
     }
