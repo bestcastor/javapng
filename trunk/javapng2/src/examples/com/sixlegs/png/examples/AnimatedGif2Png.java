@@ -115,11 +115,17 @@ public class AnimatedGif2Png
             // no more frames
         }
 
+        // expand first frame to fit all frames
+        Frame first = frames.get(0);
+        if (!first.bounds.getLocation().equals(new Point(0, 0)))
+            throw new UnsupportedOperationException("TODO: first frame has non-zero origin");
+        for (Frame frame : frames)
+            first.bounds.add(frame.bounds);
+
         PngWriter w = new PngWriter(out);
         boolean paletted = entries.size() <= 256;
         int colorType = paletted ? PngConstants.COLOR_TYPE_PALETTE :
             PngConstants.COLOR_TYPE_RGB_ALPHA;
-        Frame first = frames.get(0);
         w.start(first.bounds.getSize(), colorType, first.palette, frames.size(), numIterations);
         if (paletted) {
             if (different)
@@ -178,7 +184,7 @@ public class AnimatedGif2Png
         int index = 0;
         for (Frame frame : frames) {
             int width = frame.bounds.width;
-            BufferedImage image = imageReader.read(index++);
+            BufferedImage image = pad(imageReader.read(index++), frame.bounds);
             raw.reset();
             DeflaterOutputStream defl = new DeflaterOutputStream(raw);
             for (int y = 0, height = frame.bounds.height; y < height; y++) {
@@ -206,7 +212,7 @@ public class AnimatedGif2Png
         for (Frame frame : frames) {
             int[] palette = frame.palette;
             int width = frame.bounds.width;
-            BufferedImage image = imageReader.read(index++);
+            BufferedImage image = pad(imageReader.read(index++), frame.bounds);
             raw.reset();
             DataOutputStream defl = new DataOutputStream(new DeflaterOutputStream(raw));
             for (int y = 0, height = frame.bounds.height; y < height; y++) {
@@ -227,6 +233,21 @@ public class AnimatedGif2Png
             defl.close();
             w.frame(animated, frame, raw.toByteArray());
         }
+    }
+
+    private static BufferedImage pad(BufferedImage image, Rectangle bounds)
+    {
+        if (image.getWidth() == bounds.width && image.getHeight() == bounds.height)
+            return image;
+        BufferedImage padded =
+            new BufferedImage(image.getColorModel(),
+                              image.getRaster().createCompatibleWritableRaster(bounds.width, bounds.height),
+                              image.isAlphaPremultiplied(),
+                              null);
+        Graphics2D g = padded.createGraphics();
+        g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null, null);
+        g.dispose();
+        return padded;
     }
 
     private static class Filterer
