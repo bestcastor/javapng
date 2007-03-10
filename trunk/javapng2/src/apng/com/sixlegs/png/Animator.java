@@ -57,7 +57,6 @@ implements ActionListener
     private final Graphics2D g;
     private final RenderData[] render;
     private final int timerDelay;
-    private final Color background;
 
     private long waitUntil = 0;
     private int index = -1;
@@ -76,15 +75,15 @@ implements ActionListener
     {
         if (!png.isAnimated())
             throw new IllegalArgumentException("PNG is not animated");
+
         if (target == null)
             target = createCompatibleImage(frames[0], png.getWidth(), png.getHeight());
+        resetFrame(target);
+
         this.png = png;
         this.frames = frames;
         this.target = target;
         this.g = target.createGraphics();
-
-        Color bkgd = png.getBackground();
-        this.background = (bkgd != null) ? bkgd : TRANSPARENT_BLACK;
         
         List renderList = new ArrayList();
         int minDelay = Integer.MAX_VALUE;
@@ -116,6 +115,16 @@ implements ActionListener
         iter = 0;
         index = -1;
         done = false;
+        resetFrame(target);
+    }
+
+    private static void resetFrame(BufferedImage target)
+    {
+        Graphics2D g = target.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        g.setColor(TRANSPARENT_BLACK);
+        g.fillRect(0, 0, target.getWidth(), target.getHeight());
+        g.dispose();
     }
 
     public BufferedImage getTarget()
@@ -145,6 +154,8 @@ implements ActionListener
                     done = true;
                     return;
                 }
+                // TODO: reset buffer here
+                resetFrame(target);
                 index = 0;
             }
             waitUntil += render[index].delay;
@@ -158,7 +169,7 @@ implements ActionListener
         switch (rd.dispose) {
         case FrameControl.DISPOSE_BACKGROUND:
             g.setComposite(AlphaComposite.Src);
-            g.setColor(background);
+            g.setColor(TRANSPARENT_BLACK);
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             break;
         case FrameControl.DISPOSE_PREVIOUS:
