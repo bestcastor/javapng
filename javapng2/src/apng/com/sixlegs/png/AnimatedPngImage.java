@@ -139,6 +139,14 @@ extends PngImage
             int w = in.readInt();
             int h = in.readInt();
             Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
+            if (seq == 0) {
+                if (bounds.width != getWidth() || bounds.height != getHeight())
+                    throw new PngException("First APNG frame size " + bounds.width + "x" + bounds.height +
+                                           " should be " + getWidth() + "x" + getHeight(), false);
+                if (bounds.x != 0 || bounds.y != 0)
+                    throw new PngException("First APNG frame position " + bounds.x + "," + bounds.y +
+                                           " should be 0,0", false);
+            }
             int delayNum = in.readUnsignedShort();
             int delayDen = in.readUnsignedShort();
             if (delayDen == 0)
@@ -203,15 +211,6 @@ extends PngImage
             validateChecksum(headerChecksum, "ihdr_crc", "header");
             if (getColorType() == PngConstants.COLOR_TYPE_PALETTE)
                 validateChecksum(paletteChecksum, "plte_crc", "palette");
-
-            FrameControl first = (FrameControl)chunks.get(0);
-            Rectangle r = first.getBounds();
-            if (r.width != getWidth() || r.height != getHeight())
-                throw new PngException("First APNG frame size " + r.width + "x" + r.height +
-                                       " should be " + getWidth() + "x" + getHeight(), false);
-            if (r.x != 0 || r.y != 0)
-                throw new PngException("First APNG frame position " + r.x + "," + r.y +
-                                       " should be 0,0", false);
             if (chunks.size() > 1 && !(chunks.get(1) instanceof FrameControl))
                 throw new PngException("First APNG frame cannot have frame data", false);
 
