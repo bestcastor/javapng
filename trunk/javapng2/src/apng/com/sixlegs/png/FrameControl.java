@@ -48,15 +48,13 @@ public class FrameControl
     private final float delay;
     private final int dispose;
     private final boolean blend;
-    private final boolean skip;
         
-    FrameControl(Rectangle bounds, float delay, int dispose, boolean blend, boolean skip)
+    FrameControl(Rectangle bounds, float delay, int dispose, boolean blend)
     {
         this.bounds = bounds;
         this.delay = delay;
         this.dispose = dispose;
         this.blend = blend;
-        this.skip = skip;
     }
 
     public Rectangle getBounds()
@@ -79,14 +77,9 @@ public class FrameControl
         return blend;
     }
 
-    public boolean isSkip()
-    {
-        return skip;
-    }
-
     public String toString()
     {
         return "FrameControl{bounds=" + bounds + ",delay=" + delay +
-            ",dispose=" + dispose + ",blend=" + blend + ",skip=" + skip + "}";
+            ",dispose=" + dispose + ",blend=" + blend + "}";
     }
 }

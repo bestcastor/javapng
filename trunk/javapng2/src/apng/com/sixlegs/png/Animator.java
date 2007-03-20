@@ -92,8 +92,6 @@ implements ActionListener
         int minDelay = Integer.MAX_VALUE;
         for (int i = 0; i < png.getNumFrames(); i++) {
             FrameControl frame = png.getFrame(i);
-            if (frame.isSkip())
-                continue;
             RenderData rd = new RenderData();
             rd.image = frames[i];
             rd.bounds = frame.getBounds();
@@ -162,7 +160,6 @@ implements ActionListener
                     done = true;
                     return;
                 }
-                // TODO: reset buffer here
                 resetFrame(target);
                 index = 0;
             }
