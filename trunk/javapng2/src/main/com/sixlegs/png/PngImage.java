@@ -141,6 +141,7 @@ implements Transparency
     {
         if (in == null)
             throw new NullPointerException("InputStream is null");
+        int readLimit= config.getReadLimit();
         BufferedImage image = null;
         StateMachine machine = new StateMachine(this);
         try {
@@ -150,18 +151,23 @@ implements Transparency
             while (machine.getState() != StateMachine.STATE_END) {
                 int type = pin.startChunk();
                 machine.nextState(type);
-                if (type == PngConstants.IDAT) {
-                    if (config.getReadLimit() == PngConfig.READ_UNTIL_DATA)
-                        return null;
-                    ImageDataInputStream data = new ImageDataInputStream(pin, machine);
-                    image = createImage(data);
-                    do {
-                        if (data.read() != -1)
-                            skipFully(data, pin.getRemaining());
-                        type = machine.getType();
-                    } while (type == PngConstants.IDAT);
-                }
                 try {
+                    if (type == PngConstants.IDAT) {
+                        switch (readLimit) {
+                        case PngConfig.READ_UNTIL_DATA:
+                            return null;
+                        case PngConfig.READ_EXCEPT_DATA:
+                            break;
+                        default:
+                            ImageDataInputStream data = new ImageDataInputStream(pin, machine);
+                            image = createImage(data);
+                            do {
+                                if (data.read() != -1)
+                                    skipFully(data, pin.getRemaining());
+                                type = machine.getType();
+                            } while (type == PngConstants.IDAT);
+                        }
+                    }
                     Integer key = Integers.valueOf(type);
                     if (!isMultipleOK(type) && !PngConstants.isPrivate(type)) {
                         if (seen.contains(key)) {
@@ -174,10 +180,10 @@ implements Transparency
                         }
                     }
                     if (readChunk(type, pin, pin.getOffset(), pin.getRemaining())) {
-                        if (type == PngConstants.IHDR && config.getReadLimit() == PngConfig.READ_HEADER)
+                        if (type == PngConstants.IHDR && readLimit == PngConfig.READ_HEADER)
                             return null;
                     } else {
-                        if (!PngConstants.isAncillary(type))
+                        if (!PngConstants.isAncillary(type) && type != PngConstants.IDAT)
                             throw new PngException("Critical chunk " + PngConstants.getChunkName(type) + " cannot be skipped", true);
                         skipFully(pin, pin.getRemaining());
                     }
@@ -210,9 +216,6 @@ implements Transparency
      * of the calling {@link #read(java.io.File)} or {@link #read(java.io.InputStream, boolean)}
      * method.
      * <p>
-     * The default implementation is to decode the image into a {@link java.awt.image.BufferedImage}
-     * as long as {@link PngConfig#getReadLimit} does not equal {@link PngConfig#READ_EXCEPT_DATA}.
-     * <p>
      * Unlike {@link #readChunk} implementations, subclasses may read less than the correct
      * amount from this stream; the remainder will be skipped.
      * @param in the input stream of raw, compressed image data
@@ -222,8 +225,6 @@ implements Transparency
     protected BufferedImage createImage(InputStream in)
     throws IOException
     {
-        if (config.getReadLimit() == PngConfig.READ_EXCEPT_DATA)
-            return null;
         return ImageFactory.createImage(this, in);
     }
 
@@ -617,10 +618,10 @@ implements Transparency
      * properties into this {@code PngImage} instance. Subclasses may
      * either skip the chunk by returning {@code false}, or must
      * read the exact length of the chunk data and return {@code true}.
-     * Critical chunks cannot be skipped.
+     * Critical chunks (except IDAT) cannot be skipped.
      * <p>
-     * {@code IDAT} chunks are not processed by this method. See {@link #createImage}
-     * for custom handling of the raw image data.
+     * {@code IDAT} chunks can be processed by this method only if
+     * {@link PngConfig#getReadLimit} is set to {@link PngConfig#READ_EXCEPT_DATA}.
      * <p>
      * By default this method will handle all of the chunk types defined
      * in Version 1.2 of the PNG Specification, and most of the
@@ -636,6 +637,8 @@ implements Transparency
     protected boolean readChunk(int type, DataInput in, long offset, int length)
     throws IOException
     {
+        if (type == PngConstants.IDAT)
+            return false;
         if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngConstants.isAncillary(type)) {
             switch (type) {
             case PngConstants.gAMA:
@@ -660,6 +663,7 @@ implements Transparency
     protected boolean isMultipleOK(int type)
     {
         switch (type) {
+        case PngConstants.IDAT:
         case PngConstants.sPLT:
         case PngConstants.iTXt:
         case PngConstants.tEXt:
