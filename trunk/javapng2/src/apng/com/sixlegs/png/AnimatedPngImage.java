@@ -104,6 +104,13 @@ extends PngImage
         return (FrameControl)frames.get(index);
     }
 
+    public boolean isResetRequired()
+    {
+        FrameControl first = getFrame(0);
+        return first.isBlend() ||
+            !first.getBounds().equals(new Rectangle(getWidth(), getHeight()));
+    }
+
     public BufferedImage[] readAllFrames(File file)
     throws IOException
     {
@@ -165,10 +172,10 @@ extends PngImage
 
             if (!sawData) {
                 if (bounds.width != getWidth() || bounds.height != getHeight())
-                    throw new PngException("First APNG frame size " + bounds.width + "x" + bounds.height +
+                    throw new PngException("Frame 0 size " + bounds.width + "x" + bounds.height +
                                            " should be " + getWidth() + "x" + getHeight(), false);
                 if (bounds.x != 0 || bounds.y != 0)
-                    throw new PngException("First APNG frame position " + bounds.x + "," + bounds.y +
+                    throw new PngException("Frame 0 offset " + bounds.x + "," + bounds.y +
                                            " should be 0,0", false);
             }
             int delayNum = in.readUnsignedShort();
@@ -179,10 +186,12 @@ extends PngImage
 
             boolean blend = (renderOp & APNG_RENDER_OP_BLEND_FLAG) != 0;
             if (blend) {
+                if (!sawData)
+                    throw new PngException("Frame 0 blend flag is set", false);
                 switch (getColorType()) {
                 case PngConstants.COLOR_TYPE_GRAY:
                 case PngConstants.COLOR_TYPE_RGB:
-                    throw new PngException("APNG blend not valid for color type " + getColorType(), false);
+                    throw new PngException("APNG blend flag not valid for color type " + getColorType(), false);
                 }
             }
             int dispose = renderOp & 7;
@@ -250,10 +259,12 @@ extends PngImage
             if (!firstFrameData.isEmpty())
                 ((List)frameData.get(frames.get(0))).addAll(firstFrameData);
 
-            for (int i = 1; i < frames.size(); i++) {
+            for (int i = 0; i < frames.size(); i++) {
                 if (((List)frameData.get(frames.get(i))).isEmpty())
-                    throw new PngException("Missing data for frame " + i, false);
+                    throw new PngException("Missing data for frame", false);
             }
+            chunks.clear();
+            
         } catch (IOException e) {
             animated = false;
             throw e;

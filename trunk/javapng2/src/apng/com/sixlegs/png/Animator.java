@@ -59,6 +59,7 @@ implements ActionListener
     private final Graphics2D gPrev;
     private final RenderData[] render;
     private final int timerDelay;
+    private final boolean resetRequired;
 
     private long waitUntil = 0;
     private int index = -1;
@@ -77,10 +78,8 @@ implements ActionListener
     {
         if (!png.isAnimated())
             throw new IllegalArgumentException("PNG is not animated");
-
         if (target == null)
             target = createCompatibleImage(frames[0], png.getWidth(), png.getHeight());
-        resetFrame(target);
 
         this.png = png;
         this.frames = frames;
@@ -113,6 +112,9 @@ implements ActionListener
             gPrev = prev.createGraphics();
             gPrev.setComposite(AlphaComposite.Src);
         }
+        resetRequired = png.isResetRequired();
+        if (resetRequired)
+            resetFrame(target);
     }
 
     public void reset()
@@ -124,13 +126,11 @@ implements ActionListener
         resetFrame(target);
     }
 
-    private static void resetFrame(BufferedImage target)
+    private void resetFrame(BufferedImage target)
     {
-        Graphics2D g = target.createGraphics();
         g.setComposite(AlphaComposite.Src);
         g.setColor(TRANSPARENT_BLACK);
         g.fillRect(0, 0, target.getWidth(), target.getHeight());
-        g.dispose();
     }
 
     public BufferedImage getTarget()
@@ -160,7 +160,8 @@ implements ActionListener
                     done = true;
                     return;
                 }
-                resetFrame(target);
+                if (resetRequired)
+                    resetFrame(target);
                 index = 0;
             }
             waitUntil += render[index].delay;

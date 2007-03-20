@@ -102,13 +102,14 @@ public class AnimatedGif2Png
                 Node root = metadata.getAsTree(metadata.getNativeMetadataFormatName());
                 Node desc = getChild(root, "ImageDescriptor");
                 Node gce = getChild(root, "GraphicControlExtension");
+                int blendFlag = (index == 0) ? 0 : 8;
                 frames.add(new Frame(palette,
                                      new Rectangle(Integer.parseInt(getAttr(desc, "imageLeftPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
                                                    Integer.parseInt(getAttr(desc, "imageHeight"))),
                                      Math.max(10 * Integer.parseInt(getAttr(gce, "delayTime")), MIN_DELAY),
-                                     8 | mapDisposal(getAttr(gce, "disposalMethod"))));
+                                     blendFlag | mapDisposal(getAttr(gce, "disposalMethod"))));
                 index++;
             }
         } catch (IndexOutOfBoundsException e) {
