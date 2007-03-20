@@ -50,28 +50,40 @@ extends PngImage
     public static final int fdAt = 0x66644174;
         
     private static final int APNG_RENDER_OP_BLEND_FLAG = 8;
-    private static final int APNG_RENDER_OP_SKIP_FRAME = 16;
-
+    private static final PngConfig DEFAULT_CONFIG =
+      new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
+      
     private final List chunks = new ArrayList();
     private final List frames = new ArrayList();
     private final Map frameData = new HashMap();
+    private final List firstFrameData = new ArrayList();
 
     private boolean animated;
-    private int numFrames;
+    private boolean sawData;
     private int numIterations;
-
     private int headerChecksum;
     private int paletteChecksum;
 
     public AnimatedPngImage()
     {
+        super(DEFAULT_CONFIG);
     }
 
     public AnimatedPngImage(PngConfig config)
     {
-        super(config);
+        super(new PngConfig.Builder(config).readLimit(PngConfig.READ_EXCEPT_DATA).build());
     }
-    
+
+    private void reset()
+    {
+        animated = sawData = false;
+        numIterations = headerChecksum = paletteChecksum = 0;
+        chunks.clear();
+        frames.clear();
+        frameData.clear();
+        firstFrameData.clear();
+    }
+
     public boolean isAnimated()
     {
         return animated;
@@ -79,7 +91,7 @@ extends PngImage
 
     public int getNumFrames()
     {
-        return animated ? numFrames : 1;
+        return animated ? frames.size() : 1;
     }
 
     public int getNumIterations()
@@ -89,18 +101,15 @@ extends PngImage
 
     public FrameControl getFrame(int index)
     {
-        if (index < 0 || index >= numFrames)
-            throw new IndexOutOfBoundsException("bad frame " + index);
         return (FrameControl)frames.get(index);
     }
 
     public BufferedImage[] readAllFrames(File file)
     throws IOException
     {
-        BufferedImage first = read(file);
+        read(file);
         BufferedImage[] images = new BufferedImage[getNumFrames()];
-        images[0] = first;
-        for (int i = 1; i < images.length; i++)
+        for (int i = 0; i < images.length; i++)
             images[i] = readFrame(file, getFrame(i));
         return images;
     }
@@ -124,22 +133,37 @@ extends PngImage
     {
         int seq;
         switch (type) {
+        case PngConstants.IEND:
+            validate();
+            return super.readChunk(type, in, offset, length);
+
+        case PngConstants.IHDR:
+            reset();
+            return super.readChunk(type, in, offset, length);
+
         case acTl:
+            if (animated)
+                throw new PngException("Multiple acTl chunks are not allowed", false);
+            if (sawData)
+                throw new PngException("acTl cannot appear after IDAT", false);
             RegisteredChunks.checkLength(type, length, 16);
-            numFrames = in.readInt();
-            if (numFrames <= 0)
-                throw new PngException("APNG has zero frames", false);
+            animated = true;
+            in.readInt(); // ignore numFrames for now
             numIterations = in.readInt();
             headerChecksum = in.readInt();
             paletteChecksum = in.readInt();
             return true;
+
         case fcTl:
+            if (!sawData && !chunks.isEmpty())
+                throw new PngException("Multiple fcTl chunks are not allowed before IDAT", false);
             RegisteredChunks.checkLength(type, length, 25);
             seq = in.readInt();
             int w = in.readInt();
             int h = in.readInt();
             Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
-            if (seq == 0) {
+
+            if (!sawData) {
                 if (bounds.width != getWidth() || bounds.height != getHeight())
                     throw new PngException("First APNG frame size " + bounds.width + "x" + bounds.height +
                                            " should be " + getWidth() + "x" + getHeight(), false);
@@ -153,7 +177,6 @@ extends PngImage
                 delayDen = 100;
             int renderOp = in.readByte();
 
-            boolean skip = (renderOp & APNG_RENDER_OP_SKIP_FRAME) != 0;
             boolean blend = (renderOp & APNG_RENDER_OP_BLEND_FLAG) != 0;
             if (blend) {
                 switch (getColorType()) {
@@ -171,27 +194,25 @@ extends PngImage
             default:
                 throw new PngException("Unknown APNG dispose op " + dispose, false);
             }
-            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend, skip));
+            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend));
             return true;
+
         case fdAt:
+            if (!sawData)
+                throw new PngException("fdAt chunks cannot appear before IDAT", false);
             seq = in.readInt();
             add(seq, new FrameData(offset + 4, length - 4));
             return false; // let PngImage skip it
+
+        case PngConstants.IDAT:
+            sawData = true;
+            if (!chunks.isEmpty())
+                firstFrameData.add(new FrameData(offset, length));
+            return false;
+
         default:
             return super.readChunk(type, in, offset, length);
-        case PngConstants.IEND:
-            validate();
-            return true;
         }
-    }
-
-    protected BufferedImage createImage(InputStream in)
-    throws IOException
-    {
-        animated = numFrames > 0 &&
-            !chunks.isEmpty() &&
-            chunks.get(0) instanceof FrameControl;
-        return super.createImage(in);
     }
 
     private void add(int seq, Object chunk)
@@ -211,8 +232,6 @@ extends PngImage
             validateChecksum(headerChecksum, "ihdr_crc", "header");
             if (getColorType() == PngConstants.COLOR_TYPE_PALETTE)
                 validateChecksum(paletteChecksum, "plte_crc", "palette");
-            if (chunks.size() > 1 && !(chunks.get(1) instanceof FrameControl))
-                throw new PngException("First APNG frame cannot have frame data", false);
 
             List list = null;
             for (int i = 0; i < chunks.size(); i++) {
@@ -227,6 +246,9 @@ extends PngImage
                     list.add(chunk);
                 }
             }
+
+            if (!firstFrameData.isEmpty())
+                ((List)frameData.get(frames.get(0))).addAll(firstFrameData);
 
             for (int i = 1; i < frames.size(); i++) {
                 if (((List)frameData.get(frames.get(i))).isEmpty())
