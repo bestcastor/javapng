@@ -102,14 +102,15 @@ public class AnimatedGif2Png
                 Node root = metadata.getAsTree(metadata.getNativeMetadataFormatName());
                 Node desc = getChild(root, "ImageDescriptor");
                 Node gce = getChild(root, "GraphicControlExtension");
-                int blendFlag = (index == 0) ? 0 : 8;
+                int blendOp = (index == 0) ? FrameControl.BLEND_SOURCE : FrameControl.BLEND_OVER;
                 frames.add(new Frame(palette,
                                      new Rectangle(Integer.parseInt(getAttr(desc, "imageLeftPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageTopPosition")),
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
                                                    Integer.parseInt(getAttr(desc, "imageHeight"))),
                                      Math.max(10 * Integer.parseInt(getAttr(gce, "delayTime")), MIN_DELAY),
-                                     blendFlag | mapDisposal(getAttr(gce, "disposalMethod"))));
+                                     blendOp,
+                                     mapDisposal(getAttr(gce, "disposalMethod"))));
                 index++;
             }
         } catch (IndexOutOfBoundsException e) {
@@ -382,7 +383,8 @@ public class AnimatedGif2Png
                 chunk.writeInt(frame.bounds.y);
                 chunk.writeShort(frame.delayTime);
                 chunk.writeShort(1000);
-                chunk.writeByte(frame.renderOp);
+                chunk.writeByte(frame.dispose);
+                chunk.writeByte(frame.blend);
                 chunk.finish(data);
                 if (seq == 1) {
                     chunk.start(PngConstants.IDAT);
@@ -435,14 +437,16 @@ public class AnimatedGif2Png
         final int[] palette;
         final Rectangle bounds;
         final int delayTime;
-        final int renderOp;
+        final int dispose;
+        final int blend;
 
-        public Frame(int[] palette, Rectangle bounds, int delayTime, int renderOp)
+        public Frame(int[] palette, Rectangle bounds, int delayTime, int dispose, int blend)
         {
             this.palette = palette;
             this.bounds = bounds;
             this.delayTime = delayTime;
-            this.renderOp = renderOp;
+            this.dispose = dispose;
+            this.blend = blend;
         }
     }
 }

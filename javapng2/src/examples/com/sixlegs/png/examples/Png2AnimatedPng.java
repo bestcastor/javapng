@@ -99,7 +99,8 @@ public class Png2AnimatedPng
                 chunk.writeInt(0);
                 chunk.writeShort(500); // 1/2 second
                 chunk.writeShort(1000);
-                chunk.writeByte(1); // blend = false, dispose = none
+                chunk.writeByte(FrameControl.DISPOSE_NONE);
+                chunk.writeByte(FrameControl.BLEND_SOURCE);
                 chunk.finish(out);
             }
         }).read(new File(args[0]));

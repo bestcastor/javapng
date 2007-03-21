@@ -40,16 +40,19 @@ import java.awt.Rectangle;
 
 public class FrameControl
 {
-    public static final int DISPOSE_NONE = 1;
-    public static final int DISPOSE_BACKGROUND = 2;
-    public static final int DISPOSE_PREVIOUS = 4;
+    public static final int DISPOSE_NONE = 0;
+    public static final int DISPOSE_BACKGROUND = 1;
+    public static final int DISPOSE_PREVIOUS = 2;
 
+    public static final int BLEND_SOURCE = 0;
+    public static final int BLEND_OVER = 1;
+    
     private final Rectangle bounds;
     private final float delay;
     private final int dispose;
-    private final boolean blend;
+    private final int blend;
         
-    FrameControl(Rectangle bounds, float delay, int dispose, boolean blend)
+    FrameControl(Rectangle bounds, float delay, int dispose, int blend)
     {
         this.bounds = bounds;
         this.delay = delay;
@@ -72,7 +75,7 @@ public class FrameControl
         return dispose;
     }
 
-    public boolean isBlend()
+    public int getBlend()
     {
         return blend;
     }

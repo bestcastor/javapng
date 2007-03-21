@@ -95,7 +95,9 @@ implements ActionListener
             rd.image = frames[i];
             rd.bounds = frame.getBounds();
             rd.dispose = frame.getDispose();
-            rd.blend = frame.isBlend() ? AlphaComposite.SrcOver : AlphaComposite.Src;
+            rd.blend = (frame.getBlend() == FrameControl.BLEND_SOURCE) ?
+                AlphaComposite.Src :
+                AlphaComposite.SrcOver;
             if (frame.getDispose() == FrameControl.DISPOSE_PREVIOUS)
                 prevBounds.add(new Rectangle(rd.bounds.getSize()));
             rd.delay = Math.max((int)(frame.getDelay() * 1000), MIN_DELAY);
