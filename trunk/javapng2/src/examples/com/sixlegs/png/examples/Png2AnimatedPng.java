@@ -39,11 +39,41 @@ package com.sixlegs.png.examples;
 import com.sixlegs.png.*;
 import java.awt.image.*;
 import java.io.*;
+import java.util.*;
 
 // TODO: this is a work in progress
 public class Png2AnimatedPng
 {
-    public static void main(final String[] args) throws Exception {
+    private static final ArgumentProcessor PROC;
+
+    static
+    {
+        PROC = new ArgumentProcessor(Arrays.asList(
+            new ArgumentProcessor.Option("iter", Integer.class).defaultValue(0).range(0, Integer.MAX_VALUE),
+            new ArgumentProcessor.Option("delay", Short.class).range((short)0, Short.MAX_VALUE),
+            new ArgumentProcessor.Option("skip", Boolean.class).defaultValue(false)
+        ));
+    }
+    
+    public static void main(String[] args) throws Exception {
+        try {
+            run(new ArrayList<String>(Arrays.asList(args)));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private static void run(List<String> args) throws Exception {
+        Map<String,Object> opts = PROC.parse(args, args);
+        final int iter = ((Number)opts.get("iter")).intValue();
+        final int delay = ((Number)opts.get("delay")).intValue();
+        final boolean skip = ((Boolean)opts.get("skip")).booleanValue();
+        
+        // TODO: handle numIterations, delay, skip
+        final List<File> files = new ArrayList<File>();
+        for (String arg : args)
+            files.add(new File(arg));
+
         final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(System.out));
         final PngConfig config = new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
         out.writeLong(0x89504E470D0A1A0AL); // signature
@@ -55,7 +85,7 @@ public class Png2AnimatedPng
                 in.readFully(data);
 
                 if (type == PngConstants.IEND) {
-                    for (int i = 1; i < args.length; i++) {
+                    for (File file : files.subList(1, files.size())) {
                         nextFrame();
                         (new PngImage(config) {
                             protected boolean readChunk(int type, DataInput in, long offset, int length) throws IOException {
@@ -71,7 +101,7 @@ public class Png2AnimatedPng
                                     return super.readChunk(type, in, offset, length);
                                 }
                             }
-                        }).read(new File(args[i]));
+                        }).read(file);
                     }
                 }
 
@@ -82,10 +112,11 @@ public class Png2AnimatedPng
 
                 if (type == PngConstants.IHDR) {
                     chunk.start(AnimatedPngImage.acTL);
-                    chunk.writeInt(args.length);
-                    chunk.writeInt(0);
+                    chunk.writeInt(files.size());
+                    chunk.writeInt(iter);
                     chunk.finish(out);
-                    nextFrame();
+                    if (!skip)
+                        nextFrame();
                 }
                 return result;
             }
@@ -97,13 +128,13 @@ public class Png2AnimatedPng
                 chunk.writeInt(getHeight());
                 chunk.writeInt(0);
                 chunk.writeInt(0);
-                chunk.writeShort(500); // 1/2 second
+                chunk.writeShort(delay);
                 chunk.writeShort(1000);
                 chunk.writeByte(FrameControl.DISPOSE_NONE);
                 chunk.writeByte(FrameControl.BLEND_SOURCE);
                 chunk.finish(out);
             }
-        }).read(new File(args[0]));
+        }).read(files.get(0));
         out.close();
     }
 }
