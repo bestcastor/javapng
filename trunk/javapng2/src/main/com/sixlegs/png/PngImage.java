@@ -193,13 +193,7 @@ implements Transparency
                     skipFully(pin, pin.getRemaining());
                     handleWarning(exception);
                 }
-                int crc = pin.endChunk(type);
-                switch (type) {
-                case PngConstants.IHDR:
-                case PngConstants.PLTE:
-                    // for APNG
-                    props.put(PngConstants.getChunkName(type).toLowerCase() + "_crc", new Integer(crc));
-                }
+                pin.endChunk(type);
             }
             return image;
         } finally {
