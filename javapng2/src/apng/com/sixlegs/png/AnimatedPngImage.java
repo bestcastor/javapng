@@ -161,7 +161,7 @@ extends PngImage
         case fcTL:
             if (!sawData && !chunks.isEmpty())
                 throw new PngException("Multiple fcTL chunks are not allowed before IDAT", false);
-            RegisteredChunks.checkLength(type, length, 25);
+            RegisteredChunks.checkLength(type, length, 26);
             seq = in.readInt();
             int w = in.readInt();
             int h = in.readInt();
