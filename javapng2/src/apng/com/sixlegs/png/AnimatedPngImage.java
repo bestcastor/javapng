@@ -45,9 +45,9 @@ import java.util.List;
 public class AnimatedPngImage
 extends PngImage
 {
-    public static final int acTl = 0x6163546C;
-    public static final int fcTl = 0x6663546C;
-    public static final int fdAt = 0x66644174;
+    public static final int acTL = 0x6163544C;
+    public static final int fcTL = 0x6663544C;
+    public static final int fdAT = 0x66644154;
         
     private static final int APNG_RENDER_OP_BLEND_FLAG = 8;
     private static final PngConfig DEFAULT_CONFIG =
@@ -61,8 +61,6 @@ extends PngImage
     private boolean animated;
     private boolean sawData;
     private int numIterations;
-    private int headerChecksum;
-    private int paletteChecksum;
 
     public AnimatedPngImage()
     {
@@ -77,7 +75,7 @@ extends PngImage
     private void reset()
     {
         animated = sawData = false;
-        numIterations = headerChecksum = paletteChecksum = 0;
+        numIterations = 0;
         chunks.clear();
         frames.clear();
         frameData.clear();
@@ -148,22 +146,20 @@ extends PngImage
             reset();
             return super.readChunk(type, in, offset, length);
 
-        case acTl:
+        case acTL:
             if (animated)
-                throw new PngException("Multiple acTl chunks are not allowed", false);
+                throw new PngException("Multiple acTL chunks are not allowed", false);
             if (sawData)
-                throw new PngException("acTl cannot appear after IDAT", false);
-            RegisteredChunks.checkLength(type, length, 16);
+                throw new PngException("acTL cannot appear after IDAT", false);
+            RegisteredChunks.checkLength(type, length, 8);
             animated = true;
             in.readInt(); // ignore numFrames for now
             numIterations = in.readInt();
-            headerChecksum = in.readInt();
-            paletteChecksum = in.readInt();
             return true;
 
-        case fcTl:
+        case fcTL:
             if (!sawData && !chunks.isEmpty())
-                throw new PngException("Multiple fcTl chunks are not allowed before IDAT", false);
+                throw new PngException("Multiple fcTL chunks are not allowed before IDAT", false);
             RegisteredChunks.checkLength(type, length, 25);
             seq = in.readInt();
             int w = in.readInt();
@@ -206,9 +202,9 @@ extends PngImage
             add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend));
             return true;
 
-        case fdAt:
+        case fdAT:
             if (!sawData)
-                throw new PngException("fdAt chunks cannot appear before IDAT", false);
+                throw new PngException("fdAT chunks cannot appear before IDAT", false);
             seq = in.readInt();
             add(seq, new FrameData(offset + 4, length - 4));
             return false; // let PngImage skip it
@@ -238,10 +234,6 @@ extends PngImage
         if (!animated)
             return;
         try {
-            validateChecksum(headerChecksum, "ihdr_crc", "header");
-            if (getColorType() == PngConstants.COLOR_TYPE_PALETTE)
-                validateChecksum(paletteChecksum, "plte_crc", "palette");
-
             List list = null;
             for (int i = 0; i < chunks.size(); i++) {
                 Object chunk = chunks.get(i);
@@ -269,12 +261,5 @@ extends PngImage
             animated = false;
             throw e;
         }
-    }
-
-    private void validateChecksum(int apng, String key, String desc)
-    throws IOException
-    {
-        if (apng != ((Number)getProperty(key)).intValue())
-            throw new PngException("Bad APNG " + desc + " checksum: 0x" + Integer.toHexString(apng), false);
     }
 }

@@ -336,8 +336,7 @@ public class AnimatedGif2Png
             chunk.writeByte(PngConstants.COMPRESSION_BASE);
             chunk.writeByte(PngConstants.FILTER_BASE);
             chunk.writeByte(PngConstants.INTERLACE_NONE);
-            int ihdr_crc = chunk.finish(data);
-            int plte_crc = 0;
+            chunk.finish(data);
 
             if (colorType == PngConstants.COLOR_TYPE_PALETTE) {
                 chunk.start(PngConstants.PLTE);
@@ -353,7 +352,7 @@ public class AnimatedGif2Png
                         maxTrans = i;
                     }
                 }
-                plte_crc = chunk.finish(data);
+                chunk.finish(data);
 
                 if (numTrans > 0) {
                     chunk.start(PngConstants.tRNS);
@@ -364,11 +363,9 @@ public class AnimatedGif2Png
             }
 
             if (numFrames > 1) {
-                chunk.start(AnimatedPngImage.acTl);
+                chunk.start(AnimatedPngImage.acTL);
                 chunk.writeInt(numFrames);
                 chunk.writeInt(numIterations);
-                chunk.writeInt(ihdr_crc);
-                chunk.writeInt(plte_crc);
                 chunk.finish(data);
             }
         }
@@ -377,7 +374,7 @@ public class AnimatedGif2Png
         throws IOException
         {
             if (animated) {
-                chunk.start(AnimatedPngImage.fcTl);
+                chunk.start(AnimatedPngImage.fcTL);
                 chunk.writeInt(seq++);
                 chunk.writeInt(frame.bounds.width);
                 chunk.writeInt(frame.bounds.height);
@@ -390,7 +387,7 @@ public class AnimatedGif2Png
                 if (seq == 1) {
                     chunk.start(PngConstants.IDAT);
                 } else {
-                    chunk.start(AnimatedPngImage.fdAt);
+                    chunk.start(AnimatedPngImage.fdAT);
                     chunk.writeInt(seq++);
                 }
                 chunk.write(bytes);
