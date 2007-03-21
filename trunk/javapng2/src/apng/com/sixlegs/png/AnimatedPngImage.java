@@ -105,7 +105,8 @@ extends PngImage
     public boolean isResetRequired()
     {
         FrameControl first = getFrame(0);
-        return first.isBlend() ||
+        return (first.getBlend() == FrameControl.BLEND_OVER) ||
+            (first.getDispose() == FrameControl.DISPOSE_PREVIOUS) ||
             !first.getBounds().equals(new Rectangle(getWidth(), getHeight()));
     }
 
@@ -178,28 +179,34 @@ extends PngImage
             int delayDen = in.readUnsignedShort();
             if (delayDen == 0)
                 delayDen = 100;
-            int renderOp = in.readByte();
 
-            boolean blend = (renderOp & APNG_RENDER_OP_BLEND_FLAG) != 0;
-            if (blend) {
+            int disposeOp = in.readByte();
+            switch (disposeOp) {
+            case FrameControl.DISPOSE_PREVIOUS:
                 if (!sawData)
-                    throw new PngException("Frame 0 blend flag is set", false);
+                    throw new PngException("Previous dispose op not valid for frame 0", false);
+                /* fall-through */
+            case FrameControl.DISPOSE_NONE:
+            case FrameControl.DISPOSE_BACKGROUND:
+                break;
+            default:
+                throw new PngException("Unknown APNG dispose op " + disposeOp, false);
+            }
+
+            int blendOp = in.readByte();
+            if (blendOp == FrameControl.BLEND_OVER) {
+                if (!sawData)
+                    throw new PngException("Over blend op not valid for frame 0", false);
                 switch (getColorType()) {
                 case PngConstants.COLOR_TYPE_GRAY:
                 case PngConstants.COLOR_TYPE_RGB:
-                    throw new PngException("APNG blend flag not valid for color type " + getColorType(), false);
+                    throw new PngException("Over blend op not valid for color type " + getColorType(), false);
                 }
+            } else if (blendOp != FrameControl.BLEND_SOURCE) {
+                throw new PngException("Unknown APNG blend op " + blendOp, false);
             }
-            int dispose = renderOp & 7;
-            switch (dispose) {
-            case FrameControl.DISPOSE_NONE:
-            case FrameControl.DISPOSE_BACKGROUND:
-            case FrameControl.DISPOSE_PREVIOUS:
-                break;
-            default:
-                throw new PngException("Unknown APNG dispose op " + dispose, false);
-            }
-            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, dispose, blend));
+            
+            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, disposeOp, blendOp));
             return true;
 
         case fdAT:
