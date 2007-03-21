@@ -408,43 +408,6 @@ public class AnimatedGif2Png
         }
     }
 
-    private static class ChunkWriter
-    extends DataOutputStream
-    {
-        public ChunkWriter()
-        {
-            super(new ByteArrayOutputStream());
-        }
-
-        public void start(int type)
-        throws IOException
-        {
-            ((ByteArrayOutputStream)out).reset();
-            writeInt(type);
-        }
-
-        public int finish(DataOutput data)
-        throws IOException
-        {
-            byte[] bytes = ((ByteArrayOutputStream)out).toByteArray();
-            int crc = crc(bytes);
-            data.writeInt(bytes.length - 4);
-            data.write(bytes);
-            data.writeInt(crc);
-            return crc;
-        }
-
-        private static int crc(byte[] bytes)
-        throws IOException
-        {
-            CheckedOutputStream checked = new CheckedOutputStream(new NullOutputStream(), new CRC32());
-            DataOutputStream data = new DataOutputStream(checked);
-            data.write(bytes);
-            data.flush();
-            return (int)checked.getChecksum().getValue();
-        }
-    }
-    
     private static Node getChild(Node node, String name)
     {
         for (node = node.getFirstChild(); node != null; node = node.getNextSibling())
@@ -481,12 +444,5 @@ public class AnimatedGif2Png
             this.delayTime = delayTime;
             this.renderOp = renderOp;
         }
-    }
-
-    private static class NullOutputStream extends OutputStream
-    {
-        public void write(int b) { }
-        public void write(byte[] b) { }
-        public void write(byte[] b, int off, int len) { }
     }
 }
