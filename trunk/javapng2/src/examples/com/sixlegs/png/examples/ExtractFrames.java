@@ -38,30 +38,151 @@ package com.sixlegs.png.examples;
 
 import com.sixlegs.png.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.*;
 import java.text.DecimalFormat;
-import javax.imageio.ImageIO;
+import java.util.*;
 
 public class ExtractFrames
 {
     public static void main(String[] args)
     throws Exception
     {
-        PngConfig config = new PngConfig.Builder().warningsFatal(true).build();
-        AnimatedPngImage apng = new AnimatedPngImage(config);
         DecimalFormat fmt = new DecimalFormat("000");
         for (int i = 0; i < args.length; i++) {
             File in = new File(args[i]);
-            BufferedImage[] images = apng.readAllFrames(in);
-            for (int frame = 0; frame < images.length; frame++) {
+            PngSplitter splitter = new PngSplitter(in);
+            int numFrames = splitter.getNumFrames();
+            for (int frame = 0; frame < numFrames; frame++) {
                 File out = new File(fmt.format(frame) + "-" + in.getName());
                 if (out.exists()) {
                     System.err.println("File exists, skipping: " + out);
                     break;
                 }
                 System.err.println("Writing " + out);
-                ImageIO.write(images[frame], "PNG", out);
+                splitter.write(out, frame);
             }
+        }
+    }
+
+    private static class PngSplitter
+    extends PngImage
+    {
+        private static final PngConfig CONFIG = new PngConfig.Builder()
+            .warningsFatal(true)
+            .readLimit(PngConfig.READ_EXCEPT_DATA)
+            .build();
+
+        private File in;
+        private List<Chunk> commonBefore = new ArrayList<Chunk>();
+        private List<Chunk> commonAfter = new ArrayList<Chunk>();
+        private List<Chunk> data = new ArrayList<Chunk>();
+        private List<Chunk> bySequence = new ArrayList<Chunk>();
+        private List<List<Chunk>> byFrame = new ArrayList<List<Chunk>>();
+        private byte[] buf = new byte[0x2000];
+
+        public PngSplitter(File in)
+        throws IOException
+        {
+            super(CONFIG);
+            this.in = in;
+            read(in);
+            byFrame.add(data);
+            List<Chunk> cur = null;
+            for (Chunk chunk : bySequence) {
+                if (chunk.type == AnimatedPngImage.fcTL || chunk.type == fcTl) {
+                    byFrame.add(cur = new ArrayList<Chunk>());
+                } else {
+                    cur.add(chunk);
+                }
+            }
+        }
+
+        public int getNumFrames()
+        {
+            return byFrame.size();
+        }
+
+        public void write(File file, int index)
+        throws IOException
+        {
+            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+            ChunkWriter cw = new ChunkWriter();
+            try {
+                out.writeLong(PngConstants.SIGNATURE);
+                echo(out, commonBefore);
+                echo(out, byFrame.get(index));
+                echo(out, commonAfter);
+            } finally {
+                out.close();
+            }
+        }
+
+        private void echo(DataOutput out, List<Chunk> chunks)
+        throws IOException
+        {
+            ChunkWriter cw = new ChunkWriter();
+            RandomAccessFile rf = new RandomAccessFile(in, "r");
+            try {
+                for (Chunk chunk : chunks) {
+                    cw.start(chunk.type);
+                    rf.seek(chunk.offset);
+                    rf.readFully(buf, 0, chunk.length);
+                    cw.write(buf, 0, chunk.length);
+                    cw.finish(out);
+                }
+            } finally {
+                rf.close();
+            }
+        }
+
+        private static final int acTl = 0x6163546C;
+        private static final int fcTl = 0x6663546C;
+        private static final int fdAt = 0x66644174;
+
+        protected boolean readChunk(int type, DataInput in, long offset, int length)
+        throws IOException
+        {
+            Chunk chunk = new Chunk();
+            chunk.type = type;
+            chunk.offset = offset;
+            chunk.length = length;
+            switch (type) {
+            case PngConstants.IDAT:
+                data.add(chunk);
+                return false;
+            case AnimatedPngImage.acTL:
+            case acTl:
+                return false;
+                
+            case AnimatedPngImage.fdAT:
+            case fdAt:
+                chunk.type = PngConstants.IDAT;
+                chunk.offset += 4;
+                chunk.length -= 4;
+                /* fall-through */
+            case AnimatedPngImage.fcTL:
+            case fcTl:
+                int seq = in.readInt();
+                while (bySequence.size() <= seq)
+                    bySequence.add(null);
+                bySequence.set(seq, chunk);
+                return false;
+            default:
+                (data.isEmpty() ? commonBefore : commonAfter).add(chunk);
+                return super.readChunk(type, in, offset, length);
+            }
+        }
+    }
+
+    private static class Chunk
+    {
+        int type;
+        long offset;
+        int length;
+
+        public String toString()
+        {
+            return PngConstants.getChunkName(type);
         }
     }
 }
