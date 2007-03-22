@@ -129,7 +129,9 @@ abstract public class PngConstants
                 (((int)chunkName.charAt(2) & 0xFF) <<  8) | 
                 (((int)chunkName.charAt(3) & 0xFF)      ));
     }
-    
+
+    /** Eight byte magic number that begins all PNG images */
+    public static final long SIGNATURE = 0x89504E470D0A1A0AL;
     
     /** Image header */
     public static final int IHDR = 0x49484452;
