@@ -48,8 +48,6 @@ final class PngInputStream
 extends InputStream
 implements DataInput
 {
-    private static final long SIGNATURE = 0x89504E470D0A1A0AL;
-
     private final CRC32 crc = new CRC32();
     private final InputStream in;
     private final DataInputStream data;
@@ -65,9 +63,9 @@ implements DataInput
         data = new DataInputStream(this);
         left = 8;
         long sig = readLong();
-        if (sig != SIGNATURE) {
+        if (sig != PngConstants.SIGNATURE) {
             throw new PngException("Improper signature, expected 0x" +
-                                   Long.toHexString(SIGNATURE) + ", got 0x" +
+                                   Long.toHexString(PngConstants.SIGNATURE) + ", got 0x" +
                                    Long.toHexString(sig), true);
         }
         total += 8;
