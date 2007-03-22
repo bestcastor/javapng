@@ -327,8 +327,7 @@ public class AnimatedGif2Png
         public void start(Dimension size, int colorType, int[] palette, int numFrames, int numIterations)
         throws IOException
         {
-            data.writeLong(0x89504E470D0A1A0AL);
-
+            data.writeLong(PngConstants.SIGNATURE);
             chunk.start(PngConstants.IHDR);
             chunk.writeInt(size.width);
             chunk.writeInt(size.height);
