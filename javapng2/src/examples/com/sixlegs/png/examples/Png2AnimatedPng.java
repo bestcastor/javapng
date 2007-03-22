@@ -76,7 +76,7 @@ public class Png2AnimatedPng
 
         final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(System.out));
         final PngConfig config = new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
-        out.writeLong(0x89504E470D0A1A0AL); // signature
+        out.writeLong(PngConstants.SIGNATURE);
         (new PngImage(config) {
             private ChunkWriter chunk = new ChunkWriter();
             private int seq = 0;
