@@ -196,14 +196,16 @@
     </target>
 
     <target name="jar-gif2apng" depends="compile-all" description="Create gif2apng jar">
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
-        <jar jarfile="dist/gif2apng-${version}.jar">
-            <fileset dir="build/examples" includes="com/sixlegs/png/examples/AnimatedGif2Png*.class"/>
+        <jarjar jarfile="dist/gif2apng-${version}.jar">
+            <fileset dir="build/examples"/>
+            <keep pattern="com.sixlegs.png.examples.AnimatedGif2Png"/>
             <manifest>
                 <attribute name="Main-Class" value="com.sixlegs.png.examples.AnimatedGif2Png"/>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
-        </jar>
+        </jarjar>
     </target>
 
     <target name="jar-pngviewer" depends="compile-all" description="Create pngviewer jar">
