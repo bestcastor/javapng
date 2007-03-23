@@ -169,10 +169,10 @@ extends PngImage
 
             if (!sawData) {
                 if (bounds.width != getWidth() || bounds.height != getHeight())
-                    throw new PngException("Frame 0 size " + bounds.width + "x" + bounds.height +
+                    throw new PngException("Size of first frame " + bounds.width + "x" + bounds.height +
                                            " should be " + getWidth() + "x" + getHeight(), false);
                 if (bounds.x != 0 || bounds.y != 0)
-                    throw new PngException("Frame 0 offset " + bounds.x + "," + bounds.y +
+                    throw new PngException("Offset of first frame " + bounds.x + "," + bounds.y +
                                            " should be 0,0", false);
             }
             int delayNum = in.readUnsignedShort();
@@ -184,7 +184,7 @@ extends PngImage
             switch (disposeOp) {
             case FrameControl.DISPOSE_PREVIOUS:
                 if (!sawData)
-                    throw new PngException("Previous dispose op not valid for frame 0", false);
+                    throw new PngException("Previous dispose op not valid for the default image", false);
                 /* fall-through */
             case FrameControl.DISPOSE_NONE:
             case FrameControl.DISPOSE_BACKGROUND:
@@ -196,12 +196,7 @@ extends PngImage
             int blendOp = in.readByte();
             if (blendOp == FrameControl.BLEND_OVER) {
                 if (!sawData)
-                    throw new PngException("Over blend op not valid for frame 0", false);
-                switch (getColorType()) {
-                case PngConstants.COLOR_TYPE_GRAY:
-                case PngConstants.COLOR_TYPE_RGB:
-                    throw new PngException("Over blend op not valid for color type " + getColorType(), false);
-                }
+                    throw new PngException("Over blend op not valid for the default image", false);
             } else if (blendOp != FrameControl.BLEND_SOURCE) {
                 throw new PngException("Unknown APNG blend op " + blendOp, false);
             }
