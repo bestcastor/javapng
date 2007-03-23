@@ -42,39 +42,49 @@ import java.io.*;
 import java.util.*;
 
 // TODO: this is a work in progress
+// TODO: support crop
 public class Png2AnimatedPng
 {
     private static final ArgumentProcessor PROC;
 
     static
     {
-        PROC = new ArgumentProcessor(Arrays.asList(
+        PROC = new ArgumentProcessor(
             new ArgumentProcessor.Option("iter", Integer.class).defaultValue(0).range(0, Integer.MAX_VALUE),
-            new ArgumentProcessor.Option("delay", Short.class).range((short)0, Short.MAX_VALUE),
-            new ArgumentProcessor.Option("skip", Boolean.class).defaultValue(false)
-        ));
+            new ArgumentProcessor.Option("delay", Integer.class).range(0, (int)Short.MAX_VALUE),
+            new ArgumentProcessor.Option("blend", Integer.class).defaultValue(0).range(0, 1),
+            new ArgumentProcessor.Option("dispose", Integer.class).defaultValue(0).range(0, 2),
+            new ArgumentProcessor.Option("skip"),
+            new ArgumentProcessor.Option("crop")
+        );
     }
     
     public static void main(String[] args) throws Exception {
         try {
-            run(new ArrayList<String>(Arrays.asList(args)));
+            run(args);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void run(List<String> args) throws Exception {
-        Map<String,Object> opts = PROC.parse(args, args);
+    public static void run(String... orig) throws Exception {
+        List<String> args = new ArrayList<String>();
+        Map<String,Object> opts = PROC.parse(Arrays.asList(orig), args);
         final int iter = ((Number)opts.get("iter")).intValue();
         final int delay = ((Number)opts.get("delay")).intValue();
+        final int blend = ((Number)opts.get("blend")).intValue();
+        final int dispose = ((Number)opts.get("dispose")).intValue();
         final boolean skip = ((Boolean)opts.get("skip")).booleanValue();
         
         // TODO: handle numIterations, delay, skip
         final List<File> files = new ArrayList<File>();
+        if (args.size() < 2)
+            throw new IllegalArgumentException("Not enough arguments");
         for (String arg : args)
             files.add(new File(arg));
+        File target = files.remove(files.size() - 1);
 
-        final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(System.out));
+        final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(target)));
         final PngConfig config = new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
         out.writeLong(PngConstants.SIGNATURE);
         (new PngImage(config) {
@@ -130,8 +140,8 @@ public class Png2AnimatedPng
                 chunk.writeInt(0);
                 chunk.writeShort(delay);
                 chunk.writeShort(1000);
-                chunk.writeByte(FrameControl.DISPOSE_NONE);
-                chunk.writeByte(FrameControl.BLEND_SOURCE);
+                chunk.writeByte((byte)dispose);
+                chunk.writeByte((!skip && seq == 1) ? 0 : (byte)blend);
                 chunk.finish(out);
             }
         }).read(files.get(0));
