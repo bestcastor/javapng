@@ -109,8 +109,8 @@ public class AnimatedGif2Png
                                                    Integer.parseInt(getAttr(desc, "imageWidth")),
                                                    Integer.parseInt(getAttr(desc, "imageHeight"))),
                                      Math.max(10 * Integer.parseInt(getAttr(gce, "delayTime")), MIN_DELAY),
-                                     blendOp,
-                                     mapDisposal(getAttr(gce, "disposalMethod"))));
+                                     mapDisposal(getAttr(gce, "disposalMethod")),
+                                     blendOp));
                 index++;
             }
         } catch (IndexOutOfBoundsException e) {
