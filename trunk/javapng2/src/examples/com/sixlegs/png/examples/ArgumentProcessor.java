@@ -56,6 +56,9 @@ class ArgumentProcessor
         PARSERS.put(Short.class.getName(), new Parser() {
             public Object parse(String arg) { return Short.valueOf(arg, 10); }
         });
+        PARSERS.put(Byte.class.getName(), new Parser() {
+            public Object parse(String arg) { return Byte.valueOf(arg, 10); }
+        });
         PARSERS.put(Long.class.getName(), new Parser() {
             public Object parse(String arg) { return Long.valueOf(arg, 10); }
         });
@@ -75,7 +78,7 @@ class ArgumentProcessor
     
     private final Map<String,Option> options = new HashMap<String,Option>();
     
-    public ArgumentProcessor(List<Option> options)
+    public ArgumentProcessor(Option... options)
     {
         for (Option opt : options)
             this.options.put(opt.name, new Option(opt));
@@ -97,30 +100,27 @@ class ArgumentProcessor
                 Option opt = options.get(name);
                 if (opt == null)
                     throw new IllegalArgumentException("Unknown argument " + arg);
-
-                String peek = (index < src.size()) ? src.get(index) : null;
-                boolean hasArg = peek != null && !peek.startsWith("--") && !peek.equals("--");
-                if (hasArg) {
-                    if (opt.type == null)
-                        throw new IllegalArgumentException("Option " + name + " does not take an argument");
+                if (opt.type.equals(Boolean.class)) {
+                    result.put(name, Boolean.TRUE);
+                } else {
+                    String peek = (index < src.size()) ? src.get(index) : null;
+                    if (peek == null || peek.startsWith("--"))
+                        throw new IllegalArgumentException("Expecting argument for option " + name);
                     index++;
                     result.put(name, opt.parse(peek));
-                } else {
-                    if (opt.type != null)
-                        throw new IllegalArgumentException("Expecting argument for option " + name);
                 }
             } else {
                 break;
             }
         }
         for (Option opt : options.values()) {
-            if (opt.required) {
-                if (!result.containsKey(opt.name))
+            if (!result.containsKey(opt.name)) {
+                if (opt.required)
                     throw new IllegalArgumentException("--" + opt.name + " is required");
-            } else if (opt.type != null) {
                 result.put(opt.name, opt.defaultValue);
             }
         }
+
         List<String> tmp = new ArrayList<String>();
         tmp.addAll(src.subList(index, src.size()));
         dst.clear();
@@ -132,7 +132,7 @@ class ArgumentProcessor
     {
         final String name;
         final Class type;
-        boolean required;
+        boolean required = true;
         Object defaultValue;
         Comparable start;
         Comparable end;
@@ -149,25 +149,18 @@ class ArgumentProcessor
 
         public Option(String name)
         {
-            this(name, null, false);
+            this(name, Boolean.class);
+            defaultValue(Boolean.FALSE);
         }
 
         public Option(String name, Class type)
         {
-            this(name, type, true);
-            if (type == null)
-                throw new IllegalArgumentException("Type cannot be null");
-        }
-
-        private Option(String name, Class type, boolean required)
-        {
-            if (name.startsWith("-"))
-                throw new IllegalArgumentException("Option names cannot start with a hyphen");
             if (!PARSERS.containsKey(type.getName()))
                 throw new IllegalArgumentException("Unsupported type " + type);
+            if (name.startsWith("-"))
+                throw new IllegalArgumentException("Option names cannot start with a hyphen");
             this.name = name;
             this.type = type;
-            this.required = required;
         }
 
         public Option defaultValue(Object value)
@@ -208,8 +201,6 @@ class ArgumentProcessor
 
         private void checkType(Object value)
         {
-            if (type == null)
-                throw new IllegalArgumentException(name + " does not take an argument");
             if (!type.isAssignableFrom(value.getClass()))
                 throw new IllegalArgumentException(name + " value " + value + " is not assignable to " + type.getName());
         }
