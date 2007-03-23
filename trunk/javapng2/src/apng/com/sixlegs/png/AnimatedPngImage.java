@@ -58,8 +58,10 @@ extends PngImage
     private final Map frameData = new HashMap();
     private final List firstFrameData = new ArrayList();
 
+    private Rectangle headerBounds;
     private boolean animated;
     private boolean sawData;
+    private int numFrames;
     private int numIterations;
 
     public AnimatedPngImage()
@@ -145,17 +147,23 @@ extends PngImage
 
         case PngConstants.IHDR:
             reset();
-            return super.readChunk(type, in, offset, length);
+            boolean result = super.readChunk(type, in, offset, length);
+            headerBounds = new Rectangle(getWidth(), getHeight());
+            return result;
 
         case acTL:
             if (animated)
-                throw new PngException("Multiple acTL chunks are not allowed", false);
+                error("Multiple acTL chunks are not allowed");
             if (sawData)
-                throw new PngException("acTL cannot appear after IDAT", false);
+                error("acTL cannot appear after IDAT");
             RegisteredChunks.checkLength(type, length, 8);
             animated = true;
-            in.readInt(); // ignore numFrames for now
+            numFrames = in.readInt();
+            if (numFrames <= 0)
+                error("Invalid frame count: " + numFrames);
             numIterations = in.readInt();
+            if (numIterations < 0)
+                error("Invalid iteration count: " + numIterations);
             return true;
 
         case fcTL:
@@ -164,17 +172,15 @@ extends PngImage
             int w = in.readInt();
             int h = in.readInt();
             Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
-
             if (!sawData) {
                 if (!chunks.isEmpty())
-                    throw new PngException("Multiple fcTL chunks are not allowed before IDAT", false);
-                if (bounds.width != getWidth() || bounds.height != getHeight())
-                    throw new PngException("Size of first frame " + bounds.width + "x" + bounds.height +
-                                           " should be " + getWidth() + "x" + getHeight(), false);
-                if (bounds.x != 0 || bounds.y != 0)
-                    throw new PngException("Offset of first frame " + bounds.x + "," + bounds.y +
-                                           " should be 0,0", false);
+                    error("Multiple fcTL chunks are not allowed before IDAT");
+                if (!bounds.equals(headerBounds))
+                    error("Default image frame must match IHDR bounds");
             }
+            if (!headerBounds.contains(bounds))
+                error("Frame bounds must fall within IHDR bounds");
+            
             int delayNum = in.readUnsignedShort();
             int delayDen = in.readUnsignedShort();
             if (delayDen == 0)
@@ -187,18 +193,18 @@ extends PngImage
                 break;
             case FrameControl.DISPOSE_PREVIOUS:
                 if (!sawData)
-                    throw new PngException("Previous dispose op not valid for the default image", false);
+                    error("Previous dispose op invalid for the default image");
                 break;
             default:
-                throw new PngException("Unknown APNG dispose op " + disposeOp, false);
+                error("Unknown APNG dispose op " + disposeOp);
             }
 
             int blendOp = in.readByte();
             if (blendOp == FrameControl.BLEND_OVER) {
                 if (!sawData)
-                    throw new PngException("Over blend op not valid for the default image", false);
+                    error("Over blend op invalid for the default image");
             } else if (blendOp != FrameControl.BLEND_SOURCE) {
-                throw new PngException("Unknown APNG blend op " + blendOp, false);
+                error("Unknown APNG blend op " + blendOp);
             }
             
             add(seq, new FrameControl(bounds, (float)delayNum / delayDen, disposeOp, blendOp));
@@ -206,7 +212,7 @@ extends PngImage
 
         case fdAT:
             if (!sawData)
-                throw new PngException("fdAT chunks cannot appear before IDAT", false);
+                error("fdAT chunks cannot appear before IDAT");
             seq = in.readInt();
             add(seq, new FrameData(offset + 4, length - 4));
             return false; // let PngImage skip it
@@ -225,9 +231,16 @@ extends PngImage
     private void add(int seq, Object chunk)
     throws PngException
     {
-        if (chunks.size() != seq)
-            throw new PngException("APNG chunks out of order", false);
+        if (chunks.size() != seq ||
+            (seq == 0 && !(chunk instanceof FrameControl)))
+            error("APNG chunks out of order");
         chunks.add(chunk);
+    }
+
+    private static void error(String message)
+    throws PngException
+    {
+        throw new PngException(message, false);
     }
 
     private void validate()
@@ -236,13 +249,13 @@ extends PngImage
         if (!animated)
             return;
         try {
+            if (chunks.isEmpty())
+                error("Found zero frames");
+            
             List list = null;
             for (int i = 0; i < chunks.size(); i++) {
                 Object chunk = chunks.get(i);
-                if (chunk == null)
-                    throw new PngException("Missing APNG sequence " + i, false);
                 if (chunk instanceof FrameControl) {
-                    // System.err.println(chunk);
                     frames.add(chunk);
                     frameData.put(chunk, list = new ArrayList());
                 } else {
@@ -250,12 +263,15 @@ extends PngImage
                 }
             }
 
+            if (frames.size() != numFrames)
+                error("Found " + frames.size() + " frames, expected " + numFrames);
+
             if (!firstFrameData.isEmpty())
                 ((List)frameData.get(frames.get(0))).addAll(firstFrameData);
 
             for (int i = 0; i < frames.size(); i++) {
                 if (((List)frameData.get(frames.get(i))).isEmpty())
-                    throw new PngException("Missing data for frame", false);
+                    error("Missing data for frame");
             }
             chunks.clear();
             
