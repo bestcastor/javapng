@@ -159,8 +159,6 @@ extends PngImage
             return true;
 
         case fcTL:
-            if (!sawData && !chunks.isEmpty())
-                throw new PngException("Multiple fcTL chunks are not allowed before IDAT", false);
             RegisteredChunks.checkLength(type, length, 26);
             seq = in.readInt();
             int w = in.readInt();
@@ -168,6 +166,8 @@ extends PngImage
             Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
 
             if (!sawData) {
+                if (!chunks.isEmpty())
+                    throw new PngException("Multiple fcTL chunks are not allowed before IDAT", false);
                 if (bounds.width != getWidth() || bounds.height != getHeight())
                     throw new PngException("Size of first frame " + bounds.width + "x" + bounds.height +
                                            " should be " + getWidth() + "x" + getHeight(), false);
@@ -182,12 +182,12 @@ extends PngImage
 
             int disposeOp = in.readByte();
             switch (disposeOp) {
+            case FrameControl.DISPOSE_NONE:
+            case FrameControl.DISPOSE_BACKGROUND:
+                break;
             case FrameControl.DISPOSE_PREVIOUS:
                 if (!sawData)
                     throw new PngException("Previous dispose op not valid for the default image", false);
-                /* fall-through */
-            case FrameControl.DISPOSE_NONE:
-            case FrameControl.DISPOSE_BACKGROUND:
                 break;
             default:
                 throw new PngException("Unknown APNG dispose op " + disposeOp, false);
@@ -223,11 +223,11 @@ extends PngImage
     }
 
     private void add(int seq, Object chunk)
+    throws PngException
     {
-        // TODO: put limit on sequence number to prevent OOM
-        while (chunks.size() <= seq)
-            chunks.add(null);
-        chunks.set(seq, chunk);
+        if (chunks.size() != seq)
+            throw new PngException("APNG chunks out of order", false);
+        chunks.add(chunk);
     }
 
     private void validate()
