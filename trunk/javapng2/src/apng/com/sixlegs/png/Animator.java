@@ -52,7 +52,6 @@ implements ActionListener
     private static final int MIN_DELAY = 10;
     
     private final AnimatedPngImage png;
-    private final BufferedImage[] frames;
     private final BufferedImage target;
     private final Graphics2D g;
     private final BufferedImage prev;
@@ -82,7 +81,6 @@ implements ActionListener
             target = createCompatibleImage(frames[0], png.getWidth(), png.getHeight());
 
         this.png = png;
-        this.frames = frames;
         this.target = target;
         g = target.createGraphics();
 
@@ -202,8 +200,6 @@ implements ActionListener
         int dispose;
         Rectangle bounds;
         BufferedImage image;
-        BufferedImage prev;
-        Graphics2D prev_g;
         Composite blend;
     }
 }
