@@ -71,7 +71,7 @@ extends DataOutputStream
         CheckedOutputStream checked = new CheckedOutputStream(new NullOutputStream(), new CRC32());
         DataOutputStream data = new DataOutputStream(checked);
         data.write(bytes);
-        data.flush();
+        data.close();
         return (int)checked.getChecksum().getValue();
     }
 

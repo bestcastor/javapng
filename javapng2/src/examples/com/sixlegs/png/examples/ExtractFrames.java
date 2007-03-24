@@ -128,6 +128,7 @@ public class ExtractFrames
                     rf.seek(chunk.offset);
                     rf.readFully(buf, 0, chunk.length);
                     cw.write(buf, 0, chunk.length);
+                    cw.close();
                     cw.finish(out);
                 }
             } finally {
