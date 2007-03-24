@@ -89,7 +89,7 @@ public class ExtractFrames
             byFrame.add(data);
             List<Chunk> cur = null;
             for (Chunk chunk : bySequence) {
-                if (chunk.type == AnimatedPngImage.fcTL || chunk.type == fcTl) {
+                if (chunk.type == AnimatedPngImage.fcTL) {
                     byFrame.add(cur = new ArrayList<Chunk>());
                 } else {
                     cur.add(chunk);
@@ -136,10 +136,6 @@ public class ExtractFrames
             }
         }
 
-        private static final int acTl = 0x6163546C;
-        private static final int fcTl = 0x6663546C;
-        private static final int fdAt = 0x66644174;
-
         protected boolean readChunk(int type, DataInput in, long offset, int length)
         throws IOException
         {
@@ -152,17 +148,13 @@ public class ExtractFrames
                 data.add(chunk);
                 return false;
             case AnimatedPngImage.acTL:
-            case acTl:
                 return false;
-                
             case AnimatedPngImage.fdAT:
-            case fdAt:
                 chunk.type = PngConstants.IDAT;
                 chunk.offset += 4;
                 chunk.length -= 4;
                 /* fall-through */
             case AnimatedPngImage.fcTL:
-            case fcTl:
                 int seq = in.readInt();
                 while (bySequence.size() <= seq)
                     bySequence.add(null);
