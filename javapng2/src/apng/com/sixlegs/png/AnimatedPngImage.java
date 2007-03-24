@@ -49,18 +49,18 @@ extends PngImage
     public static final int fcTL = 0x6663544C;
     public static final int fdAT = 0x66644154;
         
-    private static final int APNG_RENDER_OP_BLEND_FLAG = 8;
     private static final PngConfig DEFAULT_CONFIG =
       new PngConfig.Builder().readLimit(PngConfig.READ_EXCEPT_DATA).build();
       
     private final List chunks = new ArrayList();
     private final List frames = new ArrayList();
     private final Map frameData = new HashMap();
-    private final List firstFrameData = new ArrayList();
+    private final List defaultImageData = new ArrayList();
 
     private Rectangle headerBounds;
     private boolean animated;
     private boolean sawData;
+    private boolean useDefaultImage;
     private int numFrames;
     private int numIterations;
 
@@ -76,36 +76,42 @@ extends PngImage
 
     private void reset()
     {
-        animated = sawData = false;
-        numIterations = 0;
+        animated = sawData = useDefaultImage = false;
         chunks.clear();
         frames.clear();
         frameData.clear();
-        firstFrameData.clear();
+        defaultImageData.clear();
     }
 
     public boolean isAnimated()
     {
+        assertRead();
         return animated;
     }
 
     public int getNumFrames()
     {
-        return animated ? frames.size() : 1;
+        assertRead();
+        return frames.size();
     }
 
     public int getNumIterations()
     {
-        return numIterations;
+        assertRead();
+        return animated ? numIterations : 1;
     }
 
     public FrameControl getFrame(int index)
     {
+        assertRead();
         return (FrameControl)frames.get(index);
     }
 
-    public boolean isResetRequired()
+    public boolean isClearRequired()
     {
+        assertRead();
+        if (!animated)
+            return false;
         FrameControl first = getFrame(0);
         return (first.getBlend() == FrameControl.BLEND_OVER) ||
             (first.getDispose() == FrameControl.DISPOSE_PREVIOUS) ||
@@ -122,18 +128,32 @@ extends PngImage
         return images;
     }
 
+    // TODO: make sure that file is what we read before?
+    // TODO: make sure that frame control is from this image?
     public BufferedImage readFrame(File file, FrameControl frame)
     throws IOException
     {
-        List data = (List)frameData.get(frame);
-        if (data == null)
-            throw new IllegalArgumentException("Cannot read data for first APNG frame");
+        assertRead();
+        if (frame == null)
+            return readImage(file, defaultImageData, new Dimension(getWidth(), getHeight()));
+        return readImage(file, (List)frameData.get(frame), frame.getBounds().getSize());
+    }
+
+    private BufferedImage readImage(File file, List data, Dimension size)
+    throws IOException
+    {
         FrameDataInputStream in = new FrameDataInputStream(file, data);
         try {
-            return ImageFactory.createImage(this, in, frame.getBounds().getSize());
+            return createImage(in, size);
         } finally {
             in.close();
         }
+    }
+
+    private void assertRead()
+    {
+        if (frames.isEmpty())
+            throw new IllegalStateException("Image has not been read");
     }
 
     protected boolean readChunk(int type, DataInput in, long offset, int length)
@@ -177,6 +197,7 @@ extends PngImage
                     error("Multiple fcTL chunks are not allowed before IDAT");
                 if (!bounds.equals(headerBounds))
                     error("Default image frame must match IHDR bounds");
+                useDefaultImage = true;
             }
             if (!headerBounds.contains(bounds))
                 error("Frame bounds must fall within IHDR bounds");
@@ -219,8 +240,7 @@ extends PngImage
 
         case PngConstants.IDAT:
             sawData = true;
-            if (!chunks.isEmpty())
-                firstFrameData.add(new FrameData(offset, length));
+            defaultImageData.add(new FrameData(offset, length));
             return false;
 
         default:
@@ -246,8 +266,10 @@ extends PngImage
     private void validate()
     throws IOException
     {
-        if (!animated)
+        if (!animated) {
+            frames.add(null);
             return;
+        }
         try {
             if (chunks.isEmpty())
                 error("Found zero frames");
@@ -266,8 +288,8 @@ extends PngImage
             if (frames.size() != numFrames)
                 error("Found " + frames.size() + " frames, expected " + numFrames);
 
-            if (!firstFrameData.isEmpty())
-                ((List)frameData.get(frames.get(0))).addAll(firstFrameData);
+            if (useDefaultImage)
+                ((List)frameData.get(frames.get(0))).addAll(defaultImageData);
 
             for (int i = 0; i < frames.size(); i++) {
                 if (((List)frameData.get(frames.get(i))).isEmpty())

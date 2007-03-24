@@ -1,6 +1,7 @@
 package com.sixlegs.png;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -125,7 +126,7 @@ extends PngTestCase
     throws Exception
     {
         PngImage png = new PngImage(){
-            protected BufferedImage createImage(InputStream in) throws IOException {
+            protected BufferedImage createImage(InputStream in, Dimension size) throws IOException {
                 if (getBitDepth() == 1 &&
                     getColorType() == PngConstants.COLOR_TYPE_GRAY) {
                     Map props = getProperties();
@@ -136,7 +137,7 @@ extends PngTestCase
                         (byte)255, (byte)255, 0
                     });
                 }
-                return super.createImage(in);
+                return super.createImage(in, size);
             }
         };
         InputStream in = getClass().getResourceAsStream("/images/suite/basn0g01.png");
