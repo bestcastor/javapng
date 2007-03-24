@@ -37,6 +37,7 @@ exception statement from your version.
 package com.sixlegs.png;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -64,7 +65,8 @@ implements Transparency
         new PngConfig.Builder().build();
       
     private final PngConfig config;
-    private Map props;
+    private final Map props = new HashMap();
+    private boolean read = false;
 
     /**
      * Constructor which uses a default instance of {@link PngConfig}.
@@ -141,11 +143,13 @@ implements Transparency
     {
         if (in == null)
             throw new NullPointerException("InputStream is null");
-        int readLimit= config.getReadLimit();
+        this.read = true;
+        props.clear();
+
+        int readLimit = config.getReadLimit();
         BufferedImage image = null;
         StateMachine machine = new StateMachine(this);
         try {
-            props = new HashMap();
             PngInputStream pin = new PngInputStream(in);
             Set seen = new HashSet();
             while (machine.getState() != StateMachine.STATE_END) {
@@ -160,7 +164,7 @@ implements Transparency
                             break;
                         default:
                             ImageDataInputStream data = new ImageDataInputStream(pin, machine);
-                            image = createImage(data);
+                            image = createImage(data, new Dimension(getWidth(), getHeight()));
                             do {
                                 if (data.read() != -1)
                                     skipFully(data, pin.getRemaining());
@@ -168,17 +172,9 @@ implements Transparency
                             } while (type == PngConstants.IDAT);
                         }
                     }
-                    Integer key = Integers.valueOf(type);
-                    if (!isMultipleOK(type) && !PngConstants.isPrivate(type)) {
-                        if (seen.contains(key)) {
-                            String msg = "Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed";
-                            if (PngConstants.isAncillary(type))
-                                throw new PngException(msg, false);
-                            throw new PngException(msg, true);
-                        } else {
-                            seen.add(key);
-                        }
-                    }
+                    if (!isMultipleOK(type) && !PngConstants.isPrivate(type) && !seen.add(Integers.valueOf(type)))
+                        throw new PngException("Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed",
+                                               !PngConstants.isAncillary(type));
                     if (readChunk(type, pin, pin.getOffset(), pin.getRemaining())) {
                         if (type == PngConstants.IHDR && readLimit == PngConfig.READ_HEADER)
                             return null;
@@ -213,13 +209,14 @@ implements Transparency
      * Unlike {@link #readChunk} implementations, subclasses may read less than the correct
      * amount from this stream; the remainder will be skipped.
      * @param in the input stream of raw, compressed image data
+     * @param size the size of the image data
      * @return the decoded image, or null
      * @throws IOException if any error occurred while processing the image data
      */
-    protected BufferedImage createImage(InputStream in)
+    protected BufferedImage createImage(InputStream in, Dimension size)
     throws IOException
     {
-        return ImageFactory.createImage(this, in);
+        return ImageFactory.createImage(this, in, size);
     }
 
     /**
@@ -594,19 +591,6 @@ implements Transparency
         return null;
     }
 
-    // package-protected
-    int getInt(String name)
-    {
-        assertRead();
-        return ((Number)props.get(name)).intValue();
-    }
-
-    private void assertRead()
-    {
-        if (props == null)
-            throw new IllegalStateException("Image has not been read");
-    }
-
     /**
      * Read the chunk data from the image input stream, storing
      * properties into this {@code PngImage} instance. Subclasses may
@@ -645,16 +629,19 @@ implements Transparency
         return RegisteredChunks.read(type, in, length, this);
     }
 
-    /**
-     * Returns whether a chunk is allowed to occur multiple times.
-     * <p>
-     * By default this method returns {@code true} only for {@link PngConstants#sPLT sPLT},
-     * {@link PngConstants#iTXt iTXt}, {@link PngConstants#tEXt tEXt},
-     * {@link PngConstants#zTXt zTXt}, and {@link PngConstants#IDAT IDAT}.
-     * @param type the chunk type
-     * @return whether multiple chunks of the given type are allowed
-     */
-    protected boolean isMultipleOK(int type)
+    private int getInt(String name)
+    {
+        assertRead();
+        return ((Number)props.get(name)).intValue();
+    }
+
+    private void assertRead()
+    {
+        if (!read)
+            throw new IllegalStateException("Image has not been read");
+    }
+
+    private static boolean isMultipleOK(int type)
     {
         switch (type) {
         case PngConstants.IDAT:

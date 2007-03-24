@@ -59,7 +59,7 @@ implements ActionListener
     private final Graphics2D gPrev;
     private final RenderData[] render;
     private final int timerDelay;
-    private final boolean resetRequired;
+    private final boolean clearRequired;
 
     private long waitUntil = 0;
     private int index = -1;
@@ -114,9 +114,9 @@ implements ActionListener
             gPrev = prev.createGraphics();
             gPrev.setComposite(AlphaComposite.Src);
         }
-        resetRequired = png.isResetRequired();
-        if (resetRequired)
-            resetFrame(target);
+        clearRequired = png.isClearRequired();
+        if (clearRequired)
+            clearFrame(target);
     }
 
     public void reset()
@@ -125,10 +125,10 @@ implements ActionListener
         iter = 0;
         index = -1;
         done = false;
-        resetFrame(target);
+        clearFrame(target);
     }
 
-    private void resetFrame(BufferedImage target)
+    private void clearFrame(BufferedImage target)
     {
         g.setComposite(AlphaComposite.Src);
         g.setColor(TRANSPARENT_BLACK);
@@ -162,8 +162,8 @@ implements ActionListener
                     done = true;
                     return;
                 }
-                if (resetRequired)
-                    resetFrame(target);
+                if (clearRequired)
+                    clearFrame(target);
                 index = 0;
             }
             waitUntil += render[index].delay;
