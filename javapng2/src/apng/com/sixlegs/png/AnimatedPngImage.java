@@ -159,7 +159,6 @@ extends PngImage
     protected boolean readChunk(int type, DataInput in, long offset, int length)
     throws IOException
     {
-        int seq;
         switch (type) {
         case PngConstants.IEND:
             validate();
@@ -172,70 +171,27 @@ extends PngImage
             return result;
 
         case acTL:
+            RegisteredChunks.checkLength(type, length, 8);
             if (animated)
                 error("Multiple acTL chunks are not allowed");
             if (sawData)
                 error("acTL cannot appear after IDAT");
-            RegisteredChunks.checkLength(type, length, 8);
             animated = true;
-            numFrames = in.readInt();
-            if (numFrames <= 0)
+            if ((numFrames = in.readInt()) <= 0)
                 error("Invalid frame count: " + numFrames);
-            numIterations = in.readInt();
-            if (numIterations < 0)
+            if ((numIterations = in.readInt()) < 0)
                 error("Invalid iteration count: " + numIterations);
             return true;
 
         case fcTL:
             RegisteredChunks.checkLength(type, length, 26);
-            seq = in.readInt();
-            int w = in.readInt();
-            int h = in.readInt();
-            Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
-            if (!sawData) {
-                if (!chunks.isEmpty())
-                    error("Multiple fcTL chunks are not allowed before IDAT");
-                if (!bounds.equals(headerBounds))
-                    error("Default image frame must match IHDR bounds");
-                useDefaultImage = true;
-            }
-            if (!headerBounds.contains(bounds))
-                error("Frame bounds must fall within IHDR bounds");
-            
-            int delayNum = in.readUnsignedShort();
-            int delayDen = in.readUnsignedShort();
-            if (delayDen == 0)
-                delayDen = 100;
-
-            int disposeOp = in.readByte();
-            switch (disposeOp) {
-            case FrameControl.DISPOSE_NONE:
-            case FrameControl.DISPOSE_BACKGROUND:
-                break;
-            case FrameControl.DISPOSE_PREVIOUS:
-                if (!sawData)
-                    error("Previous dispose op invalid for the default image");
-                break;
-            default:
-                error("Unknown APNG dispose op " + disposeOp);
-            }
-
-            int blendOp = in.readByte();
-            if (blendOp == FrameControl.BLEND_OVER) {
-                if (!sawData)
-                    error("Over blend op invalid for the default image");
-            } else if (blendOp != FrameControl.BLEND_SOURCE) {
-                error("Unknown APNG blend op " + blendOp);
-            }
-            
-            add(seq, new FrameControl(bounds, (float)delayNum / delayDen, disposeOp, blendOp));
+            add(in.readInt(), readFrameControl(in));
             return true;
 
         case fdAT:
             if (!sawData)
                 error("fdAT chunks cannot appear before IDAT");
-            seq = in.readInt();
-            add(seq, new FrameData(offset + 4, length - 4));
+            add(in.readInt(), new FrameData(offset + 4, length - 4));
             return false; // let PngImage skip it
 
         case PngConstants.IDAT:
@@ -261,6 +217,50 @@ extends PngImage
     throws PngException
     {
         throw new PngException(message, false);
+    }
+
+    private FrameControl readFrameControl(DataInput in)
+    throws IOException
+    {
+        int w = in.readInt();
+        int h = in.readInt();
+        Rectangle bounds = new Rectangle(in.readInt(), in.readInt(), w, h);
+        if (!sawData) {
+            if (!chunks.isEmpty())
+                error("Multiple fcTL chunks are not allowed before IDAT");
+            if (!bounds.equals(headerBounds))
+                error("Default image frame must match IHDR bounds");
+            useDefaultImage = true;
+        }
+        if (!headerBounds.contains(bounds))
+            error("Frame bounds must fall within IHDR bounds");
+            
+        int delayNum = in.readUnsignedShort();
+        int delayDen = in.readUnsignedShort();
+        if (delayDen == 0)
+            delayDen = 100;
+
+        int disposeOp = in.readByte();
+        switch (disposeOp) {
+        case FrameControl.DISPOSE_NONE:
+        case FrameControl.DISPOSE_BACKGROUND:
+            break;
+        case FrameControl.DISPOSE_PREVIOUS:
+            if (!sawData)
+                error("Previous dispose op invalid for the default image");
+            break;
+        default:
+            error("Unknown APNG dispose op " + disposeOp);
+        }
+
+        int blendOp = in.readByte();
+        if (blendOp == FrameControl.BLEND_OVER) {
+            if (!sawData)
+                error("Over blend op invalid for the default image");
+        } else if (blendOp != FrameControl.BLEND_SOURCE) {
+            error("Unknown APNG blend op " + blendOp);
+        }
+        return new FrameControl(bounds, (float)delayNum / delayDen, disposeOp, blendOp);
     }
 
     private void validate()
