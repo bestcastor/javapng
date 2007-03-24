@@ -649,8 +649,8 @@ implements Transparency
      * Returns whether a chunk is allowed to occur multiple times.
      * <p>
      * By default this method returns {@code true} only for {@link PngConstants#sPLT sPLT},
-     * {@link PngConstants#iTXt iTXt}, {@link PngConstants#tEXt tEXt}, and
-     * {@link PngConstants#zTXt zTXt}.
+     * {@link PngConstants#iTXt iTXt}, {@link PngConstants#tEXt tEXt},
+     * {@link PngConstants#zTXt zTXt}, and {@link PngConstants#IDAT IDAT}.
      * @param type the chunk type
      * @return whether multiple chunks of the given type are allowed
      */
