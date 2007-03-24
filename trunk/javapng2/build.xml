@@ -284,17 +284,6 @@
         <delete file="dist/temp.jar"/>
     </target>
 
-    <target name="pmd" depends="init" description="Find bugs using PMD">
-        <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="path.libdev"/>
-        <mkdir dir="reports"/>
-        <pmd rulesetfiles="rulesets/basic.xml,rulesets/coupling.xml,rulesets/imports.xml,rulesets/unusedcode.xml">
-            <formatter type="html" toFile="reports/pmd_report.html"/>
-            <fileset dir="src/main">
-                <include name="**/*.java"/>
-            </fileset>
-        </pmd>
-    </target>
-
     <!-- TODO: stylesheetfile -->
     <target name="javadoc" depends="compile" description="Generate the javadoc">
         <mkdir dir="dist/api"/>
