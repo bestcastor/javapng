@@ -64,7 +64,6 @@ class ImageFactory
     throws IOException
     {
         PngConfig config = png.getConfig();
-        Map props = png.getProperties();
 
         int width     = size.width;
         int height    = size.height;
@@ -79,7 +78,7 @@ class ImageFactory
 
         PixelProcessor pp = null;
         if (colorModel instanceof ComponentColorModel) {
-            int[] trans = (int[])props.get(PngConstants.TRANSPARENCY);
+            int[] trans = (int[])png.getProperty(PngConstants.TRANSPARENCY, int[].class, false);
             int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
             if (shift != 0 || trans != null || gammaTable != null) {
                 if (gammaTable == null)
@@ -184,6 +183,7 @@ class ImageFactory
     }
 
     private static ColorModel createColorModel(PngImage png, short[] gammaTable)
+    throws PngException
     {
         Map props = png.getProperties();
         int colorType = png.getColorType();
@@ -194,7 +194,7 @@ class ImageFactory
         if (isPalette || (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
             byte[] r, g, b;
             if (isPalette) {
-                byte[] palette = (byte[])props.get(PngConstants.PALETTE);
+                byte[] palette = (byte[])png.getProperty(PngConstants.PALETTE, byte[].class, true);
                 int paletteSize = palette.length / 3;
                 r = new byte[paletteSize];
                 g = new byte[paletteSize];
@@ -216,7 +216,7 @@ class ImageFactory
                 applyGamma(r, gammaTable);
             }
             if (props.containsKey(PngConstants.PALETTE_ALPHA)) {
-                byte[] trans = (byte[])props.get(PngConstants.PALETTE_ALPHA);
+                byte[] trans = (byte[])png.getProperty(PngConstants.PALETTE_ALPHA, byte[].class, true);
                 byte[] a = new byte[r.length];
                 Arrays.fill(a, trans.length, r.length, (byte)0xFF);
                 System.arraycopy(trans, 0, a, 0, trans.length);
@@ -224,7 +224,7 @@ class ImageFactory
             } else {
                 int trans = -1;
                 if (props.containsKey(PngConstants.TRANSPARENCY)) {
-                    trans = ((int[])props.get(PngConstants.TRANSPARENCY))[0];
+                    trans = ((int[])png.getProperty(PngConstants.TRANSPARENCY, int[].class, true))[0];
                     trans = trans * 255 / ((1 << bitDepth) - 1);
                 }
                 return new IndexColorModel(outputDepth, r.length, r, g, b, trans);

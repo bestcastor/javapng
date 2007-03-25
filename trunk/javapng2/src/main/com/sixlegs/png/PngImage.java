@@ -63,7 +63,7 @@ implements Transparency
 {
     private static final PngConfig DEFAULT_CONFIG =
         new PngConfig.Builder().build();
-      
+
     private final PngConfig config;
     private final Map props = new HashMap();
     private boolean read = false;
@@ -175,14 +175,10 @@ implements Transparency
                     if (!isMultipleOK(type) && !seen.add(Integers.valueOf(type)))
                         throw new PngException("Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed",
                                                !PngConstants.isAncillary(type));
-                    if (readChunk(type, pin, pin.getOffset(), pin.getRemaining())) {
-                        if (type == PngConstants.IHDR && readLimit == PngConfig.READ_HEADER)
-                            return null;
-                    } else {
-                        if (!PngConstants.isAncillary(type) && type != PngConstants.IDAT)
-                            throw new PngException("Critical chunk " + PngConstants.getChunkName(type) + " cannot be skipped", true);
-                        skipFully(pin, pin.getRemaining());
-                    }
+                    readChunk(type, pin, pin.getOffset(), pin.getRemaining());
+                    skipFully(pin, pin.getRemaining());
+                    if (type == PngConstants.IHDR && readLimit == PngConfig.READ_HEADER)
+                        return null;
                 } catch (PngException exception) {
                     if (exception.isFatal())
                         throw exception;
@@ -277,7 +273,7 @@ implements Transparency
     }
     
     /** 
-     * Returns the image width in pixels.
+     * Returns the image widt hin pixels.
      * @throws IllegalStateException if an image has not been read
      */
     public int getWidth()
@@ -372,7 +368,7 @@ implements Transparency
     {
         assertRead();
         if (props.containsKey(PngConstants.GAMMA))
-            return ((Number)props.get(PngConstants.GAMMA)).floatValue();
+            return ((Number)getProperty(PngConstants.GAMMA, Number.class, true)).floatValue();
         return config.getDefaultGamma();
     }
 
@@ -414,13 +410,12 @@ implements Transparency
      */
     public Color getBackground()
     {
-        assertRead();
-        int[] background = (int[])props.get(PngConstants.BACKGROUND);
+        int[] background = (int[])getProperty(PngConstants.BACKGROUND, int[].class, false);
         if (background == null)
             return null;
         switch (getColorType()) {
         case PngConstants.COLOR_TYPE_PALETTE:
-            byte[] palette = (byte[])props.get(PngConstants.PALETTE);
+            byte[] palette = (byte[])getProperty(PngConstants.PALETTE, byte[].class, true);
             int index = background[0] * 3;
             return new Color(0xFF & palette[index + 0], 
                              0xFF & palette[index + 1], 
@@ -554,16 +549,32 @@ implements Transparency
         return props.get(name);
     }
 
+    Object getProperty(String name, Class type, boolean required)
+    {
+        assertRead();
+        Object value = props.get(name);
+        if (value == null) {
+            if (required)
+                throw new IllegalStateException("Image is missing property \"" + name + "\"");
+        } else if (!type.isAssignableFrom(value.getClass())) {
+            throw new IllegalStateException("Property \"" + name + "\" has type " + value.getClass().getName() + ", expected " + type.getName());
+        }
+        return value;
+    }
+
+    private int getInt(String name)
+    {
+        return ((Number)getProperty(name, Number.class, true)).intValue();
+    }
+
     /**
      * Returns the map which stores all of this image's property values.
      * The map is mutable, and storing a value with the wrong type may
      * result in other methods in this class throwing a {@code ClassCastException}.
      * @return the mutable map of image properties
-     * @throws IllegalStateException if an image has not been read
      */
     public Map getProperties()
     {
-        assertRead();
         return props;
     }
 
@@ -579,8 +590,7 @@ implements Transparency
      */
     public TextChunk getTextChunk(String key)
     {
-        assertRead();
-        List list = (List)getProperty(PngConstants.TEXT_CHUNKS);
+        List list = (List)getProperty(PngConstants.TEXT_CHUNKS, List.class, false);
         if (key != null && list != null) {
             for (Iterator it = list.iterator(); it.hasNext();) {
                 TextChunk chunk = (TextChunk)it.next();
@@ -593,40 +603,37 @@ implements Transparency
 
     /**
      * Read the chunk data from the image input stream, storing
-     * properties into this {@code PngImage} instance. Subclasses may
-     * either skip the chunk by returning {@code false}, or must
-     * read the exact length of the chunk data and return {@code true}.
-     * Critical chunks (except IDAT) cannot be skipped.
-     * <p>
-     * {@code IDAT} chunks can be processed by this method only if
-     * {@link PngConfig#getReadLimit} is set to {@link PngConfig#READ_EXCEPT_DATA}.
+     * properties into this {@code PngImage} instance.
      * <p>
      * By default this method will handle all of the chunk types defined
      * in Version 1.2 of the PNG Specification, and most of the
      * registered extension chunks.
+     * {@code IDAT} chunks will be processed through this method only if
+     * {@link PngConfig#getReadLimit} is set to {@link PngConfig#READ_EXCEPT_DATA}.
      * <p>
      * Attempting to read past the end of the chunk data will result in
-     * an {@link EOFException}.
+     * an {@link EOFException}. Unread data will be skipped.
      * @param type the chunk type
-     * @param in the input stream to read the chunk data from
+     * @param in the chunk data
+     * @param offset the location of the chunk data within the entire PNG datastream
      * @param length the length of the chunk data
-     * @return whether the chunk data has been processed
+     * @return true if the chunk data has been read
      */
-    protected boolean readChunk(int type, DataInput in, long offset, int length)
+    protected void readChunk(int type, DataInput in, long offset, int length)
     throws IOException
     {
         if (type == PngConstants.IDAT)
-            return false;
+            return;
         if (config.getReadLimit() == PngConfig.READ_EXCEPT_METADATA && PngConstants.isAncillary(type)) {
             switch (type) {
             case PngConstants.gAMA:
             case PngConstants.tRNS:
                 break;
             default:
-                return false;
+                return;
             }
         }
-        return RegisteredChunks.read(type, in, length, this);
+        RegisteredChunks.read(type, in, length, this);
     }
 
     /**
@@ -649,12 +656,6 @@ implements Transparency
             return true;
         }
         return false;
-    }
-
-    private int getInt(String name)
-    {
-        assertRead();
-        return ((Number)props.get(name)).intValue();
     }
 
     private void assertRead()
