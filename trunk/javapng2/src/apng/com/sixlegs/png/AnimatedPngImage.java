@@ -205,8 +205,6 @@ extends PngImage
 
         case acTL:
             RegisteredChunks.checkLength(type, length, 8);
-            if (animated)
-                error("Multiple acTL chunks are not allowed");
             if (sawData)
                 error("acTL cannot appear after IDAT");
             animated = true;
@@ -235,6 +233,16 @@ extends PngImage
         default:
             return super.readChunk(type, in, offset, length);
         }
+    }
+
+    protected boolean isMultipleOK(int type)
+    {
+        switch (type) {
+        case fcTL:
+        case fdAT:
+            return true;
+        }
+        return super.isMultipleOK(type);
     }
 
     private void add(int seq, Object chunk)

@@ -172,7 +172,7 @@ implements Transparency
                             } while (type == PngConstants.IDAT);
                         }
                     }
-                    if (!isMultipleOK(type) && !PngConstants.isPrivate(type) && !seen.add(Integers.valueOf(type)))
+                    if (!isMultipleOK(type) && !seen.add(Integers.valueOf(type)))
                         throw new PngException("Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed",
                                                !PngConstants.isAncillary(type));
                     if (readChunk(type, pin, pin.getOffset(), pin.getRemaining())) {
@@ -629,19 +629,16 @@ implements Transparency
         return RegisteredChunks.read(type, in, length, this);
     }
 
-    private int getInt(String name)
-    {
-        assertRead();
-        return ((Number)props.get(name)).intValue();
-    }
-
-    private void assertRead()
-    {
-        if (!read)
-            throw new IllegalStateException("Image has not been read");
-    }
-
-    private static boolean isMultipleOK(int type)
+    /**
+     * Returns whether a chunk is allowed to occur multiple times.
+     * <p>
+     * By default this method returns {@code true} only for {@link PngConstants#sPLT sPLT},
+     * {@link PngConstants#iTXt iTXt}, {@link PngConstants#tEXt tEXt},
+     * {@link PngConstants#zTXt zTXt}, and {@link PngConstants#IDAT IDAT}.
+     * @param type the chunk type
+     * @return whether multiple chunks of the given type are allowed
+     */
+    protected boolean isMultipleOK(int type)
     {
         switch (type) {
         case PngConstants.IDAT:
@@ -652,6 +649,18 @@ implements Transparency
             return true;
         }
         return false;
+    }
+
+    private int getInt(String name)
+    {
+        assertRead();
+        return ((Number)props.get(name)).intValue();
+    }
+
+    private void assertRead()
+    {
+        if (!read)
+            throw new IllegalStateException("Image has not been read");
     }
 
     private static void skipFully(InputStream in, long skip)
