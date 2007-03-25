@@ -90,7 +90,7 @@ public class Png2AnimatedPng
         (new PngImage(config) {
             private ChunkWriter chunk = new ChunkWriter();
             private int seq = 0;
-            protected boolean readChunk(int type, DataInput in, long offset, int length) throws IOException {
+            protected void readChunk(int type, DataInput in, long offset, int length) throws IOException {
                 byte[] data = new byte[length];
                 in.readFully(data);
 
@@ -98,7 +98,7 @@ public class Png2AnimatedPng
                     for (File file : files.subList(1, files.size())) {
                         nextFrame();
                         (new PngImage(config) {
-                            protected boolean readChunk(int type, DataInput in, long offset, int length) throws IOException {
+                            protected void readChunk(int type, DataInput in, long offset, int length) throws IOException {
                                 if (type == PngConstants.IDAT) {
                                     byte[] data = new byte[length];
                                     in.readFully(data);
@@ -106,9 +106,8 @@ public class Png2AnimatedPng
                                     chunk.writeInt(seq++);
                                     chunk.write(data);
                                     chunk.finish(out);
-                                    return true;
                                 } else {
-                                    return super.readChunk(type, in, offset, length);
+                                    super.readChunk(type, in, offset, length);
                                 }
                             }
                         }).read(file);
@@ -118,7 +117,7 @@ public class Png2AnimatedPng
                 chunk.start(type);
                 chunk.write(data);
                 chunk.finish(out);
-                boolean result = super.readChunk(type, new DataInputStream(new ByteArrayInputStream(data)), offset, length);
+                super.readChunk(type, new DataInputStream(new ByteArrayInputStream(data)), offset, length);
 
                 if (type == PngConstants.IHDR) {
                     chunk.start(AnimatedPngImage.acTL);
@@ -128,7 +127,6 @@ public class Png2AnimatedPng
                     if (!skip)
                         nextFrame();
                 }
-                return result;
             }
 
             private void nextFrame() throws IOException {

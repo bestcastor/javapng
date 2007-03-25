@@ -136,7 +136,7 @@ public class ExtractFrames
             }
         }
 
-        protected boolean readChunk(int type, DataInput in, long offset, int length)
+        protected void readChunk(int type, DataInput in, long offset, int length)
         throws IOException
         {
             Chunk chunk = new Chunk();
@@ -146,9 +146,9 @@ public class ExtractFrames
             switch (type) {
             case PngConstants.IDAT:
                 data.add(chunk);
-                return false;
+                break;
             case AnimatedPngImage.acTL:
-                return false;
+                break;
             case AnimatedPngImage.fdAT:
                 chunk.type = PngConstants.IDAT;
                 chunk.offset += 4;
@@ -159,10 +159,10 @@ public class ExtractFrames
                 while (bySequence.size() <= seq)
                     bySequence.add(null);
                 bySequence.set(seq, chunk);
-                return false;
+                break;
             default:
                 (data.isEmpty() ? commonBefore : commonAfter).add(chunk);
-                return super.readChunk(type, in, offset, length);
+                super.readChunk(type, in, offset, length);
             }
         }
     }

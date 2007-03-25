@@ -58,14 +58,14 @@ class RegisteredChunks
         case PngConstants.bKGD: read_bKGD(in, length, props, png); break;
         case PngConstants.tRNS: read_tRNS(in, length, props, png); break;
         case PngConstants.sBIT: read_sBIT(in, length, props, png); break;
+        case PngConstants.hIST: read_hIST(in, length, props, png); break;
+        case PngConstants.sPLT: read_sPLT(in, length, props, png); break;
         case PngConstants.cHRM: read_cHRM(in, length, props); break;
         case PngConstants.gAMA: read_gAMA(in, length, props); break;
-        case PngConstants.hIST: read_hIST(in, length, props); break;
         case PngConstants.iCCP: read_iCCP(in, length, props); break;
         case PngConstants.pHYs: read_pHYs(in, length, props); break;
         case PngConstants.sRGB: read_sRGB(in, length, props); break;
         case PngConstants.tIME: read_tIME(in, length, props); break;
-        case PngConstants.sPLT: read_sPLT(in, length, props); break;
         case PngConstants.gIFg: read_gIFg(in, length, props); break;
         case PngConstants.oFFs: read_oFFs(in, length, props); break;
         case PngConstants.sCAL: read_sCAL(in, length, props); break;
@@ -74,7 +74,7 @@ class RegisteredChunks
         case PngConstants.iTXt:
         case PngConstants.tEXt:
         case PngConstants.zTXt:
-            readText(type, in, length, props);
+            readText(type, in, length, props, png);
             break;
         default:
             return false;
@@ -183,7 +183,7 @@ class RegisteredChunks
             });
             break;
         case PngConstants.COLOR_TYPE_PALETTE:
-            int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
+            int paletteSize = ((byte[])png.getProperty(PngConstants.PALETTE, byte[].class, true)).length / 3;
             if (length > paletteSize)
                 throw new PngException("Too many transparency palette entries (" + length + " > " + paletteSize + ")", true);
             byte[] trans = new byte[length];
@@ -243,11 +243,11 @@ class RegisteredChunks
             props.put(PngConstants.GAMMA, new Float(gamma / 100000f));
     }
 
-    private static void read_hIST(DataInput in, int length, Map props)
+    private static void read_hIST(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         // TODO: ensure it is divisible by three
-        int paletteSize = ((byte[])props.get(PngConstants.PALETTE)).length / 3;
+        int paletteSize = ((byte[])png.getProperty(PngConstants.PALETTE, byte[].class, true)).length / 3;
         checkLength(PngConstants.hIST, length, paletteSize * 2);
         int[] array = new int[paletteSize];
         for (int i = 0; i < paletteSize; i++)
@@ -330,7 +330,7 @@ class RegisteredChunks
         return value;
     }
 
-    private static void read_sPLT(DataInput in, int length, Map props)
+    private static void read_sPLT(DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         String name = readKeyword(in, length);
@@ -344,7 +344,7 @@ class RegisteredChunks
         byte[] bytes = new byte[length];
         in.readFully(bytes);
 
-        List palettes = (List)props.get(PngConstants.SUGGESTED_PALETTES);
+        List palettes = (List)png.getProperty(PngConstants.SUGGESTED_PALETTES, List.class, false);
         if (palettes == null)
             props.put(PngConstants.SUGGESTED_PALETTES, palettes = new ArrayList());
         for (Iterator it = palettes.iterator(); it.hasNext();) {
@@ -354,7 +354,7 @@ class RegisteredChunks
         palettes.add(new SuggestedPaletteImpl(name, sampleDepth, bytes));
     }
 
-    private static void readText(int type, DataInput in, int length, Map props)
+    private static void readText(int type, DataInput in, int length, Map props, PngImage png)
     throws IOException
     {
         byte[] bytes = new byte[length];
@@ -399,7 +399,7 @@ class RegisteredChunks
         }
         if (text.indexOf('\0') >= 0)
             throw new PngException("Text value contains null", false);
-        List chunks = (List)props.get(PngConstants.TEXT_CHUNKS);
+        List chunks = (List)png.getProperty(PngConstants.TEXT_CHUNKS, List.class, false);
         if (chunks == null)
             props.put(PngConstants.TEXT_CHUNKS, chunks = new ArrayList());
         chunks.add(new TextChunkImpl(keyword, text, language, translated, type));

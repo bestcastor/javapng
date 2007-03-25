@@ -189,19 +189,20 @@ extends PngImage
             throw new IllegalStateException("Image has not been read");
     }
 
-    protected boolean readChunk(int type, DataInput in, long offset, int length)
+    protected void readChunk(int type, DataInput in, long offset, int length)
     throws IOException
     {
         switch (type) {
         case PngConstants.IEND:
             validate();
-            return super.readChunk(type, in, offset, length);
+            super.readChunk(type, in, offset, length);
+            break;
 
         case PngConstants.IHDR:
             reset();
-            boolean result = super.readChunk(type, in, offset, length);
+            super.readChunk(type, in, offset, length);
             headerBounds = new Rectangle(getWidth(), getHeight());
-            return result;
+            break;
 
         case acTL:
             RegisteredChunks.checkLength(type, length, 8);
@@ -212,26 +213,26 @@ extends PngImage
                 error("Invalid frame count: " + numFrames);
             if ((numIterations = in.readInt()) < 0)
                 error("Invalid iteration count: " + numIterations);
-            return true;
+            break;
 
         case fcTL:
             RegisteredChunks.checkLength(type, length, 26);
             add(in.readInt(), readFrameControl(in));
-            return true;
+            break;
 
         case fdAT:
             if (!sawData)
                 error("fdAT chunks cannot appear before IDAT");
             add(in.readInt(), new FrameData(offset + 4, length - 4));
-            return false; // let PngImage skip it
+            break;
 
         case PngConstants.IDAT:
             sawData = true;
             defaultImageData.add(new FrameData(offset, length));
-            return false;
+            break;
 
         default:
-            return super.readChunk(type, in, offset, length);
+            super.readChunk(type, in, offset, length);
         }
     }
 

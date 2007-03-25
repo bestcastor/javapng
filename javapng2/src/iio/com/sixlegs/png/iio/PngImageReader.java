@@ -282,7 +282,7 @@ extends ImageReader
             return true;
         }
 
-        protected boolean readChunk(int type, DataInput in, long offset, int length)
+        protected void readChunk(int type, DataInput in, long offset, int length)
         throws IOException
         {
             if (ignoreMetadata) {
@@ -294,16 +294,47 @@ extends ImageReader
                 case PngConstants.gAMA:
                     break;
                 default:
-                    return false;
+                    return;
                 }
             }
-            if (!super.readChunk(type, in, offset, length)) {
+            if (isKnownChunkType(type)) {
+                super.readChunk(type, in, offset, length);
+            } else {
                 byte[] bytes = new byte[length];
                 in.readFully(bytes);
                 unknownChunks.put(new Integer(type), bytes);
             }
+        }
+    }
+
+    private static boolean isKnownChunkType(int type)
+    {
+        switch (type) {
+        case PngConstants.IHDR:
+        case PngConstants.IEND:
+        case PngConstants.IDAT:
+        case PngConstants.PLTE:
+        case PngConstants.bKGD:
+        case PngConstants.tRNS:
+        case PngConstants.sBIT:
+        case PngConstants.cHRM:
+        case PngConstants.gAMA:
+        case PngConstants.hIST:
+        case PngConstants.iCCP:
+        case PngConstants.pHYs:
+        case PngConstants.sRGB:
+        case PngConstants.tIME:
+        case PngConstants.sPLT:
+        case PngConstants.gIFg:
+        case PngConstants.oFFs:
+        case PngConstants.sCAL:
+        case PngConstants.sTER:
+        case PngConstants.iTXt:
+        case PngConstants.tEXt:
+        case PngConstants.zTXt:
             return true;
         }
+        return false;
     }
 
 	/* Reads a PNG header */
