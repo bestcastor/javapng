@@ -42,11 +42,17 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * TODO
+ */
 public class AnimatedPngImage
 extends PngImage
 {
+    /** TODO */
     public static final int acTL = 0x6163544C;
+    /** TODO */
     public static final int fcTL = 0x6663544C;
+    /** TODO */
     public static final int fdAT = 0x66644154;
         
     private static final PngConfig DEFAULT_CONFIG =
@@ -64,11 +70,17 @@ extends PngImage
     private int numFrames;
     private int numIterations;
 
+    /**
+     * TODO
+     */
     public AnimatedPngImage()
     {
         super(DEFAULT_CONFIG);
     }
 
+    /**
+     * TODO
+     */
     public AnimatedPngImage(PngConfig config)
     {
         super(new PngConfig.Builder(config).readLimit(PngConfig.READ_EXCEPT_DATA).build());
@@ -83,30 +95,45 @@ extends PngImage
         defaultImageData.clear();
     }
 
+    /**
+     * TODO
+     */
     public boolean isAnimated()
     {
         assertRead();
         return animated;
     }
 
+    /**
+     * TODO
+     */
     public int getNumFrames()
     {
         assertRead();
         return frames.size();
     }
 
+    /**
+     * TODO
+     */
     public int getNumIterations()
     {
         assertRead();
         return animated ? numIterations : 1;
     }
 
+    /**
+     * TODO
+     */
     public FrameControl getFrame(int index)
     {
         assertRead();
         return (FrameControl)frames.get(index);
     }
 
+    /**
+     * TODO
+     */
     public boolean isClearRequired()
     {
         assertRead();
@@ -118,6 +145,9 @@ extends PngImage
             !first.getBounds().equals(new Rectangle(getWidth(), getHeight()));
     }
 
+    /**
+     * TODO
+     */
     public BufferedImage[] readAllFrames(File file)
     throws IOException
     {
@@ -130,6 +160,9 @@ extends PngImage
 
     // TODO: make sure that file is what we read before?
     // TODO: make sure that frame control is from this image?
+    /**
+     * TODO
+     */
     public BufferedImage readFrame(File file, FrameControl frame)
     throws IOException
     {

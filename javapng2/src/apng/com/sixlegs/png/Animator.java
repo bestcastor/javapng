@@ -45,6 +45,9 @@ import javax.swing.Timer;
 import java.util.*;
 import java.util.List;
 
+/**
+ * TODO
+ */
 public class Animator
 implements ActionListener
 {
@@ -73,6 +76,9 @@ implements ActionListener
                                  null); // TODO: properties
     }
 
+    /**
+     * TODO
+     */
     public Animator(AnimatedPngImage png, BufferedImage[] frames, BufferedImage target)
     {
         if (!png.isAnimated())
@@ -133,11 +139,17 @@ implements ActionListener
         g.fillRect(0, 0, target.getWidth(), target.getHeight());
     }
 
+    /**
+     * TODO
+     */
     public BufferedImage getTarget()
     {
         return target;
     }
 
+    /**
+     * TODO
+     */
     public int getTimerDelay()
     {
         return timerDelay;
