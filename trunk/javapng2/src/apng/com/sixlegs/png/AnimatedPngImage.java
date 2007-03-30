@@ -68,7 +68,7 @@ extends PngImage
     private boolean sawData;
     private boolean useDefaultImage;
     private int numFrames;
-    private int numIterations;
+    private int numPlays;
 
     /**
      * TODO
@@ -116,10 +116,10 @@ extends PngImage
     /**
      * TODO
      */
-    public int getNumIterations()
+    public int getNumPlays()
     {
         assertRead();
-        return animated ? numIterations : 1;
+        return animated ? numPlays : 1;
     }
 
     /**
@@ -211,8 +211,8 @@ extends PngImage
             animated = true;
             if ((numFrames = in.readInt()) <= 0)
                 error("Invalid frame count: " + numFrames);
-            if ((numIterations = in.readInt()) < 0)
-                error("Invalid iteration count: " + numIterations);
+            if ((numPlays = in.readInt()) < 0)
+                error("Invalid play count: " + numPlays);
             break;
 
         case fcTL:
@@ -288,8 +288,8 @@ extends PngImage
         case FrameControl.DISPOSE_BACKGROUND:
             break;
         case FrameControl.DISPOSE_PREVIOUS:
-            if (!sawData)
-                error("Previous dispose op invalid for the default image");
+            if (chunks.isEmpty())
+                error("Previous dispose op invalid for the first frame");
             break;
         default:
             error("Unknown APNG dispose op " + disposeOp);
@@ -297,8 +297,8 @@ extends PngImage
 
         int blendOp = in.readByte();
         if (blendOp == FrameControl.BLEND_OVER) {
-            if (!sawData)
-                error("Over blend op invalid for the default image");
+            if (chunks.isEmpty())
+                error("Over blend op invalid for the first frame");
         } else if (blendOp != FrameControl.BLEND_SOURCE) {
             error("Unknown APNG blend op " + blendOp);
         }
