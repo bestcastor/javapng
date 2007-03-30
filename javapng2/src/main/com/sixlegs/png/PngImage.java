@@ -570,7 +570,8 @@ implements Transparency
     /**
      * Returns the map which stores all of this image's property values.
      * The map is mutable, and storing a value with the wrong type may
-     * result in other methods in this class throwing a {@code ClassCastException}.
+     * result in other methods in this class throwing {@code IllegalStateException} or
+     * {@code ClassCastException}.
      * @return the mutable map of image properties
      */
     public Map getProperties()
@@ -593,6 +594,7 @@ implements Transparency
         List list = (List)getProperty(PngConstants.TEXT_CHUNKS, List.class, false);
         if (key != null && list != null) {
             for (Iterator it = list.iterator(); it.hasNext();) {
+                // TODO: check list value type before cast?
                 TextChunk chunk = (TextChunk)it.next();
                 if (chunk.getKeyword().equals(key))
                     return chunk;
