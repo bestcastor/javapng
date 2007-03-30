@@ -128,6 +128,16 @@ class ArgumentProcessor
         return result;
     }
 
+    public static Option option(String name)
+    {
+        return new Option(name);
+    }
+
+    public static Option option(String name, Class type)
+    {
+        return new Option(name, type);
+    }
+
     public static class Option
     {
         final String name;
@@ -147,13 +157,13 @@ class ArgumentProcessor
             end = option.end;
         }
 
-        public Option(String name)
+        Option(String name)
         {
             this(name, Boolean.class);
             defaultValue(Boolean.FALSE);
         }
 
-        public Option(String name, Class type)
+        Option(String name, Class type)
         {
             if (!PARSERS.containsKey(type.getName()))
                 throw new IllegalArgumentException("Unsupported type " + type);
