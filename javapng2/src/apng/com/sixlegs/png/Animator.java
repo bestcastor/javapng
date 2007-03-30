@@ -167,7 +167,7 @@ implements ActionListener
             if (index >= 0)
                 dispose(render[index]);
             if (++index == render.length) {
-                int maxIter = png.getNumIterations();
+                int maxIter = png.getNumPlays();
                 if (++iter == maxIter && maxIter != 0) {
                     done = true;
                     return;
