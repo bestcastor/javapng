@@ -40,6 +40,7 @@ import com.sixlegs.png.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import static com.sixlegs.png.examples.ArgumentProcessor.*;
 
 // TODO: this is a work in progress
 // TODO: support crop
@@ -50,12 +51,12 @@ public class Png2AnimatedPng
     static
     {
         PROC = new ArgumentProcessor(
-            new ArgumentProcessor.Option("iter", Integer.class).defaultValue(0).range(0, Integer.MAX_VALUE),
-            new ArgumentProcessor.Option("delay", Integer.class).range(0, (int)Short.MAX_VALUE),
-            new ArgumentProcessor.Option("blend", Integer.class).defaultValue(0).range(0, 1),
-            new ArgumentProcessor.Option("dispose", Integer.class).defaultValue(0).range(0, 2),
-            new ArgumentProcessor.Option("skip"),
-            new ArgumentProcessor.Option("crop")
+            option("iter", Integer.class).defaultValue(0).range(0, Integer.MAX_VALUE),
+            option("delay", Integer.class).range(0, (int)Short.MAX_VALUE),
+            option("blend", Integer.class).defaultValue(0).range(0, 1),
+            option("dispose", Integer.class).defaultValue(0).range(0, 2),
+            option("skip"),
+            option("crop")
         );
     }
     
