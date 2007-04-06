@@ -141,7 +141,6 @@ extends PngImage
             return false;
         FrameControl first = getFrame(0);
         return (first.getBlend() == FrameControl.BLEND_OVER) ||
-            (first.getDispose() == FrameControl.DISPOSE_PREVIOUS) ||
             !first.getBounds().equals(new Rectangle(getWidth(), getHeight()));
     }
 
@@ -289,17 +288,18 @@ extends PngImage
             break;
         case FrameControl.DISPOSE_PREVIOUS:
             if (chunks.isEmpty())
-                error("Previous dispose op invalid for the first frame");
+                disposeOp = FrameControl.DISPOSE_BACKGROUND;
             break;
         default:
             error("Unknown APNG dispose op " + disposeOp);
         }
 
         int blendOp = in.readByte();
-        if (blendOp == FrameControl.BLEND_OVER) {
-            if (chunks.isEmpty())
-                error("Over blend op invalid for the first frame");
-        } else if (blendOp != FrameControl.BLEND_SOURCE) {
+        switch (blendOp) {
+        case FrameControl.BLEND_OVER:
+        case FrameControl.BLEND_SOURCE:
+            break;
+        default:
             error("Unknown APNG blend op " + blendOp);
         }
         return new FrameControl(bounds, (float)delayNum / delayDen, disposeOp, blendOp);
