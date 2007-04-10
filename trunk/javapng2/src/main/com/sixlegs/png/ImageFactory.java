@@ -69,15 +69,56 @@ class ImageFactory
         int height    = size.height;
         int bitDepth  = png.getBitDepth();
         int samples   = png.getSamples();
-
         boolean interlaced = png.isInterlaced();
+
+        boolean indexed = isIndexed(png);
+        boolean convertIndexed = 
+            indexed && (config.getConvertIndexed() ||
+                        (!interlaced && config.getLowPassFilter() &&
+                         (config.getSourceXSubsampling() != 1 ||
+                          config.getSourceYSubsampling() != 1)));
+
         short[] gammaTable = config.getGammaCorrect() ? getGammaTable(png) : null;
-        ColorModel colorModel = createColorModel(png, gammaTable);
-        Destination dst = createDestination(config, colorModel, size);
-        BufferedImage image = new BufferedImage(colorModel, dst.getRaster(), false, null);
+        ColorModel dstColorModel = createColorModel(png, gammaTable, convertIndexed);
+
+
+        int dstWidth = width;
+        int dstHeight = height;
+        Rectangle sourceRegion = config.getSourceRegion();
+        if (sourceRegion != null) {
+            if (!new Rectangle(dstWidth, dstHeight).contains(sourceRegion))
+                throw new IllegalStateException("Source region " + sourceRegion + " falls outside of " +
+                                                width + "x" + height + " image");
+            dstWidth = sourceRegion.width;
+            dstHeight = sourceRegion.height;
+        }
+
+        Destination dst;
+        int xsub = config.getSourceXSubsampling();
+        int ysub = config.getSourceYSubsampling();
+        if (xsub != 1 || ysub != 1) {
+            int xoff = config.getSubsamplingXOffset();
+            int yoff = config.getSubsamplingYOffset();
+            int subw = calcSubsamplingSize(dstWidth, xsub, xoff, 'X');
+            int subh = calcSubsamplingSize(dstHeight, ysub, yoff, 'Y');
+            WritableRaster raster = dstColorModel.createCompatibleWritableRaster(subw, subh);
+            if (config.getLowPassFilter() && !interlaced) {
+                dst = new LowPassDestination(raster, new Dimension(width, height), xsub, ysub, xoff, yoff);
+            } else {
+                dst = new SubsamplingDestination(raster, width, xsub, ysub, xoff, yoff);
+            }
+        } else {
+            dst = new RasterDestination(dstColorModel.createCompatibleWritableRaster(dstWidth, dstHeight), width);
+        }
+        if (sourceRegion != null)
+            dst = new SourceRegionDestination(dst, sourceRegion);
+
+
+        // Destination dst = createDestination(config, dstColorModel, size, interlaced);
+        BufferedImage image = new BufferedImage(dstColorModel, dst.getRaster(), false, null);
 
         PixelProcessor pp = null;
-        if (colorModel instanceof ComponentColorModel) {
+        if (!indexed) {
             int[] trans = (int[])png.getProperty(PngConstants.TRANSPARENCY, int[].class, false);
             int shift = (bitDepth == 16 && config.getReduce16()) ? 8 : 0;
             if (shift != 0 || trans != null || gammaTable != null) {
@@ -90,10 +131,14 @@ class ImageFactory
                 }
             }
         }
+        if (convertIndexed) {
+            IndexColorModel srcColorModel = (IndexColorModel)createColorModel(png, gammaTable, false);
+            dst = new ConvertIndexedDestination(dst, width, srcColorModel, (ComponentColorModel)dstColorModel);
+        }
 
         if (pp == null)
-            pp = new BasicPixelProcessor(dst);            
-        if (config.getProgressive() && interlaced)
+            pp = new BasicPixelProcessor(dst, samples);
+        if (config.getProgressive() && interlaced && !convertIndexed)
             pp = new ProgressivePixelProcessor(dst, pp, width, height);
         pp = new ProgressUpdater(png, image, pp);
 
@@ -142,37 +187,6 @@ class ImageFactory
         return png.getGammaTable();
     }
 
-    private static Destination createDestination(PngConfig config, ColorModel colorModel, Dimension size)
-    {
-        int width = size.width;
-        int height = size.height;
-        Rectangle sourceRegion = config.getSourceRegion();
-        if (sourceRegion != null) {
-            if (!new Rectangle(width, height).contains(sourceRegion))
-                throw new IllegalStateException("Source region " + sourceRegion + " falls outside of " +
-                                                width + "x" + height + " image");
-            width = sourceRegion.width;
-            height = sourceRegion.height;
-        }
-
-        Destination dst;
-        int xsub = config.getSourceXSubsampling();
-        int ysub = config.getSourceYSubsampling();
-        if (xsub != 1 || ysub != 1) {
-            int xoff = config.getSubsamplingXOffset();
-            int yoff = config.getSubsamplingYOffset();
-            int subw = calcSubsamplingSize(width, xsub, xoff, 'X');
-            int subh = calcSubsamplingSize(height, ysub, yoff, 'Y');
-            dst = new SubsamplingDestination(colorModel.createCompatibleWritableRaster(subw, subh),
-                                             size.width, xsub, ysub, xoff, yoff);
-            // if (config.getLowPassFilter())
-            // dst = new LowPassFilterDestination(dst, colorModel.createCompatibleWritableRaster(width, height));
-        } else {
-            dst = new RasterDestination(colorModel.createCompatibleWritableRaster(width, height), size.height);
-        }
-        return (sourceRegion != null) ? new SourceRegionDestination(dst, sourceRegion) : dst;
-    }
-
     private static int calcSubsamplingSize(int len, int sub, int off, char desc)
     {
         int size = (len - off + sub - 1) / sub;
@@ -182,7 +196,14 @@ class ImageFactory
         return size;
     }
 
-    private static ColorModel createColorModel(PngImage png, short[] gammaTable)
+    private static boolean isIndexed(PngImage png)
+    {
+        int colorType = png.getColorType();
+        return colorType == PngConstants.COLOR_TYPE_PALETTE ||
+            (colorType == PngConstants.COLOR_TYPE_GRAY && png.getBitDepth() < 16);
+    }
+
+    private static ColorModel createColorModel(PngImage png, short[] gammaTable, boolean convertIndexed)
     throws PngException
     {
         Map props = png.getProperties();
@@ -190,10 +211,9 @@ class ImageFactory
         int bitDepth = png.getBitDepth();
         int outputDepth = (bitDepth == 16 && png.getConfig().getReduce16()) ? 8 : bitDepth;
 
-        boolean isPalette = colorType == PngConstants.COLOR_TYPE_PALETTE;
-        if (isPalette || (colorType == PngConstants.COLOR_TYPE_GRAY && bitDepth < 16)) {
+        if (isIndexed(png) && !convertIndexed) {
             byte[] r, g, b;
-            if (isPalette) {
+            if (colorType == PngConstants.COLOR_TYPE_PALETTE) {
                 byte[] palette = (byte[])png.getProperty(PngConstants.PALETTE, byte[].class, true);
                 int paletteSize = palette.length / 3;
                 r = new byte[paletteSize];
