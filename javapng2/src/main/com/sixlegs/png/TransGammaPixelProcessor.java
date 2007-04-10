@@ -48,7 +48,7 @@ extends BasicPixelProcessor
     
     public TransGammaPixelProcessor(Destination dst, short[] gammaTable, int[] trans, int shift)
     {
-        super(dst);
+        super(dst, dst.getRaster().getNumBands());
         this.gammaTable = gammaTable;
         this.trans = trans;
         this.shift = shift;

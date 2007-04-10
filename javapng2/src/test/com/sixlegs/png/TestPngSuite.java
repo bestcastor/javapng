@@ -25,6 +25,15 @@ extends PngTestCase
         new SuiteViewer(config).render(false);
     }
 
+    public void testConvertIndexed()
+    throws Exception
+    {
+        PngConfig config = new PngConfig.Builder()
+            .convertIndexed(true)
+            .build();
+        new SuiteViewer(config).render(false);
+    }
+
     public TestPngSuite(String name)
     {
         super(name);

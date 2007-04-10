@@ -36,34 +36,60 @@ exception statement from your version.
 
 package com.sixlegs.png;
 
-final class GammaPixelProcessor
-extends BasicPixelProcessor
+import java.awt.image.*;
+
+class ConvertIndexedDestination
+extends Destination
 {
-    final private short[] gammaTable;
-    final private int shift;
-    final private int samplesNoAlpha;
-    final private boolean hasAlpha;
-    final private boolean shiftAlpha;
+    private final Destination dst;
+    private final IndexColorModel srcColorModel;
+    private final int srcSamples;
+    private final int dstSamples;
+    private final int sampleDiff;
+    private final int[] row;
     
-    public GammaPixelProcessor(Destination dst, short[] gammaTable, int shift)
+    public ConvertIndexedDestination(Destination dst, int width, IndexColorModel srcColorModel, ComponentColorModel dstColorModel)
     {
-        super(dst, dst.getRaster().getNumBands());
-        this.gammaTable = gammaTable;
-        this.shift = shift;
-        hasAlpha = samples % 2 == 0;
-        samplesNoAlpha = hasAlpha ? samples - 1 : samples; // don't change alpha channel
-        shiftAlpha = hasAlpha && shift > 0;
+        this.dst = dst;
+        this.srcColorModel = srcColorModel;
+        srcSamples = srcColorModel.getNumComponents();
+        dstSamples = dstColorModel.getNumComponents();
+        sampleDiff = srcSamples - dstSamples;
+        row = new int[width * dstSamples + sampleDiff];
     }
-    
-    public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)
+
+    public void setPixels(int x, int y, int w, int[] pixels)
     {
-        int total = samples * width;
-        for (int i = 0; i < samplesNoAlpha; i++)
-            for (int index = i; index < total; index += samples)
-                row[index] = 0xFFFF & gammaTable[row[index] >> shift];
-        if (shiftAlpha)
-            for (int index = samplesNoAlpha; index < total; index += samples)
-                row[index] >>= shift;
-        return super.process(row, xOffset, xStep, yStep, y, width);
+        for (int i = w - 1, off = dstSamples * i; i >= 0; i--, off -= dstSamples)
+            srcColorModel.getComponents(pixels[i], row, off);
+        if (sampleDiff != 0)
+            System.arraycopy(row, sampleDiff, row, 0, dstSamples * w);
+        dst.setPixels(x, y, w, row);
     }
+
+    public void setPixel(int x, int y, int[] pixel)
+    {
+        setPixels(x, y, 1, pixel);
+    }
+
+    public void getPixel(int x, int y, int[] pixel)
+    {
+        // TODO: convert backwards (requires looking up palette index)
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    public WritableRaster getRaster()
+    {
+        return dst.getRaster();
+    }
+
+    public int getSourceWidth()
+    {
+        return dst.getSourceWidth();
+    }
+
+    public void done()
+    {
+        dst.done();
+    }    
 }

@@ -42,10 +42,10 @@ extends PixelProcessor
     protected final Destination dst;
     protected final int samples;
     
-    public BasicPixelProcessor(Destination dst)
+    public BasicPixelProcessor(Destination dst, int samples)
     {
         this.dst = dst;
-        this.samples = dst.getRaster().getNumBands();
+        this.samples = samples;
     }
     
     public boolean process(int[] row, int xOffset, int xStep, int yStep, int y, int width)

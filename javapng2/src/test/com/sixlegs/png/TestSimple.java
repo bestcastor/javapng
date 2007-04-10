@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import javax.imageio.*;
 import junit.framework.*;
 
 // TODO: reduce reliance on ImageIO for checksum calc
@@ -72,11 +73,24 @@ extends PngTestCase
         assertNull(png.getTextChunk("foobar"));
     }
 
+    public void testFiltering()
+    throws Exception
+    {
+        BufferedImage image;
+        image = subsamplingHelper("/images/misc/downscale.png", 4, 4, 1958330875L, true);
+        // ImageIO.write(image, "PNG", new File("filter-downscale.png"));
+        image = subsamplingHelper("/images/misc/penguin.png", 1, 1, 2805979037L, true);
+        image = subsamplingHelper("/images/misc/penguin.png", 2, 2, 508607534L, true);
+        // ImageIO.write(image, "PNG", new File("filter-penguin.png"));
+        image = subsamplingHelper("/images/misc/penguin.png", 3, 3, 3023360989L, true);
+        image = subsamplingHelper("/images/misc/penguin.png", 1, 3, 214193228L, true);
+    }
+
     public void testSubsampling()
     throws Exception
     {
-        subsamplingHelper("/images/misc/penguin.png", 3, 3, 923164955L);
-        subsamplingHelper("/images/misc/pngtest.png", 3, 3, 1930297805L);
+        subsamplingHelper("/images/misc/penguin.png", 3, 3, 923164955L, false);
+        subsamplingHelper("/images/misc/pngtest.png", 3, 3, 1930297805L, false);
         try {
             readResource("/images/suite/s02n3p01.png",
                          new PngImage(new PngConfig.Builder().sourceSubsampling(3, 3, 2, 2).build()));
@@ -84,12 +98,16 @@ extends PngTestCase
         } catch (IllegalStateException ignore) { }
     }
 
-    private void subsamplingHelper(String path, int xsub, int ysub, long expect)
+    private BufferedImage subsamplingHelper(String path, int xsub, int ysub, long expect, boolean filter)
     throws Exception
     {
-        PngImage png = new PngImage(new PngConfig.Builder().sourceSubsampling(xsub, ysub, 0, 0).build());
+        PngImage png = new PngImage(new PngConfig.Builder()
+                                    .sourceSubsampling(xsub, ysub, 0, 0)
+                                    .lowPassFilter(filter)
+                                    .build());
         BufferedImage image = png.read(getClass().getResourceAsStream(path), true);
         assertChecksum(expect, image, "subsample");
+        return image;
     }
 
     public void testSourceRegions()

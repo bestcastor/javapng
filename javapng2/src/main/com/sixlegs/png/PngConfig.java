@@ -66,6 +66,7 @@ final public class PngConfig
     final Rectangle sourceRegion;
     final int[] subsampling;
     final boolean filter;
+    final boolean convertIndexed;
 
     PngConfig(Builder builder)
     {
@@ -79,9 +80,10 @@ final public class PngConfig
         this.sourceRegion = builder.sourceRegion;
         this.subsampling = builder.subsampling;
         this.filter = builder.filter;
-        if (progressive &&
-            ((getSourceXSubsampling() != 1 || getSourceYSubsampling() != 1) ||
-             getSourceRegion() != null))
+        this.convertIndexed = builder.convertIndexed;
+        
+        boolean subsampleOn = getSourceXSubsampling() != 1 || getSourceYSubsampling() != 1;
+        if (progressive && (subsampleOn || getSourceRegion() != null))
             throw new IllegalStateException("Progressive rendering cannot be used with source regions or subsampling");
     }
 
@@ -109,7 +111,8 @@ final public class PngConfig
         boolean gammaCorrect = true;
         Rectangle sourceRegion;
         int[] subsampling = DEFAULT_SUBSAMPLING;
-        boolean filter = false;
+        boolean filter;
+        boolean convertIndexed;
 
         /**
          * Create a new builder using default values.
@@ -275,21 +278,40 @@ final public class PngConfig
             return this;
         }
 
-        /*
+        /**
+         * TODO
+         */
         public Builder lowPassFilter(boolean filter)
         {
             this.filter = filter;
             return this;
         }
-        */
+
+        /**
+         * TODO
+         */
+        public Builder convertIndexed(boolean convertIndexed)
+        {
+            this.convertIndexed = convertIndexed;
+            return this;
+        }
     }
 
-    /*
+    /**
+     * TODO
+     */
     public boolean getLowPassFilter()
     {
         return filter;
     }
-    */
+
+    /**
+     * TODO
+     */
+    public boolean getConvertIndexed()
+    {
+        return convertIndexed;
+    }
 
     /**
      * Returns the current 16-bit reduction setting.
