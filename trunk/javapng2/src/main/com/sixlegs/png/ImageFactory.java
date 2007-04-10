@@ -223,10 +223,8 @@ class ImageFactory
                 return new IndexColorModel(outputDepth, r.length, r, g, b, a);
             } else {
                 int trans = -1;
-                if (props.containsKey(PngConstants.TRANSPARENCY)) {
+                if (props.containsKey(PngConstants.TRANSPARENCY))
                     trans = ((int[])png.getProperty(PngConstants.TRANSPARENCY, int[].class, true))[0];
-                    trans = trans * 255 / ((1 << bitDepth) - 1);
-                }
                 return new IndexColorModel(outputDepth, r.length, r, g, b, trans);
             }
         } else {
