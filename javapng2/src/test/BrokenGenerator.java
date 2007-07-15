@@ -90,9 +90,9 @@ public class BrokenGenerator
         gen("suite/cdun2c08.png", "broken/phys_after_idat.png", swap(pHYs, IDAT));
         gen("misc/ps2n2c16.png", "broken/splt_after_idat.png", swap(sPLT, IDAT));
 
-        gen("misc/pngtest.png", "broken/offs_after_idat.png", swap(oFFs, IDAT));
-        gen("misc/pngtest.png", "broken/pcal_after_idat.png", swap(pCAL, IDAT));
-        gen("misc/pngtest.png", "broken/scal_after_idat.png", swap(sCAL, IDAT));
+        gen("misc/pngtest.png", "broken/offs_after_idat.png", swap(oFFs, zTXt));
+        gen("misc/pngtest.png", "broken/pcal_after_idat.png", swap(pCAL, zTXt));
+        gen("misc/pngtest.png", "broken/scal_after_idat.png", swap(sCAL, zTXt));
 
         gen("suite/basn0g01.png", "broken/length_sbit_2.png",
             addAfter(find(IHDR), extract("suite/basn3p02.png", sBIT)));
