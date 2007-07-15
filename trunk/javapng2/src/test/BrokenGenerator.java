@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
+import org.apache.tools.bzip2.CBZip2OutputStream;
 
 public class BrokenGenerator
 {
@@ -119,7 +120,7 @@ public class BrokenGenerator
             replaceHeader(32, 32, 8, 3, 0, 0, 2));
 
         gen("suite/basn3p08.png", "broken/private_compression_method.png",
-            replaceHeader(32, 32, 8, 3, 128, 0, 0));
+            replaceHeader(32, 32, 8, 3, 128, 0, 0), BZIP2);
         gen("suite/basn3p08.png", "broken/private_filter_method.png",
             replaceHeader(32, 32, 8, 3, 0, 128, 0));
         gen("suite/basn3p08.png", "broken/private_interlace_method.png",
@@ -258,6 +259,20 @@ public class BrokenGenerator
             }
         };
     }
+
+    private static final Processor BZIP2 = new DataProcessor(){
+        @Override protected byte[] compress(byte[] data) throws IOException {
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OutputStream out = new CBZip2OutputStream(baos);
+            pipe(in, out, new byte[0x2000]);
+            out.close();
+            return baos.toByteArray();
+        }
+        public byte[] process(byte[] data) {
+            return data;
+        }
+    };
 
     private static Processor changeDataByte(final int offset, final int value)
     {
@@ -444,8 +459,17 @@ public class BrokenGenerator
                 System.arraycopy(data, 0, concat, pos, data.length);
                 pos += data.length;
             }
-            concat = deflate(process(inflate(concat)));
+            
+            concat = compress(process(decompress(concat)));
             chunks.add(index, new Chunk(IDAT, concat, crc(IDAT, concat)));
+        }
+
+        protected byte[] decompress(byte[] data) throws IOException {
+            return inflate(data);
+        }
+
+        protected byte[] compress(byte[] data) throws IOException {
+            return deflate(data);
         }
 
         abstract public byte[] process(byte[] data);
