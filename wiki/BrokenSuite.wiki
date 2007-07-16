@@ -7,8 +7,7 @@ As a means of increasing test coverage, I started working on suite of images to 
 
 The code to generate the images is checked in:
 [http://javapng.googlecode.com/svn/trunk/javapng2/src/test/BrokenGenerator.java BrokenGenerator.java]. In general I try to pick a simple image
-from `PngSuite` and mutate it by swapping chunks, adding in new chunks,
-etc. Contributions are welcome.
+from [http://www.schaik.com/pngsuite/ PngSuite] and mutate it by swapping chunks, adding in new chunks, etc. Contributions are welcome.
 
 == Download ==
 
@@ -132,4 +131,3 @@ This table lists all of the images in the latest release and the corresponding e
 || private_filter_method.png || Unrecognized filter method: 128 ||
 || private_interlace_method.png || Unrecognized interlace method: 128 ||
 || private_filter_type.png || Unrecognized filter type 128 ||
-
