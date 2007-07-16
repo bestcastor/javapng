@@ -1,6 +1,135 @@
 #summary Suite of broken PNG images
 #labels Featured
 
-= Introduction =
+== Introduction ==
 
-[http://code.google.com/p/javapng/downloads/list?q=label:BrokenSuite Download here.]
+As a means of increasing test coverage, I started working on suite of images to cover all the possible error cases. It has subsequently also been used to improve the coverage of the excellent [http://www.libpng.org/pub/png/apps/pngcheck.html pngcheck] tool.
+
+The code to generate the images is checked in:
+[http://javapng.googlecode.com/svn/trunk/javapng2/src/test/BrokenGenerator.java BrokenGenerator.java]. In general I try to pick a simple image
+from `PngSuite` and mutate it by swapping chunks, adding in new chunks,
+etc. Contributions are welcome.
+
+== Download ==
+
+All releases are tagged with the [http://code.google.com/p/javapng/downloads/list?q=label:BrokenSuite BrokenSuite label].
+
+== Images ==
+
+This table lists all of the images in the latest release and the corresponding errors (the message of the exception that will be thrown).
+
+|| x00n0g01.png || Bad image size: 0x0 ||
+|| xcrn0g04.png || Improper signature, expected 0x89504e470d0a1a0a, got 0x89504e470d0d0a1a ||
+|| xlfn0g04.png || Improper signature, expected 0x89504e470d0a1a0a, got 0x89504e470a0a0a1a ||
+|| bkgd_after_idat.png || bKGD cannot appear after IDAT ||
+|| chrm_after_idat.png || cHRM cannot appear after IDAT ||
+|| chrm_after_plte.png || cHRM cannot appear after PLTE ||
+|| chunk_crc.png || Bad CRC value for IHDR chunk ||
+|| chunk_length.png || Bad chunk length: 4294967276 ||
+|| chunk_private_critical.png || Private critical chunk encountered: GaMA ||
+|| chunk_type.png || Corrupted chunk type: 0x67614d5f ||
+|| gama_after_idat.png || gAMA cannot appear after IDAT ||
+|| gama_after_plte.png || gAMA cannot appear after PLTE ||
+|| gama_zero.png || Meaningless zero gAMA chunk value ||
+|| hist_after_idat.png || hIST cannot appear after IDAT ||
+|| hist_before_plte.png || PLTE must precede hIST ||
+|| iccp_after_idat.png || iCCP cannot appear after IDAT ||
+|| iccp_after_plte.png || iCCP cannot appear after PLTE ||
+|| ihdr_16bit_palette.png || Bad bit depth for color type 3: 16 ||
+|| ihdr_1bit_alpha.png || Bad bit depth for color type 6: 1 ||
+|| ihdr_bit_depth.png || Bad bit depth: 7 ||
+|| ihdr_color_type.png || Bad color type: 1 ||
+|| ihdr_compression_method.png || Unrecognized compression method: 1 ||
+|| ihdr_filter_method.png || Unrecognized filter method: 1 ||
+|| ihdr_image_size.png || Bad image size: -32x-32 ||
+|| ihdr_interlace_method.png || Unrecognized interlace method: 2 ||
+|| itxt_compression_flag.png || Illegal iTXt compression flag: 2 ||
+|| itxt_compression_method.png || Unrecognized iTXt compression method: 1 ||
+|| itxt_keyword_length.png || Invalid keyword length: 0 ||
+|| itxt_keyword_length_2.png || Invalid keyword length: 80 ||
+|| missing_idat.png || Required data chunk(s) not found ||
+|| missing_ihdr.png || IHDR chunk must be first chunk ||
+|| missing_plte.png || Required PLTE chunk not found ||
+|| missing_plte_2.png || Required PLTE chunk not found ||
+|| multiple_bkgd.png || Multiple bKGD chunks are not allowed ||
+|| multiple_chrm.png || Multiple cHRM chunks are not allowed ||
+|| multiple_gama.png || Multiple gAMA chunks are not allowed ||
+|| multiple_hist.png || Multiple hIST chunks are not allowed ||
+|| multiple_iccp.png || Multiple iCCP chunks are not allowed ||
+|| multiple_ihdr.png || Multiple IHDR chunks are not allowed ||
+|| multiple_offs.png || Multiple oFFs chunks are not allowed ||
+|| multiple_pcal.png || Multiple pCAL chunks are not allowed ||
+|| multiple_phys.png || Multiple pHYs chunks are not allowed ||
+|| multiple_plte.png || Multiple PLTE chunks are not allowed ||
+|| multiple_sbit.png || Multiple sBIT chunks are not allowed ||
+|| multiple_scal.png || Multiple sCAL chunks are not allowed ||
+|| multiple_srgb.png || Multiple sRGB chunks are not allowed ||
+|| multiple_ster.png || Multiple sTER chunks are not allowed ||
+|| multiple_time.png || Multiple tIME chunks are not allowed ||
+|| multiple_trns.png || Multiple tRNS chunks are not allowed ||
+|| nonconsecutive_idat.png || IDAT chunks must be consecutive ||
+|| offs_after_idat.png || oFFs cannot appear after IDAT ||
+|| pcal_after_idat.png || pCAL cannot appear after IDAT ||
+|| phys_after_idat.png || pHYs cannot appear after IDAT ||
+|| plte_after_idat.png || Required PLTE chunk not found ||
+|| plte_empty.png || PLTE chunk cannot be empty ||
+|| plte_in_grayscale.png || PLTE chunk found in grayscale image ||
+|| plte_length_mod_three.png || PLTE chunk length indivisible by 3: 2 ||
+|| plte_too_many_entries.png || Too many palette entries: 17 ||
+|| plte_too_many_entries_2.png || Too many palette entries: 257 ||
+|| sbit_after_idat.png || sBIT cannot appear after IDAT ||
+|| sbit_after_plte.png || sBIT cannot appear after PLTE ||
+|| scal_after_idat.png || sCAL cannot appear after IDAT ||
+|| splt_after_idat.png || sPLT cannot appear after IDAT ||
+|| srgb_after_idat.png || sRGB cannot appear after IDAT ||
+|| srgb_after_plte.png || sRGB cannot appear after PLTE ||
+|| ster_after_idat.png || sTER cannot appear after IDAT ||
+|| time_value_range.png || tIME month value 0 is out of bounds (1-12) ||
+|| trns_after_idat.png || tRNS cannot appear after IDAT ||
+|| trns_bad_color_type.png || tRNS prohibited for color type 6 ||
+|| trns_too_many_entries.png || Too many transparency palette entries (200 > 173) ||
+|| phys_unit_specifier.png || Illegal pHYs chunk unit specifier: 2 ||
+|| offs_unit_specifier.png || Illegal oFFs chunk unit specifier: 2 ||
+|| scal_unit_specifier.png || Illegal sCAL chunk unit specifier: 3 ||
+|| scal_floating_point.png || For input string: "Q.527777777778" ||
+|| scal_negative.png || sCAL measurements must be >= 0 ||
+|| scal_zero.png || sCAL measurements must be >= 0 ||
+|| sbit_sample_depth.png || Illegal sBIT sample depth ||
+|| sbit_sample_depth_2.png || Illegal sBIT sample depth ||
+|| ster_mode.png || Unknown sTER mode: 2 ||
+|| splt_sample_depth.png || Sample depth must be 8 or 16 ||
+|| splt_length_mod_6.png || Incorrect sPLT data length for given sample depth ||
+|| splt_length_mod_10.png || Incorrect sPLT data length for given sample depth ||
+|| splt_duplicate_name.png || Duplicate suggested palette name Lemonade ||
+|| ztxt_compression_method.png || Unrecognized compression method: 3 ||
+|| ztxt_data_format.png || unknown compression method ||
+|| length_ihdr.png || Bad IHDR chunk length: 14 (expected 13) ||
+|| length_iend.png || Bad IEND chunk length: 1 (expected 0) ||
+|| length_ster.png || Bad sTER chunk length: 2 (expected 1) ||
+|| length_srgb.png || Bad sRGB chunk length: 2 (expected 1) ||
+|| length_gama.png || Bad gAMA chunk length: 3 (expected 4) ||
+|| length_phys.png || Bad pHYs chunk length: 8 (expected 9) ||
+|| length_time.png || Bad tIME chunk length: 6 (expected 7) ||
+|| length_offs.png || Bad oFFs chunk length: 8 (expected 9) ||
+|| length_chrm.png || Bad cHRM chunk length: 31 (expected 32) ||
+|| length_gifg.png || Bad gIFg chunk length: 5 (expected 4) ||
+|| length_trns_gray.png || Bad tRNS chunk length: 0 (expected 2) ||
+|| length_trns_rgb.png || Bad tRNS chunk length: 0 (expected 6) ||
+|| length_trns_palette.png || Too many transparency palette entries (174 > 173) ||
+|| length_hist.png || Bad hIST chunk length: 28 (expected 30) ||
+|| length_sbit.png || Bad sBIT chunk length: 4 (expected 3) ||
+|| length_sbit_2.png || Bad sBIT chunk length: 3 (expected 1) ||
+|| length_bkgd_gray.png || Bad bKGD chunk length: 6 (expected 2) ||
+|| length_bkgd_rgb.png || Bad bKGD chunk length: 2 (expected 6) ||
+|| length_bkgd_palette.png || Bad bKGD chunk length: 6 (expected 1) ||
+|| truncate_zlib.png || Unexpected end of ZLIB input stream ||
+|| truncate_zlib_2.png || Unexpected end of ZLIB input stream ||
+|| truncate_idat_0.png || Unexpected end of image data ||
+|| truncate_idat_1.png || Unexpected end of image data ||
+|| unknown_filter_type.png || Unrecognized filter type 5 ||
+|| text_trailing_null.png || Text value contains null ||
+|| private_compression_method.png || Unrecognized compression method: 128 ||
+|| private_filter_method.png || Unrecognized filter method: 128 ||
+|| private_interlace_method.png || Unrecognized interlace method: 128 ||
+|| private_filter_type.png || Unrecognized filter type 128 ||
+
