@@ -128,6 +128,31 @@
         </sequential>
     </macrodef>
 
+    <!-- TODO: stylesheetfile -->
+    <macrodef name="myjavadoc">
+        <attribute name="destdir"/>
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <javadoc 
+              sourcepath="src/main"
+              destdir="@{destdir}"
+              access="${javadoc.access}"
+              failonerror="true"
+              packagenames="com.sixlegs.png.*"
+              classpathref="path.main"
+              Author="true"
+              Version="true"
+              Use="true"
+            >
+                <link href="http://java.sun.com/javase/6/docs/api/"/>
+            </javadoc>
+        </sequential>
+    </macrodef>
+
+    <target name="javadoc" depends="compile" description="Generate the javadoc">
+        <myjavadoc destdir="javadoc"/>
+    </target>
+
     <target name="test" depends="compile-test" description="Run JUnit tests">
         <mytest refid="path.test" includes="com/sixlegs/png/Test*.java"/>
         <mytest refid="path.test" includes="com/sixlegs/png/iio/Test*.java" usefile="true"/>
@@ -287,24 +312,6 @@
         <delete file="dist/temp.jar"/>
     </target>
 
-    <!-- TODO: stylesheetfile -->
-    <target name="javadoc" depends="compile" description="Generate the javadoc">
-        <mkdir dir="dist/api"/>
-        <javadoc 
-          sourcepath="src/main"
-          destdir="dist/api"
-          access="${javadoc.access}"
-          failonerror="true"
-          packagenames="com.sixlegs.png.*"
-          classpathref="path.main"
-          Author="true"
-          Version="true"
-          Use="true"
-        >
-            <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
-        </javadoc>
-    </target>
-
     <target name="dist-broken" depends="broken" description="Create broken suite distribution">
         <tstamp/>
         <mkdir dir="dist"/>
@@ -313,8 +320,9 @@
         </zip>
     </target>
 
-    <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
+    <target name="dist" depends="clean,test,jar" description="Create source distribution">
         <mkdir dir="dist"/>
+        <myjavadoc destdir="dist/api"/>
         <jar jarfile="dist/${prefix}-src.jar" filesonly="true">
             <zipfileset dir="src" prefix="${prefix}/src">
                 <exclude name="**/*.java~"/>
