@@ -619,7 +619,6 @@ implements Transparency
      * @param in the chunk data
      * @param offset the location of the chunk data within the entire PNG datastream
      * @param length the length of the chunk data
-     * @return true if the chunk data has been read
      */
     protected void readChunk(int type, DataInput in, long offset, int length)
     throws IOException
