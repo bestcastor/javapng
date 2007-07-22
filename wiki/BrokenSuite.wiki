@@ -3,7 +3,7 @@
 
 == Introduction ==
 
-As a means of increasing test coverage, I started working on suite of images to cover all the possible error cases. It has subsequently also been used to improve the coverage of the excellent [http://www.libpng.org/pub/png/apps/pngcheck.html pngcheck] tool.
+As a means of increasing test coverage, I started working on suite of images to cover all the possible error cases. It has subsequently also been used to improve the excellent [http://www.libpng.org/pub/png/apps/pngcheck.html pngcheck] tool.
 
 The code to generate the images is checked in:
 [http://javapng.googlecode.com/svn/trunk/javapng2/src/test/BrokenGenerator.java BrokenGenerator.java]. In general I try to pick a simple image
