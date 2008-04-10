@@ -494,7 +494,7 @@ class RegisteredChunks
                 out.write(tmp, 0, inf.inflate(tmp));
             }
         } catch (DataFormatException e) {
-            throw new PngException(e.getMessage(), false);
+            throw new PngException("Error reading compressed data", e, false);
         }
         return out.toByteArray();
     }

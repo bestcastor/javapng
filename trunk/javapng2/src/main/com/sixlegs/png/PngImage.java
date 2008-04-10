@@ -175,7 +175,14 @@ implements Transparency
                     if (!isMultipleOK(type) && !seen.add(Integers.valueOf(type)))
                         throw new PngException("Multiple " + PngConstants.getChunkName(type) + " chunks are not allowed",
                                                !PngConstants.isAncillary(type));
-                    readChunk(type, pin, pin.getOffset(), pin.getRemaining());
+                    try {
+                        readChunk(type, pin, pin.getOffset(), pin.getRemaining());
+                    } catch (PngException e) {
+                        throw e;
+                    } catch (IOException e) {
+                        throw new PngException("Malformed " + PngConstants.getChunkName(type) + " chunk", e,
+                                               !PngConstants.isAncillary(type));
+                    }
                     skipFully(pin, pin.getRemaining());
                     if (type == PngConstants.IHDR && readLimit == PngConfig.READ_HEADER)
                         return null;
