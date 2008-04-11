@@ -1,6 +1,16 @@
 #summary List of important changes in each release.
 #labels Featured
 
+== Changes from v2.0-rc6 → v2.0-rc8 (2008-04-10) ==
+
+  * Fix bug skipping over extra IDAT data
+  * Fix bug with tRNS chunk in paletted images
+  * Fix CRC calculation bug
+  * Allow multiple private chunks
+  * Some low-level changes needed by APNG code
+
+(skipped rc7)
+
 == Changes from v2.0-rc5 → v2.0-rc6 (2006-12-01) ==
 
   * Fix bugs found by `FindBugs`
@@ -54,7 +64,5 @@
   * 16-bit images do not have to be reduced to 8-bit
   * Faster decoding 
   * License changed from LGPL to GPL-with-library-exception (the same as the GNU Classpath project)
-
-
 
 
