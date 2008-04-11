@@ -7,14 +7,16 @@
 PngImage
 </TITLE>
 
-<META NAME="keywords" CONTENT="com.sixlegs.png.PngImage class">
+<META NAME="date" CONTENT="2008-04-10">
 
 <LINK REL ="stylesheet" TYPE="text/css" HREF="../../../stylesheet.css" TITLE="Style">
 
 <SCRIPT type="text/javascript">
 function windowTitle()
 {
-    parent.document.title="PngImage";
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="PngImage";
+    }
 }
 </SCRIPT>
 <NOSCRIPT>
@@ -23,6 +25,7 @@ function windowTitle()
 </HEAD>
 
 <BODY BGCOLOR="white" onload="windowTitle();">
+<HR>
 
 
 <!-- ========= START OF TOP NAVBAR ======= -->
@@ -88,20 +91,20 @@ com.sixlegs.png</FONT>
 <BR>
 Class PngImage</H2>
 <PRE>
-<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" title="class or interface in java.lang">java.lang.Object</A>
+<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</A>
   <IMG SRC="../../../resources/inherit.gif" ALT="extended by "><B>com.sixlegs.png.PngImage</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html" title="class or interface in java.awt">Transparency</A></DD>
+<DT><B>All Implemented Interfaces:</B> <DD><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true" title="class or interface in java.awt">Transparency</A></DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>PngImage</B><DT>extends <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" title="class or interface in java.lang">Object</A><DT>implements <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html" title="class or interface in java.awt">Transparency</A></DL>
+<DT><PRE>public class <B>PngImage</B><DT>extends <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</A><DT>implements <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true" title="class or interface in java.awt">Transparency</A></DL>
 </PRE>
 
 <P>
 A class to decode PNG images.
- The simplest use is if only a decoded <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image"><CODE>BufferedImage</CODE></A> is required:
+ The simplest use is if only a decoded <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image"><CODE>BufferedImage</CODE></A> is required:
  <pre>BufferedImage image = new PngImage().read(new java.io.File("test.png"));</pre>
  The <code>PngImage</code> instance used to read the image also stores all of the
  image metadata. For customized PNG decoding, a <A HREF="../../../com/sixlegs/png/PngConfig.html" title="class in com.sixlegs.png"><CODE>PngConfig</CODE></A> object
@@ -133,10 +136,10 @@ A class to decode PNG images.
 &nbsp;<A NAME="fields_inherited_from_class_java.awt.Transparency"><!-- --></A>
 <TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
 <TR BGCOLOR="#EEEEFF" CLASS="TableSubHeadingColor">
-<TH ALIGN="left"><B>Fields inherited from interface java.awt.<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html" title="class or interface in java.awt">Transparency</A></B></TH>
+<TH ALIGN="left"><B>Fields inherited from interface java.awt.<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true" title="class or interface in java.awt">Transparency</A></B></TH>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
-<TD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html#BITMASK" title="class or interface in java.awt">BITMASK</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html#OPAQUE" title="class or interface in java.awt">OPAQUE</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html#TRANSLUCENT" title="class or interface in java.awt">TRANSLUCENT</A></CODE></TD>
+<TD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true#BITMASK" title="class or interface in java.awt">BITMASK</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true#OPAQUE" title="class or interface in java.awt">OPAQUE</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true#TRANSLUCENT" title="class or interface in java.awt">TRANSLUCENT</A></CODE></TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -172,16 +175,16 @@ A class to decode PNG images.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>protected &nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#createImage(java.io.InputStream, java.awt.Dimension)">createImage</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html" title="class or interface in java.io">InputStream</A>&nbsp;in,
-            <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Dimension.html" title="class or interface in java.awt">Dimension</A>&nbsp;size)</CODE>
+<CODE>protected &nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#createImage(java.io.InputStream, java.awt.Dimension)">createImage</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</A>&nbsp;in,
+            <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Dimension.html?is-external=true" title="class or interface in java.awt">Dimension</A>&nbsp;size)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A hook by which subclasses can access or manipulate the raw image data.</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html" title="class or interface in java.awt">Color</A></CODE></FONT></TD>
+<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html?is-external=true" title="class or interface in java.awt">Color</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getBackground()">getBackground</A></B>()</CODE>
 
 <BR>
@@ -238,7 +241,7 @@ A class to decode PNG images.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/util/Map.html" title="class or interface in java.util">Map</A></CODE></FONT></TD>
+<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getProperties()">getProperties</A></B>()</CODE>
 
 <BR>
@@ -246,8 +249,8 @@ A class to decode PNG images.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" title="class or interface in java.lang">Object</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getProperty(java.lang.String)">getProperty</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html" title="class or interface in java.lang">String</A>&nbsp;name)</CODE>
+<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</A></CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getProperty(java.lang.String)">getProperty</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;name)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns a per-image property by name.</TD>
@@ -263,7 +266,7 @@ A class to decode PNG images.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;<A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com.sixlegs.png">TextChunk</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getTextChunk(java.lang.String)">getTextChunk</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html" title="class or interface in java.lang">String</A>&nbsp;key)</CODE>
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#getTextChunk(java.lang.String)">getTextChunk</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;key)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns a text chunk that uses the given keyword, if one exists.</TD>
@@ -287,7 +290,7 @@ A class to decode PNG images.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>protected &nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#handlePass(java.awt.image.BufferedImage, int)">handlePass</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#handlePass(java.awt.image.BufferedImage, int)">handlePass</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
            int&nbsp;pass)</CODE>
 
 <BR>
@@ -297,7 +300,7 @@ A class to decode PNG images.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>protected &nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#handleProgress(java.awt.image.BufferedImage, float)">handleProgress</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#handleProgress(java.awt.image.BufferedImage, float)">handleProgress</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
                float&nbsp;pct)</CODE>
 
 <BR>
@@ -331,16 +334,16 @@ A class to decode PNG images.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.File)">read</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/File.html" title="class or interface in java.io">File</A>&nbsp;file)</CODE>
+<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.File)">read</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</A>&nbsp;file)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reads a PNG image from the specified file.</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.InputStream, boolean)">read</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html" title="class or interface in java.io">InputStream</A>&nbsp;in,
+<CODE>&nbsp;<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A></CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.InputStream, boolean)">read</A></B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</A>&nbsp;in,
      boolean&nbsp;close)</CODE>
 
 <BR>
@@ -350,7 +353,7 @@ A class to decode PNG images.
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>protected &nbsp;void</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../com/sixlegs/png/PngImage.html#readChunk(int, java.io.DataInput, long, int)">readChunk</A></B>(int&nbsp;type,
-          <A HREF="http://java.sun.com/javase/6/docs/api/java/io/DataInput.html" title="class or interface in java.io">DataInput</A>&nbsp;in,
+          <A HREF="http://java.sun.com/javase/6/docs/api/java/io/DataInput.html?is-external=true" title="class or interface in java.io">DataInput</A>&nbsp;in,
           long&nbsp;offset,
           int&nbsp;length)</CODE>
 
@@ -362,10 +365,10 @@ A class to decode PNG images.
 &nbsp;<A NAME="methods_inherited_from_class_java.lang.Object"><!-- --></A>
 <TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
 <TR BGCOLOR="#EEEEFF" CLASS="TableSubHeadingColor">
-<TH ALIGN="left"><B>Methods inherited from class java.lang.<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" title="class or interface in java.lang">Object</A></B></TH>
+<TH ALIGN="left"><B>Methods inherited from class java.lang.<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</A></B></TH>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
-<TD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#clone()" title="class or interface in java.lang">clone</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang">equals</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#finalize()" title="class or interface in java.lang">finalize</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#getClass()" title="class or interface in java.lang">getClass</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#hashCode()" title="class or interface in java.lang">hashCode</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#notify()" title="class or interface in java.lang">notify</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#notifyAll()" title="class or interface in java.lang">notifyAll</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#toString()" title="class or interface in java.lang">toString</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#wait()" title="class or interface in java.lang">wait</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#wait(long)" title="class or interface in java.lang">wait</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html#wait(long, int)" title="class or interface in java.lang">wait</A></CODE></TD>
+<TD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#clone()" title="class or interface in java.lang">clone</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#equals(java.lang.Object)" title="class or interface in java.lang">equals</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#finalize()" title="class or interface in java.lang">finalize</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#getClass()" title="class or interface in java.lang">getClass</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#hashCode()" title="class or interface in java.lang">hashCode</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#notify()" title="class or interface in java.lang">notify</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#notifyAll()" title="class or interface in java.lang">notifyAll</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#toString()" title="class or interface in java.lang">toString</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#wait()" title="class or interface in java.lang">wait</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#wait(long)" title="class or interface in java.lang">wait</A>, <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true#wait(long, int)" title="class or interface in java.lang">wait</A></CODE></TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -430,8 +433,8 @@ public <A HREF="../../../com/sixlegs/png/PngConfig.html" title="class in com.six
 <A NAME="read(java.io.File)"><!-- --></A><H3>
 read</H3>
 <PRE>
-public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A> <B>read</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/File.html" title="class or interface in java.io">File</A>&nbsp;file)
-                   throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></PRE>
+public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A> <B>read</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</A>&nbsp;file)
+                   throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></PRE>
 <DL>
 <DD>Reads a PNG image from the specified file. Image metadata will
  be stored in the property map of this <code>PngImage</code> instance,
@@ -452,7 +455,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedIma
 <DT><B>Parameters:</B><DD><CODE>file</CODE> - the file to read
 <DT><B>Returns:</B><DD>the decoded image, or null if no image was decoded
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while reading the image<DT><B>See Also:</B><DD><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.InputStream, boolean)"><CODE>read(java.io.InputStream, boolean)</CODE></A>, 
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while reading the image<DT><B>See Also:</B><DD><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.InputStream, boolean)"><CODE>read(java.io.InputStream, boolean)</CODE></A>, 
 <A HREF="../../../com/sixlegs/png/PngImage.html#createImage(java.io.InputStream, java.awt.Dimension)"><CODE>createImage(java.io.InputStream, java.awt.Dimension)</CODE></A>, 
 <A HREF="../../../com/sixlegs/png/PngImage.html#handlePass(java.awt.image.BufferedImage, int)"><CODE>handlePass(java.awt.image.BufferedImage, int)</CODE></A></DL>
 </DD>
@@ -462,9 +465,9 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedIma
 <A NAME="read(java.io.InputStream, boolean)"><!-- --></A><H3>
 read</H3>
 <PRE>
-public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A> <B>read</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html" title="class or interface in java.io">InputStream</A>&nbsp;in,
+public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A> <B>read</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</A>&nbsp;in,
                           boolean&nbsp;close)
-                   throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></PRE>
+                   throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></PRE>
 <DL>
 <DD>Reads a PNG image from the specified input stream. Image metadata will
  be stored in the property map of this <code>PngImage</code> instance,
@@ -485,7 +488,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedIma
 <DT><B>Parameters:</B><DD><CODE>in</CODE> - the input stream to read<DD><CODE>close</CODE> - whether to close the input stream after reading
 <DT><B>Returns:</B><DD>the decoded image, or null if no image was decoded
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while reading the image<DT><B>See Also:</B><DD><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.File)"><CODE>read(java.io.File)</CODE></A>, 
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while reading the image<DT><B>See Also:</B><DD><A HREF="../../../com/sixlegs/png/PngImage.html#read(java.io.File)"><CODE>read(java.io.File)</CODE></A>, 
 <A HREF="../../../com/sixlegs/png/PngImage.html#createImage(java.io.InputStream, java.awt.Dimension)"><CODE>createImage(java.io.InputStream, java.awt.Dimension)</CODE></A>, 
 <A HREF="../../../com/sixlegs/png/PngImage.html#handlePass(java.awt.image.BufferedImage, int)"><CODE>handlePass(java.awt.image.BufferedImage, int)</CODE></A></DL>
 </DD>
@@ -495,9 +498,9 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedIma
 <A NAME="createImage(java.io.InputStream, java.awt.Dimension)"><!-- --></A><H3>
 createImage</H3>
 <PRE>
-protected <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A> <B>createImage</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html" title="class or interface in java.io">InputStream</A>&nbsp;in,
-                                    <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Dimension.html" title="class or interface in java.awt">Dimension</A>&nbsp;size)
-                             throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></PRE>
+protected <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A> <B>createImage</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</A>&nbsp;in,
+                                    <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Dimension.html?is-external=true" title="class or interface in java.awt">Dimension</A>&nbsp;size)
+                             throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></PRE>
 <DL>
 <DD>A hook by which subclasses can access or manipulate the raw image data.
  All of the raw, compressed image data contained in the <code>IDAT</code> chunks
@@ -516,7 +519,7 @@ protected <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/Buffered
 <DT><B>Parameters:</B><DD><CODE>in</CODE> - the input stream of raw, compressed image data<DD><CODE>size</CODE> - the size of the image data
 <DT><B>Returns:</B><DD>the decoded image, or null
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while processing the image data</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></CODE> - if any error occurred while processing the image data</DL>
 </DD>
 </DL>
 <HR>
@@ -524,7 +527,7 @@ protected <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/Buffered
 <A NAME="handlePass(java.awt.image.BufferedImage, int)"><!-- --></A><H3>
 handlePass</H3>
 <PRE>
-protected boolean <B>handlePass</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
+protected boolean <B>handlePass</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
                              int&nbsp;pass)</PRE>
 <DL>
 <DD>A method which subclasses may override to take some action
@@ -552,7 +555,7 @@ protected boolean <B>handlePass</B>(<A HREF="http://java.sun.com/javase/6/docs/a
 <A NAME="handleProgress(java.awt.image.BufferedImage, float)"><!-- --></A><H3>
 handleProgress</H3>
 <PRE>
-protected boolean <B>handleProgress</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
+protected boolean <B>handleProgress</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/awt/image/BufferedImage.html?is-external=true" title="class or interface in java.awt.image">BufferedImage</A>&nbsp;image,
                                  float&nbsp;pct)</PRE>
 <DL>
 <DD>Reports the approximate degree of completion of the current read
@@ -613,7 +616,7 @@ public int <B>getWidth</B>()</PRE>
 <DD><DL>
 
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -631,7 +634,7 @@ public int <B>getHeight</B>()</PRE>
 <DD><DL>
 
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -650,7 +653,7 @@ public int <B>getBitDepth</B>()</PRE>
 
 <DT><B>Returns:</B><DD>1, 2, 4, 8, or 16
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -670,7 +673,7 @@ public boolean <B>isInterlaced</B>()</PRE>
 
 <DT><B>Returns:</B><DD>true if the image is interlaced
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -693,7 +696,7 @@ public int <B>getColorType</B>()</PRE>
     <A HREF="../../../com/sixlegs/png/PngConstants.html#COLOR_TYPE_RGB"><CODE>COLOR_TYPE_RGB</CODE></A>,<br>
     or <A HREF="../../../com/sixlegs/png/PngConstants.html#COLOR_TYPE_RGB_ALPHA"><CODE>COLOR_TYPE_RGB_ALPHA</CODE></A>
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -706,13 +709,13 @@ public int <B>getTransparency</B>()</PRE>
 <DD>Returns the type of this Transparency.
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html#getTransparency()" title="class or interface in java.awt">getTransparency</A></CODE> in interface <CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html" title="class or interface in java.awt">Transparency</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true#getTransparency()" title="class or interface in java.awt">getTransparency</A></CODE> in interface <CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Transparency.html?is-external=true" title="class or interface in java.awt">Transparency</A></CODE></DL>
 </DD>
 <DD><DL>
 
 <DT><B>Returns:</B><DD>the field type of this Transparency, which is either OPAQUE, BITMASK or TRANSLUCENT.
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -733,7 +736,7 @@ public int <B>getSamples</B>()</PRE>
 
 <DT><B>Returns:</B><DD>1, 2, 3 or 4
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -753,7 +756,7 @@ public float <B>getGamma</B>()</PRE>
 
 <DT><B>Returns:</B><DD>the gamma exponent
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -778,7 +781,7 @@ public short[] <B>getGammaTable</B>()</PRE>
 
 <DT><B>Returns:</B><DD>a table of component values to be used in gamma correction
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -786,7 +789,7 @@ public short[] <B>getGammaTable</B>()</PRE>
 <A NAME="getBackground()"><!-- --></A><H3>
 getBackground</H3>
 <PRE>
-public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html" title="class or interface in java.awt">Color</A> <B>getBackground</B>()</PRE>
+public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html?is-external=true" title="class or interface in java.awt">Color</A> <B>getBackground</B>()</PRE>
 <DL>
 <DD>Returns the background color explicitly encoded in the image.
  For 16-bit images the components are reduced to 8-bit by shifting.
@@ -798,7 +801,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html" title
 
 <DT><B>Returns:</B><DD>the background color, or null
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -806,7 +809,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/awt/Color.html" title
 <A NAME="getProperty(java.lang.String)"><!-- --></A><H3>
 getProperty</H3>
 <PRE>
-public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" title="class or interface in java.lang">Object</A> <B>getProperty</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html" title="class or interface in java.lang">String</A>&nbsp;name)</PRE>
+public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</A> <B>getProperty</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;name)</PRE>
 <DL>
 <DD>Returns a per-image property by name. All common property names are defined in
  <A HREF="../../../com/sixlegs/png/PngConstants.html" title="class in com.sixlegs.png"><CODE>PngConstants</CODE></A>; their types are listed in the following table.
@@ -817,28 +820,28 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" tit
  <tr bgcolor="#E0E0E0"><td nowrap><b>Property</b></td><td nowrap><b>Type</b></td>
  <td><b>Description</b></td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#BIT_DEPTH"><CODE>BIT_DEPTH</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Bit depth</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#COLOR_TYPE"><CODE>COLOR_TYPE</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Color type</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#COMPRESSION"><CODE>COMPRESSION</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Compression method</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#FILTER"><CODE>FILTER</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Filter method</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#GAMMA"><CODE>GAMMA</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Float.html" title="class or interface in java.lang"><CODE>Float</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Float.html?is-external=true" title="class or interface in java.lang"><CODE>Float</CODE></A></td>
  <td>Gamma</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#WIDTH"><CODE>WIDTH</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Width</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#HEIGHT"><CODE>HEIGHT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Height</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#INTERLACE"><CODE>INTERLACE</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Interlace method</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#PALETTE"><CODE>PALETTE</CODE></A></td>
  <td><code>byte[]</code></td>
@@ -853,25 +856,25 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" tit
  <td><code>int[]</code></td>
  <td>Background samples</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#PIXELS_PER_UNIT_X"><CODE>PIXELS_PER_UNIT_X</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Pixels per unit, X axis</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#PIXELS_PER_UNIT_Y"><CODE>PIXELS_PER_UNIT_Y</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Pixels per unit, Y axis</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#UNIT"><CODE>UNIT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Unit specifier</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#RENDERING_INTENT"><CODE>RENDERING_INTENT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Rendering intent</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#SIGNIFICANT_BITS"><CODE>SIGNIFICANT_BITS</CODE></A></td>
  <td><code>byte[]</code></td>
  <td>Significant bits</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#TEXT_CHUNKS"><CODE>TEXT_CHUNKS</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/List.html" title="class or interface in java.util"><CODE>List</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><CODE>List</CODE></A></td>
  <td>List of <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com.sixlegs.png">text chunks</A></td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#TIME"><CODE>TIME</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/Date.html" title="class or interface in java.util"><CODE>Date</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/Date.html?is-external=true" title="class or interface in java.util"><CODE>Date</CODE></A></td>
  <td>Image last-modification time</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#CHROMATICITY"><CODE>CHROMATICITY</CODE></A></td>
  <td><code>float[]</code></td>
@@ -880,37 +883,37 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" tit
  <td><code>byte[]</code></td>
  <td>ICC profile</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#ICC_PROFILE_NAME"><CODE>ICC_PROFILE_NAME</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html" title="class or interface in java.lang"><CODE>String</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang"><CODE>String</CODE></A></td>
  <td>ICC profile name</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#HISTOGRAM"><CODE>HISTOGRAM</CODE></A></td>
  <td><code>int[]</code></td>
  <td>Palette histogram</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#SUGGESTED_PALETTES"><CODE>SUGGESTED_PALETTES</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/List.html" title="class or interface in java.util"><CODE>List</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util"><CODE>List</CODE></A></td>
  <td>List of <A HREF="../../../com/sixlegs/png/SuggestedPalette.html" title="interface in com.sixlegs.png">suggested palettes</A></td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#GIF_DISPOSAL_METHOD"><CODE>GIF_DISPOSAL_METHOD</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>GIF disposal method</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#GIF_USER_INPUT_FLAG"><CODE>GIF_USER_INPUT_FLAG</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>GIF user input flag</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#GIF_DELAY_TIME"><CODE>GIF_DELAY_TIME</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>GIF delay time (hundredths of a second)</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#SCALE_UNIT"><CODE>SCALE_UNIT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Unit for physical scale of image subject</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#PIXEL_WIDTH"><CODE>PIXEL_WIDTH</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Double.html" title="class or interface in java.lang"><CODE>Double</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Double.html?is-external=true" title="class or interface in java.lang"><CODE>Double</CODE></A></td>
  <td>Physical width of pixel</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#PIXEL_HEIGHT"><CODE>PIXEL_HEIGHT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Double.html" title="class or interface in java.lang"><CODE>Double</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Double.html?is-external=true" title="class or interface in java.lang"><CODE>Double</CODE></A></td>
  <td>Physical height of pixel</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#POSITION_UNIT"><CODE>POSITION_UNIT</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Unit for image offset</td></tr>
  <tr><td><A HREF="../../../com/sixlegs/png/PngConstants.html#STEREO_MODE"><CODE>STEREO_MODE</CODE></A></td>
- <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
+ <td><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Integer.html?is-external=true" title="class or interface in java.lang"><CODE>Integer</CODE></A></td>
  <td>Indicator of stereo image</td></tr>
  </table></center>
 <P>
@@ -921,7 +924,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" tit
 <DT><B>Parameters:</B><DD><CODE>name</CODE> - a property name
 <DT><B>Returns:</B><DD>the property value, or null if no such property exists
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -929,7 +932,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/lang/Object.html" tit
 <A NAME="getProperties()"><!-- --></A><H3>
 getProperties</H3>
 <PRE>
-public <A HREF="http://java.sun.com/javase/6/docs/api/java/util/Map.html" title="class or interface in java.util">Map</A> <B>getProperties</B>()</PRE>
+public <A HREF="http://java.sun.com/javase/6/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</A> <B>getProperties</B>()</PRE>
 <DL>
 <DD>Returns the map which stores all of this image's property values.
  The map is mutable, and storing a value with the wrong type may
@@ -949,7 +952,7 @@ public <A HREF="http://java.sun.com/javase/6/docs/api/java/util/Map.html" title=
 <A NAME="getTextChunk(java.lang.String)"><!-- --></A><H3>
 getTextChunk</H3>
 <PRE>
-public <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com.sixlegs.png">TextChunk</A> <B>getTextChunk</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html" title="class or interface in java.lang">String</A>&nbsp;key)</PRE>
+public <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com.sixlegs.png">TextChunk</A> <B>getTextChunk</B>(<A HREF="http://java.sun.com/javase/6/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</A>&nbsp;key)</PRE>
 <DL>
 <DD>Returns a text chunk that uses the given keyword, if one exists.
  If multiple text chunks share the same keyword, this method
@@ -964,7 +967,7 @@ public <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com
 <DT><B>Parameters:</B><DD><CODE>key</CODE> - the text chunk keyword
 <DT><B>Returns:</B><DD>a <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com.sixlegs.png"><CODE>TextChunk</CODE></A> implementation, or null
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</A></CODE> - if an image has not been read</DL>
 </DD>
 </DL>
 <HR>
@@ -973,10 +976,10 @@ public <A HREF="../../../com/sixlegs/png/TextChunk.html" title="interface in com
 readChunk</H3>
 <PRE>
 protected void <B>readChunk</B>(int&nbsp;type,
-                         <A HREF="http://java.sun.com/javase/6/docs/api/java/io/DataInput.html" title="class or interface in java.io">DataInput</A>&nbsp;in,
+                         <A HREF="http://java.sun.com/javase/6/docs/api/java/io/DataInput.html?is-external=true" title="class or interface in java.io">DataInput</A>&nbsp;in,
                          long&nbsp;offset,
                          int&nbsp;length)
-                  throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></PRE>
+                  throws <A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></PRE>
 <DL>
 <DD>Read the chunk data from the image input stream, storing
  properties into this <code>PngImage</code> instance.
@@ -988,7 +991,7 @@ protected void <B>readChunk</B>(int&nbsp;type,
  <A HREF="../../../com/sixlegs/png/PngConfig.html#getReadLimit()"><CODE>PngConfig.getReadLimit()</CODE></A> is set to <A HREF="../../../com/sixlegs/png/PngConfig.html#READ_EXCEPT_DATA"><CODE>PngConfig.READ_EXCEPT_DATA</CODE></A>.
  <p>
  Attempting to read past the end of the chunk data will result in
- an <A HREF="http://java.sun.com/javase/6/docs/api/java/io/EOFException.html" title="class or interface in java.io"><CODE>EOFException</CODE></A>. Unread data will be skipped.
+ an <A HREF="http://java.sun.com/javase/6/docs/api/java/io/EOFException.html?is-external=true" title="class or interface in java.io"><CODE>EOFException</CODE></A>. Unread data will be skipped.
 <P>
 <DD><DL>
 </DL>
@@ -996,7 +999,7 @@ protected void <B>readChunk</B>(int&nbsp;type,
 <DD><DL>
 <DT><B>Parameters:</B><DD><CODE>type</CODE> - the chunk type<DD><CODE>in</CODE> - the chunk data<DD><CODE>offset</CODE> - the location of the chunk data within the entire PNG datastream<DD><CODE>length</CODE> - the length of the chunk data
 <DT><B>Throws:</B>
-<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html" title="class or interface in java.io">IOException</A></CODE></DL>
+<DD><CODE><A HREF="http://java.sun.com/javase/6/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</A></CODE></DL>
 </DD>
 </DL>
 <HR>
