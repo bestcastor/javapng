@@ -1,0 +1,349 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project name="Sixlegs PNG" default="jar-all">
+    <property file="${user.home}/build.properties" />
+    <property file="build.properties" />
+
+    <property name="javadoc.access" value="protected"/>
+
+    <property name="compile.bootclasspath.12" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.bootclasspath.14" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.bootclasspath.15" value="${java.home}/lib/rt.jar"/>
+    <property name="compile.extdirs" value=""/>
+
+    <property name="compile.debug" value="true"/>
+    <property name="compile.deprecation" value="false"/>
+    <property name="compile.optimize" value="false"/>
+
+    <property name="product" value="javapng"/>
+    <property name="version" value="2.0-rc8"/>
+    <property name="version.tools" value="0.5"/>
+    <property name="prefix" value="${product}-${version}"/>
+    <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
+    <property name="suite.file" value="suite.png"/>
+    <property name="benchmark.file" value="benchmark.txt"/>
+    <property name="benchmark.loop" value="1"/>
+
+    <property name="testmethods" value=""/>
+
+    <target name="init" unless="path.lib">
+        <tstamp/>
+        <path id="path.lib">
+            <fileset dir="lib" includes="**/*.jar"/>
+        </path>
+        <path id="path.libdev">
+            <fileset dir="libdev" includes="**/*.jar"/>
+        </path>
+        <path id="path.main">
+            <path refid="path.lib"/>
+            <pathelement path="build/main"/>
+        </path>
+        <path id="path.apng">
+            <path refid="path.main"/>
+            <pathelement path="build/apng"/>
+        </path>
+        <path id="path.viewer">
+            <path refid="path.apng"/>
+            <pathelement path="build/viewer"/>
+        </path>
+        <path id="path.iio">
+            <path refid="path.apng"/>
+            <pathelement path="build/iio"/>
+        </path>
+        <path id="path.examples">
+            <path refid="path.iio"/>
+            <path refid="path.libdev"/>
+            <pathelement path="build/examples"/>
+        </path>
+        <path id="path.test">
+            <path refid="path.iio"/>
+            <path refid="path.libdev"/>
+            <pathelement path="build/test"/>
+        </path>
+        <path id="path.coverage">
+            <path refid="path.lib"/>
+            <path refid="path.libdev"/>
+            <pathelement path="build/test"/>
+            <pathelement path="build/coverage"/>
+        </path>
+    </target>
+
+    <target name="compile" depends="init" description="Compile">
+        <compile module="main" refid="path.lib" source="1.2" target="1.2" bootclasspath="${compile.bootclasspath.12}"/>
+        <compile module="apng" refid="path.main" source="1.2" target="1.2" bootclasspath="${compile.bootclasspath.12}"/>
+    </target>
+
+    <target name="compile-viewer" depends="compile" description="Compile viewer">
+        <compile module="viewer" refid="path.apng"/>
+    </target>
+
+    <target name="compile-iio" depends="compile" description="Compile ImageIO plugin">
+        <compile module="iio" refid="path.main" source="1.4" target="1.4" bootclasspath="${compile.bootclasspath.14}"/>
+    </target>
+
+    <target name="compile-examples" depends="compile-iio" description="Compile examples">
+        <compile module="examples" refid="path.iio"/>
+    </target>
+
+    <target name="compile-test" depends="compile-examples" description="Compile tests">
+        <compile module="test" refid="path.examples"/>
+    </target>
+
+    <target name="compile-all" depends="compile-test,compile-viewer" description="Compile all classes"/>
+
+    <macrodef name="compile">
+        <attribute name="module"/>
+        <attribute name="refid"/>
+        <attribute name="bootclasspath" default=""/>
+        <attribute name="source" default="1.5"/>
+        <attribute name="target" default="1.5"/>
+        <sequential>
+            <mkdir dir="build/@{module}"/>
+            <copy todir="build/@{module}">
+                <fileset dir="src/@{module}" excludes="**/*.java"/>
+            </copy>
+            <javac srcdir="src/@{module}" destdir="build/@{module}"
+              source="@{source}"
+              target="@{target}" bootclasspath="@{bootclasspath}" extdirs="${compile.extdirs}"
+              debug="${compile.debug}" optimize="${compile.optimize}" deprecation="${compile.deprecation}">
+                 <classpath refid="@{refid}"/>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="mytest">
+        <attribute name="includes" default="**/Test*.java"/>
+        <attribute name="refid"/>
+        <attribute name="fork" default="false"/>
+        <attribute name="usefile" default="false"/>
+        <sequential>
+            <junit fork="@{fork}">
+                <sysproperty key="testmethods" value="${testmethods}"/>
+                <formatter type="brief" usefile="@{usefile}"/>
+                <classpath refid="@{refid}"/>
+                <test name="${testcase}" if="testcase"/>
+                <batchtest unless="testcase">
+                    <fileset dir="src/test" includes="@{includes}"/>
+                </batchtest>
+            </junit>
+        </sequential>
+    </macrodef>
+
+    <!-- TODO: stylesheetfile -->
+    <macrodef name="myjavadoc">
+        <attribute name="destdir"/>
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <javadoc 
+              sourcepath="src/main"
+              destdir="@{destdir}"
+              access="${javadoc.access}"
+              failonerror="true"
+              packagenames="com.sixlegs.png.*"
+              classpathref="path.main"
+              Author="true"
+              Version="true"
+              Use="true"
+            >
+                <link href="http://java.sun.com/javase/6/docs/api/"/>
+            </javadoc>
+        </sequential>
+    </macrodef>
+
+    <target name="javadoc" depends="compile" description="Generate the javadoc">
+        <myjavadoc destdir="javadoc"/>
+        <replaceregexp match="Generated by javadoc ([^-]|(-[^-]))+--"
+            replace="Generated by javadoc --" byline="true">
+            <fileset dir="javadoc" includes="**/*.html"/>
+        </replaceregexp>
+    </target>
+
+    <target name="test" depends="compile-test" description="Run JUnit tests">
+        <mytest refid="path.test" includes="com/sixlegs/png/Test*.java"/>
+        <mytest refid="path.test" includes="com/sixlegs/png/iio/Test*.java" usefile="true"/>
+    </target>
+
+    <target name="todo" depends="compile-test" description="Known JUnit failures">
+        <mytest refid="path.test" includes="**/*Todo.java"/>
+    </target>
+
+    <target name="coverage" depends="compile-test" description="Generate code coverage report">
+        <taskdef resource="tasks.properties" classpathref="path.libdev"/>
+        <delete file="cobertura.ser"/>
+        <mkdir dir="build/coverage"/>
+        <copy todir="build/coverage" overwrite="true">
+            <fileset dir="build/main"/>
+        </copy>
+        <cobertura-instrument>
+            <fileset dir="build/coverage" includes="**/*.class"/>
+        </cobertura-instrument>
+        <mytest refid="path.coverage" includes="com/sixlegs/png/Test*.java" fork="true"/>
+        <mkdir dir="reports"/>
+        <cobertura-report destdir="reports/coverage">
+            <fileset dir="src/main"/>
+        </cobertura-report>
+    </target>
+
+    <macrodef name="viewerImpl">
+        <attribute name="file"/>
+        <sequential>
+            <java classname="com.sixlegs.png.viewer.Viewer" classpathref="path.viewer" fork="true">
+                <arg value="@{file}"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="viewer" depends="compile-viewer" description="Run PNG Viewer application">
+        <viewerImpl file="${viewer.file}"/>
+    </target>
+
+    <target name="suite" depends="compile-test,compile-viewer" description="Decode and display PngSuite">
+        <delete file="${suite.file}"/>
+        <java classname="com.sixlegs.png.SuiteViewer" classpathref="path.test">
+            <arg value="${suite.file}"/>
+        </java>
+        <viewerImpl file="${suite.file}"/>
+    </target>
+
+    <target name="benchmark" depends="compile-test" description="Run simple benchmark">
+        <java classname="com.sixlegs.png.Benchmark" classpathref="path.test" input="${benchmark.file}">
+            <arg value="${benchmark.loop}"/>
+        </java>
+    </target>
+
+    <target name="broken" depends="compile-test" description="Regenerate broken images">
+        <java classname="BrokenGenerator" classpathref="path.test" fork="true" dir="src/test/images"/>
+    </target>
+
+    <target name="clean" description="Clean">
+        <delete dir="build"/>
+        <delete dir="dist"/>
+        <delete dir="reports"/>
+        <delete file="cobertura.ser"/>
+        <delete file="${suite.file}"/>
+        <delete>
+            <fileset dir="." includes="TEST*"/>
+        </delete>
+        <delete>
+            <fileset dir="javadoc" includes="**/*"/>
+        </delete>
+    </target>
+
+    <target name="jar-gif2apng" depends="compile-all" description="Create gif2apng jar">
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="path.libdev"/>
+        <mkdir dir="dist"/>
+        <jarjar jarfile="dist/gif2apng-${version.tools}.jar">
+            <fileset dir="build/examples"/>
+            <keep pattern="com.sixlegs.png.examples.AnimatedGif2Png"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.sixlegs.png.examples.AnimatedGif2Png"/>
+                <attribute name="Implementation-Version" value="${version.tools}"/>
+            </manifest>
+        </jarjar>
+    </target>
+
+    <target name="jar-viewer" depends="compile-all" description="Create viewer jar">
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
+        <mkdir dir="dist"/>
+        <delete file="dist/temp.jar"/>
+        <jar jarfile="dist/temp.jar">
+            <fileset dir="build/main"/>
+            <fileset dir="build/apng"/>
+            <fileset dir="build/viewer"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.sixlegs.png.viewer.Viewer"/>
+                <attribute name="Implementation-Version" value="${version.tools}"/>
+            </manifest>
+        </jar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/temp.jar
+            -outjars dist/pngviewer-${version.tools}.jar
+            -libraryjars ${compile.bootclasspath.15}
+            -libraryjars lib
+            -keep public class com.sixlegs.png.viewer.Viewer { public *; }
+            -keepattributes InnerClasses
+        </proguard>
+        <delete file="dist/temp.jar"/>
+    </target>
+
+    <target name="jar" depends="compile-all" description="Create jar">
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
+        <mkdir dir="dist"/>
+        <delete file="dist/temp.jar"/>
+        <jar jarfile="dist/temp.jar">
+            <fileset dir="build/main"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+        </jar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/temp.jar
+            -outjars dist/${prefix}.jar
+            -libraryjars ${compile.bootclasspath.12}(java/**.class)
+            -libraryjars lib
+            -keep public class com.sixlegs.png.* { public *; }
+            -keep public class com.sixlegs.png.* { protected &lt;methods&gt;; }
+            -keepattributes InnerClasses
+        </proguard>
+        <delete file="dist/temp.jar"/>
+    </target>
+
+    <target name="jar-all" depends="jar, jar-iio, jar-gif2apng, jar-viewer" description="Create all jar files"/>
+
+    <target name="jar-iio" depends="compile-iio, jar" description="Create ImageIO plugin jar">
+        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="path.libdev"/>
+        <mkdir dir="build/services"/>
+        <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
+        <jarjar jarfile="dist/temp.jar">
+            <zipfileset src="dist/${prefix}.jar" excludes="*,META-INF/*"/>
+            <rule pattern="com.sixlegs.png.*" result="com.sixlegs.png.iio.impl.@1"/>
+            <fileset dir="build/iio"/>
+            <manifest>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+            <metainf dir="build" includes="services/**"/>
+        </jarjar>
+        <proguard>
+            -dontoptimize
+            -dontusemixedcaseclassnames
+            -injars dist/temp.jar
+            -outjars dist/${prefix}-iio.jar
+            -libraryjars ${compile.bootclasspath.14}(java/**.class,javax/**.class)
+            -libraryjars lib
+            -keep public class com.sixlegs.png.iio.* { public *; }
+            -keepattributes InnerClasses
+        </proguard>
+        <delete file="dist/temp.jar"/>
+    </target>
+
+    <target name="dist-broken" depends="broken" description="Create broken suite distribution">
+        <tstamp/>
+        <mkdir dir="dist"/>
+        <zip zipfile="dist/brokensuite-${DSTAMP}.zip">
+            <fileset dir="src/test/images/broken" includes="*.png"/>
+        </zip>
+    </target>
+
+    <target name="dist" depends="clean,test,jar,javadoc" description="Create source distribution">
+        <mkdir dir="dist"/>
+        <jar jarfile="dist/${prefix}-src.jar" filesonly="true">
+            <zipfileset dir="src" prefix="${prefix}/src">
+                <exclude name="**/*.java~"/>
+                <exclude name="**/*.save"/>
+                <exclude name="test/images/nodist/*.png"/>
+            </zipfileset>
+            <zipfileset dir="lib" prefix="${prefix}/lib"/>
+            <zipfileset dir="libdev" prefix="${prefix}/libdev">
+                <include name="proguard.jar"/>
+                <include name="jarjar.jar"/>
+                <include name="xml-writer.jar"/>
+                <include name="bzip2.jar"/>
+            </zipfileset>
+            <zipfileset dir="." prefix="${prefix}" includes="build.xml,COPYING,LICENSE,README,benchmark.txt,javadoc/**"/>
+            <zipfileset dir="dist" prefix="${prefix}/dist" includes="${prefix}.jar,${prefix}-iio.jar,javadoc/**"/>
+        </jar>
+    </target>
+</project>
