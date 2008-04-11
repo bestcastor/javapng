@@ -165,11 +165,9 @@ implements Transparency
                         default:
                             ImageDataInputStream data = new ImageDataInputStream(pin, machine);
                             image = createImage(data, new Dimension(getWidth(), getHeight()));
-                            do {
-                                if (data.read() != -1)
-                                    skipFully(data, pin.getRemaining());
-                                type = machine.getType();
-                            } while (type == PngConstants.IDAT);
+                            while ((type = machine.getType()) == PngConstants.IDAT) {
+                                skipFully(data, pin.getRemaining());
+                            }
                         }
                     }
                     if (!isMultipleOK(type) && !seen.add(Integers.valueOf(type)))
@@ -672,11 +670,18 @@ implements Transparency
             throw new IllegalStateException("Image has not been read");
     }
 
-    private static void skipFully(InputStream in, long skip)
-    throws IOException
-    {
-        long total = 0;
-        while (total < skip)
-            total += in.skip(skip - total);
+    private static void skipFully(InputStream in, long n) throws IOException {
+        while (n > 0) {
+            long amt = in.skip(n);
+            if (amt == 0) {
+                // Force a blocking read to avoid infinite loop
+                if (in.read() == -1) {
+                    throw new EOFException();
+                }
+                n--;
+            } else {
+                n -= amt;
+            }
+        }
     }
 }
