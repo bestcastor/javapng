@@ -65,7 +65,6 @@ final public class PngConfig
     final boolean gammaCorrect;
     final Rectangle sourceRegion;
     final int[] subsampling;
-    final boolean filter;
     final boolean convertIndexed;
 
     PngConfig(Builder builder)
@@ -79,7 +78,6 @@ final public class PngConfig
         this.gammaCorrect = builder.gammaCorrect;
         this.sourceRegion = builder.sourceRegion;
         this.subsampling = builder.subsampling;
-        this.filter = builder.filter;
         this.convertIndexed = builder.convertIndexed;
         
         boolean subsampleOn = getSourceXSubsampling() != 1 || getSourceYSubsampling() != 1;
@@ -111,7 +109,6 @@ final public class PngConfig
         boolean gammaCorrect = true;
         Rectangle sourceRegion;
         int[] subsampling = DEFAULT_SUBSAMPLING;
-        boolean filter;
         boolean convertIndexed;
 
         /**
@@ -135,7 +132,6 @@ final public class PngConfig
             this.reduce16 = cfg.reduce16;
             this.gammaCorrect = cfg.gammaCorrect;
             this.subsampling = cfg.subsampling;
-            this.filter = cfg.filter;
         }
 
         /**
@@ -281,28 +277,11 @@ final public class PngConfig
         /**
          * TODO
          */
-        public Builder lowPassFilter(boolean filter)
-        {
-            this.filter = filter;
-            return this;
-        }
-
-        /**
-         * TODO
-         */
         public Builder convertIndexed(boolean convertIndexed)
         {
             this.convertIndexed = convertIndexed;
             return this;
         }
-    }
-
-    /**
-     * TODO
-     */
-    public boolean getLowPassFilter()
-    {
-        return filter;
     }
 
     /**

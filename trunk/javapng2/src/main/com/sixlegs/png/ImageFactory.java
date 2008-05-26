@@ -72,15 +72,9 @@ class ImageFactory
         boolean interlaced = png.isInterlaced();
 
         boolean indexed = isIndexed(png);
-        boolean convertIndexed = 
-            indexed && (config.getConvertIndexed() ||
-                        (!interlaced && config.getLowPassFilter() &&
-                         (config.getSourceXSubsampling() != 1 ||
-                          config.getSourceYSubsampling() != 1)));
-
+        boolean convertIndexed = indexed && config.getConvertIndexed();
         short[] gammaTable = config.getGammaCorrect() ? getGammaTable(png) : null;
         ColorModel dstColorModel = createColorModel(png, gammaTable, convertIndexed);
-
 
         int dstWidth = width;
         int dstHeight = height;
@@ -102,11 +96,7 @@ class ImageFactory
             int subw = calcSubsamplingSize(dstWidth, xsub, xoff, 'X');
             int subh = calcSubsamplingSize(dstHeight, ysub, yoff, 'Y');
             WritableRaster raster = dstColorModel.createCompatibleWritableRaster(subw, subh);
-            if (config.getLowPassFilter() && !interlaced) {
-                dst = new LowPassDestination(raster, new Dimension(width, height), xsub, ysub, xoff, yoff);
-            } else {
-                dst = new SubsamplingDestination(raster, width, xsub, ysub, xoff, yoff);
-            }
+            dst = new SubsamplingDestination(raster, width, xsub, ysub, xoff, yoff);
         } else {
             dst = new RasterDestination(dstColorModel.createCompatibleWritableRaster(dstWidth, dstHeight), width);
         }
