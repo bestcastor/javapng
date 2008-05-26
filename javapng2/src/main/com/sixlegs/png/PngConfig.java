@@ -364,7 +364,7 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Returns the source region to be used.
      * @see Builder#sourceRegion
      */
     public Rectangle getSourceRegion()
@@ -373,7 +373,7 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Returns the number of source columns to advance for each pixel.
      * @see Builder#sourceSubsampling
      */
     public int getSourceXSubsampling()
@@ -382,7 +382,7 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Returns the number of rows to advance for each pixel.
      * @see Builder#sourceSubsampling
      */
     public int getSourceYSubsampling()
@@ -391,7 +391,7 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Returns the horizontal offset of the subsampling grid.
      * @see Builder#sourceSubsampling
      */
     public int getSubsamplingXOffset()
@@ -400,7 +400,7 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Returns the vertical offset of the subsampling grid.
      * @see Builder#sourceSubsampling
      */
     public int getSubsamplingYOffset()
