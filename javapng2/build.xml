@@ -15,7 +15,7 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="product" value="javapng"/>
-    <property name="version" value="2.0-rc8"/>
+    <property name="version" value="2.0"/>
     <property name="version.tools" value="0.5"/>
     <property name="prefix" value="${product}-${version}"/>
     <property name="viewer.file" value="src/test/images/misc/cc1.png"/>
@@ -242,10 +242,8 @@
     </target>
 
     <target name="jar-viewer" depends="compile-all" description="Create viewer jar">
-        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
-        <delete file="dist/temp.jar"/>
-        <jar jarfile="dist/temp.jar">
+        <jar jarfile="dist/pngviewer-${version.tools}.jar">
             <fileset dir="build/main"/>
             <fileset dir="build/apng"/>
             <fileset dir="build/viewer"/>
@@ -254,41 +252,16 @@
                 <attribute name="Implementation-Version" value="${version.tools}"/>
             </manifest>
         </jar>
-        <proguard>
-            -dontoptimize
-            -dontusemixedcaseclassnames
-            -injars dist/temp.jar
-            -outjars dist/pngviewer-${version.tools}.jar
-            -libraryjars ${compile.bootclasspath.15}
-            -libraryjars lib
-            -keep public class com.sixlegs.png.viewer.Viewer { public *; }
-            -keepattributes InnerClasses
-        </proguard>
-        <delete file="dist/temp.jar"/>
     </target>
 
     <target name="jar" depends="compile-all" description="Create jar">
-        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpathref="path.libdev"/>
         <mkdir dir="dist"/>
-        <delete file="dist/temp.jar"/>
-        <jar jarfile="dist/temp.jar">
+        <jar jarfile="dist/${prefix}.jar">
             <fileset dir="build/main"/>
             <manifest>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
         </jar>
-        <proguard>
-            -dontoptimize
-            -dontusemixedcaseclassnames
-            -injars dist/temp.jar
-            -outjars dist/${prefix}.jar
-            -libraryjars ${compile.bootclasspath.12}(java/**.class)
-            -libraryjars lib
-            -keep public class com.sixlegs.png.* { public *; }
-            -keep public class com.sixlegs.png.* { protected &lt;methods&gt;; }
-            -keepattributes InnerClasses
-        </proguard>
-        <delete file="dist/temp.jar"/>
     </target>
 
     <target name="jar-all" depends="jar, jar-iio, jar-gif2apng, jar-viewer" description="Create all jar files"/>
@@ -297,7 +270,7 @@
         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="path.libdev"/>
         <mkdir dir="build/services"/>
         <echo file="build/services/javax.imageio.spi.ImageReaderSpi">com.sixlegs.png.iio.PngImageReaderSpi</echo>
-        <jarjar jarfile="dist/temp.jar">
+        <jarjar jarfile="dist/${prefix}-iio.jar">
             <zipfileset src="dist/${prefix}.jar" excludes="*,META-INF/*"/>
             <rule pattern="com.sixlegs.png.*" result="com.sixlegs.png.iio.impl.@1"/>
             <fileset dir="build/iio"/>
@@ -306,17 +279,6 @@
             </manifest>
             <metainf dir="build" includes="services/**"/>
         </jarjar>
-        <proguard>
-            -dontoptimize
-            -dontusemixedcaseclassnames
-            -injars dist/temp.jar
-            -outjars dist/${prefix}-iio.jar
-            -libraryjars ${compile.bootclasspath.14}(java/**.class,javax/**.class)
-            -libraryjars lib
-            -keep public class com.sixlegs.png.iio.* { public *; }
-            -keepattributes InnerClasses
-        </proguard>
-        <delete file="dist/temp.jar"/>
     </target>
 
     <target name="dist-broken" depends="broken" description="Create broken suite distribution">
@@ -337,7 +299,6 @@
             </zipfileset>
             <zipfileset dir="lib" prefix="${prefix}/lib"/>
             <zipfileset dir="libdev" prefix="${prefix}/libdev">
-                <include name="proguard.jar"/>
                 <include name="jarjar.jar"/>
                 <include name="xml-writer.jar"/>
                 <include name="bzip2.jar"/>
