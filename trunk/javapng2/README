@@ -1,7 +1,7 @@
-Copyright (C) 1998-2006 Chris Nokleberg
+Copyright (C) 1998-2008 Chris Nokleberg
 All rights reserved.
 
-README - Sixlegs PNG v2.0-rc6
+README - Sixlegs Java PNG Decoder
 
 Features
 
@@ -26,65 +26,12 @@ Getting Started
 
 Revision History
 
-  Changes from v2.0-rc5 -> v2.0-rc6 (2006-??-??)
-
-    * Fix bugs found by FindBugs
-    * Change chunk read method to use DataInput instead of PngInputStream
-    * Fix stereo chunk parsing
-    * Fix compressed iTXt parsing
-    * Remove PngChunk, fold constants into PngConstants
-    * Add suite of broken images, for test coverage
-
-  Changes from v2.0-rc4 -> v2.0-rc5 (2006-06-12)
-
-    * Added PngConfig.READ_EXCEPT_METADATA
-    * Better progressive performance
-    * Support image source region
-    * Reduced number of classes to make jar smaller
-    * Use ProGuard to make jar smaller
-    * Eliminate all use of reflection
-    * Combine ext package into main package
-    * Support new sTER registered chunk
-    * Performance improvements
-    * Removed get/setUserExponent from config
-    * Removed support for limiting pass decoding
-    * Use Builder pattern for PngConfig to make config immutable
-
-  Changes from v2.0-rc3 -> v2.0-rc4 (2006-04-05)
-
-    * Java IIO-compatible plugin (thanks to Dimitri Koussa)
-    * Change sBIT to use byte[] instead of int[]
-    * Support decimation subsampling 
-    * Support limiting decoding of passes to a particular range
-
-  Changes from v2.0-rc2 -> v2.0-rc3 (2005-10-7):
-
-    * Fix decoding when there is leftover IDAT data
-    * Move some methods from PngConfig to PngImage
-    * Add handleProgress methods to PngImage
-    * Support abort from handleFrame, handleProgress
-
-  Changes from v2.0-rc1 -> v2.0-rc2 (2005-9-14):
-
-    * Fixed a buffering bug in PngInputStream
-    * Made PngImage implement java.awt.Transparency
-
-  Changes from v1.3.0 -> v2.0-rc1 (2005-8-5):
-
-    * Complete rewrite, now requires Java 1.2 or higher
-    * Uses the modern BufferedImage-based Java APIs
-    * Decoded images use less memory
-    * Smaller jar file (under 35K)
-    * Access to raw image data
-    * 16-bit images do not have to be reduced to 8-bit
-    * Faster decoding 
-    * License changed from LGPL to GPL-with-library-exception 
-      (the same as the GNU Classpath project)
+  See http://code.google.com/p/javapng/wiki/ChangeLog
 
 Contact Information
 
   The latest version of this package is available from:
-  http://www.sixlegs.com/
+  http://code.google.com/p/javapng/
 
   Please let me know about any problems you encounter, or features
   that you would find valuable. 
