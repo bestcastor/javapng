@@ -1,0 +1,4 @@
+compile.bootclasspath.12 = rt-1.2.2.17.jar
+compile.bootclasspath.14 = rt-1.4.2.10.jar
+compile.optimize = true
+compile.deprecation = false
