@@ -275,7 +275,8 @@ final public class PngConfig
         }
 
         /**
-         * TODO
+         * Whether to convert images with an indexed color model
+         * (paletted and 1/2/4/8-bit grayscale) to use a component color model.
          */
         public Builder convertIndexed(boolean convertIndexed)
         {
@@ -285,7 +286,8 @@ final public class PngConfig
     }
 
     /**
-     * TODO
+     * Return sthe current indexed image conversion setting.
+     * @see Builder#convertIndexed
      */
     public boolean getConvertIndexed()
     {
