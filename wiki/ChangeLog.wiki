@@ -4,8 +4,8 @@
 == Changes from v2.0-rc8 → v2.0 (2008-05-26) ==
 
   * Remove undocumented low-pass filter code
-  * Add missing PngConfig documentation
-  * Remove use of ProGuard
+  * Add missing `PngConfig` documentation
+  * Remove use of `ProGuard`
 
 == Changes from v2.0-rc6 → v2.0-rc8 (2008-04-10) ==
 
